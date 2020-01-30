@@ -852,7 +852,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   */
 
    //add battery temperature
-  /*
   if (true) {
     char val_str[16];
     char uom_str[6];
@@ -871,7 +870,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
   }
-  */
 
   //add grey panda GPS accuracy
   /*if (true) {
@@ -896,7 +894,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   }*/
 
   //add free space - from bthaler1
-  /*
   if (true) {
     char val_str[16];
     char uom_str[3];
@@ -919,7 +916,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
       value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
   }
-  
 
   //finally draw the frame
   bb_h += 20;
@@ -928,7 +924,6 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
   nvgStrokeWidth(s->vg, 6);
   nvgStroke(s->vg);
-  */
 }
 
 
