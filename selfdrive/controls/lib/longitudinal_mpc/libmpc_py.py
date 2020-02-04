@@ -3,6 +3,7 @@ import platform
 import subprocess
 
 from cffi import FFI
+from common.ffi_wrapper import suffix
 
 mpc_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,7 +17,7 @@ if platform.machine() == "x86_64":
 subprocess.check_call(["make", "-j4"], cwd=mpc_dir)
 
 def _get_libmpc(mpc_id):
-    libmpc_fn = os.path.join(mpc_dir, "libmpc%d.so" % mpc_id)
+    libmpc_fn = os.path.join(mpc_dir, "libmpc%d%s" % (mpc_id, suffix()))
 
     ffi = FFI()
     ffi.cdef("""

@@ -10,7 +10,6 @@
 #include <czmq.h>
 
 #include "common/util.h"
-#include "common/messaging.h"
 #include "common/timing.h"
 #include "common/swaglog.h"
 #include "common/touch.h"
@@ -19,7 +18,6 @@
 
 #include "ui.hpp"
 #include "sound.hpp"
-
 
 static int last_brightness = -1;
 static void set_brightness(UIState *s, int brightness) {
