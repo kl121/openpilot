@@ -1,6 +1,6 @@
 If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
 
-** HONDAS - REFLASH PANDA ON NEW RELEASE OR CLONE **
+** If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing **
 
 This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
 
