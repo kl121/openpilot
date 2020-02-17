@@ -16,7 +16,10 @@ Remember to manually flash panda after checking out.  cd /data/openpilot/panda/b
 
 <b>kegman</b> - this is the default branch
 
-<b>kegman-plusBoschGasPress</b> - this branch gives Honda Bosch users the ability to press the gas without disengaging OP for more "stock ACC"-like behaviour.  
+<b>kegman-BoschGasPress</b> - this branch gives Honda Bosch users the ability to press the gas without disengaging OP for more "stock ACC"-like behaviour.  
+
+
+* Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
 
 
 Known bugs in 0.7.1:
