@@ -422,7 +422,7 @@ def manager_thread():
 
     if msg.thermal.started:
       for p in car_started_processes:
-        if p == "loggerd" and logger_dead:
+        if (p == "loggerd" and logger_dead) or p == "uploader":
           kill_managed_process(p)
         else:
           start_managed_process(p)
