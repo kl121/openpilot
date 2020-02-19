@@ -223,6 +223,8 @@ class CarState(CarStateBase):
     self.prev_cruise_buttons = self.cruise_buttons
     self.prev_blinker_on = self.blinker_on
     self.prev_lead_distance = self.lead_distance     self.prev_left_blinker_on = self.left_blinker_on
+    self.prev_cruise_setting = self.cruise_setting
+    self.prev_left_blinker_on = self.left_blinker_on
     self.prev_right_blinker_on = self.right_blinker_on
 
     # ******************* parse out can *******************

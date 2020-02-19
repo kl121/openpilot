@@ -88,6 +88,8 @@ class CarInterface(CarInterfaceBase):
     return float(max(max_accel, a_target / FOLLOW_AGGRESSION)) * min(speedLimiter, accelLimiter)
 
   @staticmethod
+  
+  
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
     ret = car.CarParams.new_message()
 
