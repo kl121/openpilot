@@ -2,6 +2,8 @@ If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
 
 ** If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing **
 
+If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch
+
 This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
 
 <b>ALSO IMPORTANT:</b> /data/kegman.json is a file that holds parameters and is used on various branches / forks.  When switching between forks (like @arne182 and @gernby), or between different branches within this repo (like non-gernby and gernby), it is best to delete or rename the existing file so there are no parameter conflicts. _Do this before rebooting the EON to compile on the new fork/branch.
@@ -18,9 +20,14 @@ Remember to manually flash panda after checking out.  cd /data/openpilot/panda/b
 
 <b>kegman-BoschGasPress</b> - this branch gives Honda Bosch users the ability to press the gas without disengaging OP for more "stock ACC"-like behaviour.  
 
+<b>kegman-gm</b> - this branch contains default untouched panda directories for GMs having trouble with communication mismatch.  Reflash panda after branch checkout.  (Seems Volt 2017 requires this)
+
+<b>kegman-Clarity</b> - for Honda Clarity models
 
 * Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
 
+Known bugs in 0.7.3:
+-Some people may get their panda stuck on blinking blue led.  Reflash Panda, disconnect power from the panda for 1 minute and reconnect power. Reboot Eon and restart car.
 
 Known bugs in 0.7.1:
 - BoschGasPress also does not work as of Panda code refactoring by Comma
@@ -35,7 +42,7 @@ List of changes and tweaks (latest changes at the top):
   
 - <b> New! Nudgeless Auto Lane Change with configurable toggles in kegman.json. </b>  By default the behavior is like comma stock - i.e. signal above 45 mph, then nudge the steering wheel in the direction of the blinkers.  If you don't want to nudge the wheel or want ALC enabled at slower speeds, go into kegman.json and change ALCnudgeLess to "1" and ALCminSpeed to [some value] in m/s units.
   
-- <b> Disabled stock FCW, stock AEB because they are too sensitive on some cars. </b>
+- <b> Disabled Honda stock FCW, stock AEB because they are too sensitive on some cars. </b>
 
 - <b> New! Dynamic Steer Ratio: </b>Some Hondas and other makes / models have been suffering from excessive ping-ponging on straights since 0.6.x.  The fix was to lower steerRatio.  However lowering steerRatio makes the car turn less aggressively on curves so you lose "turnability".  Raising the steerRatio makes you take turns with maximum force, but then you have ping ponging on straights.  Dynamic steer ratio adjusts based on the steering wheel angle to give you a low steerRatio on straights and a high steerRatio on turns.  This gives the best of both worlds.  Dynamic Steer Ratio is inactive by default, to activate, please adjust the following values using the Live Tuner or edit the kegman.json file:
 
