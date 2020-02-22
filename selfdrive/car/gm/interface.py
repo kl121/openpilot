@@ -33,7 +33,7 @@ class CarInterface(CarInterfaceBase):
 
     # *** init the major players ***
     canbus = CanBus()
-    self.CS = CarState(CP)
+    self.CS = CarState(CP, canbus)
     self.VM = VehicleModel(CP)
     self.pt_cp = get_powertrain_can_parser(CP, canbus)
     self.ch_cp = get_chassis_can_parser(CP, canbus)
