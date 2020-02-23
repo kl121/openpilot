@@ -7,6 +7,7 @@ from selfdrive.car.interfaces import CarStateBase
 from selfdrive.car.gm.values import DBC, CAR, \
                                     CruiseButtons, is_eps_status_ok, \
                                     STEER_THRESHOLD, SUPERCRUISE_CARS
+from common.kalman.simple_kalman import KF1D
 
 def get_powertrain_can_parser(CP, canbus):
   # this function generates lists for signal, messages and initial values
