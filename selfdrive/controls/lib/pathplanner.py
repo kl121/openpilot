@@ -82,11 +82,7 @@ class PathPlanner():
 
     self.lane_change_state = LaneChangeState.off
     self.lane_change_timer = 0.0
-<<<<<<< HEAD
-    self.pre_lane_change_timer = 0.0
-=======
     self.lane_change_ll_prob = 1.0
->>>>>>> d1ad7f3fe... openpilot v0.7.4 release
     self.prev_one_blinker = False
 
 
@@ -203,14 +199,6 @@ class PathPlanner():
           self.lane_change_state = LaneChangeState.laneChangeFinishing
 
       # finishing
-<<<<<<< HEAD
-      elif self.lane_change_state == LaneChangeState.laneChangeFinishing and lane_change_prob < 0.2:
-        self.lane_change_state = LaneChangeState.preLaneChange
-
-      # Don't allow starting lane change below 45 mph
-      if (v_ego < self.alc_min_speed) and (self.lane_change_state == LaneChangeState.preLaneChange):
-        self.lane_change_state = LaneChangeState.off
-=======
       elif self.lane_change_state == LaneChangeState.laneChangeFinishing:
         # fade in laneline over 1s
         self.lane_change_ll_prob = min(self.lane_change_ll_prob + DT_MDL, 1.0)
@@ -218,7 +206,6 @@ class PathPlanner():
           self.lane_change_state = LaneChangeState.preLaneChange
         elif self.lane_change_ll_prob > 0.99:
           self.lane_change_state = LaneChangeState.off
->>>>>>> d1ad7f3fe... openpilot v0.7.4 release
 
     if self.lane_change_state in [LaneChangeState.off, LaneChangeState.preLaneChange]:
       self.lane_change_timer = 0.0

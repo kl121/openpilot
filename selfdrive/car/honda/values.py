@@ -31,7 +31,7 @@ class CAR:
   ACURA_ILX = "ACURA ILX 2016 ACURAWATCH PLUS"
   CRV = "HONDA CR-V 2016 TOURING"
   CRV_5G = "HONDA CR-V 2017 EX"
-  INSIGHT = "HONDA INSIGHT 2019 EX"
+  INSIGHT = "HONDA INSIGHT 2019 TOURING"
   CRV_EU = "HONDA CR-V 2016 EXECUTIVE"
   CRV_HYBRID = "HONDA CR-V 2019 HYBRID"
   FIT = "HONDA FIT 2018 EX"
@@ -50,15 +50,6 @@ class CAR:
   }],
   '''
   
-
-# diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
-DIAG_MSGS = {1600: 5, 1601: 8}
-
-# diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
-DIAG_MSGS = {1600: 5, 1601: 8}
-=======
-  INSIGHT = "HONDA INSIGHT 2019 TOURING"
->>>>>>> d1ad7f3fe... openpilot v0.7.4 release
 
 # diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
 DIAG_MSGS = {1600: 5, 1601: 8}
@@ -100,6 +91,7 @@ FINGERPRINTS = {
   }],
   CAR.INSIGHT: [{
     57: 3, 148: 8, 228: 5, 304: 8, 330: 8, 344: 8, 380: 8, 387: 8, 388: 8, 399: 7, 419: 8, 420: 8, 427: 3, 432: 7, 441: 5, 450: 8, 464: 8, 476: 8, 477: 8, 479: 8, 490: 8, 495: 8, 507: 1, 525: 8, 531: 8, 545: 6, 547: 6, 597: 8, 662: 4, 773: 7, 777: 8, 780: 8, 795: 8, 804: 8, 806: 8, 808: 8, 814: 4, 815: 8, 829: 5, 832: 3, 862: 8, 884: 8, 891: 8, 927: 8, 929: 8, 954: 2, 985: 3, 1029: 8, 1093: 4, 1115: 2, 1302: 8, 1361: 5, 1365: 5, 1600: 5, 1601: 8, 1652: 8, 2015: 3
+  }],
   # 1057: 5 1024: 5 are also on the OBD2 bus. their lengths differ from the camera's f-can bus. re-fingerprint after obd2 connection is split in panda firmware from bus 1.
   CAR.CRV_EU: [{
     57: 3, 145: 8, 308: 5, 316: 8, 342: 6, 344: 8, 380: 8, 398: 3, 399: 6, 404: 4, 419: 8, 420: 8, 422: 8, 426: 8, 432: 7, 464: 8, 474: 5, 476: 4, 487: 4, 490: 8, 493: 3, 506: 8, 507: 1, 510: 3, 538: 3, 542: 7, 545: 4, 597: 8, 660: 8, 661: 4, 768: 8, 769: 8, 773: 7, 777: 8, 780: 8, 800: 8, 801: 3, 803: 8, 804: 8, 808: 8, 824: 8, 829: 5, 837: 5, 862: 8, 882: 2, 884: 7, 888: 8, 891: 8, 892: 8, 923: 2, 927: 8, 929: 8, 930: 8, 931: 8, 983: 8, 1024: 8, 1027: 5, 1029: 8, 1033: 5, 1036: 8, 1039: 8, 1040: 8, 1041: 8, 1042: 8, 1043: 8, 1044: 8, 1045: 8, 1046: 8, 1047: 8, 1056: 8, 1057: 8, 1058: 8, 1059: 8, 1060: 8, 1064: 7, 1072: 8, 1073: 8, 1074: 8, 1075: 8, 1076: 8, 1077: 8, 1078: 8, 1079: 8, 1080: 8, 1081: 8, 1088: 8, 1089: 8, 1090: 8, 1091: 8, 1092: 8, 1093: 8, 1108: 8, 1125: 8, 1279: 8, 1280: 8, 1296: 8, 1297: 8, 1365: 5, 1424: 5, 1600: 5, 1601: 8,

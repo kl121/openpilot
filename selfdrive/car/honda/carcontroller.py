@@ -178,8 +178,8 @@ class CarController():
       else:
         self.prev_lead_distance = CS.lead_distance
       
-      //elif CS.out.cruiseState.standstill:
-      //  can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
+      #elif CS.out.cruiseState.standstill:
+      #  can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
 
     else:
       # Send gas and brake commands.
