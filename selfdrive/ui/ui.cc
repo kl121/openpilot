@@ -174,9 +174,9 @@ static void ui_init(UIState *s) {
                               s->uilayout_sock,
                               s->livecalibration_sock,
                               s->radarstate_sock,
-	                      s->carstate_sock,
+	                            s->carstate_sock,
                               s->gpslocationexternal_sock,
-                              s->livempc_sock
+                              s->livempc_sock,
                               s->thermal_sock,
                               s->health_sock,
                               s->ubloxgnss_sock
@@ -969,14 +969,6 @@ int main(int argc, char* argv[]) {
         should_swap = true;
       }
     }
-
-    //awake on any touch
-    int touch_x = -1, touch_y = -1;
-    int touched = touch_poll(&touch, &touch_x, &touch_y, s->awake ? 0 : 100);
-    if (touched == 1) {
-      set_awake(s, true);
-    }
-
 
     // manage wakefulness
     if (s->awake_timeout > 0) {
