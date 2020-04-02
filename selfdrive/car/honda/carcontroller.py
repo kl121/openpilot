@@ -144,11 +144,11 @@ class CarController():
     apply_gas = clip(actuators.gas, 0., 1.)
     # return minimum of brake_last*MAX, or MAX-1, but not less than zero
 
-    lkas_active = enabled and not CS.steer_not_allowed and CS.lkMode #and not CS.left_blinker_on and not CS.right_blinker_on  # add LKAS button to toggle steering
     apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
     apply_steer = int(interp(-actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
 
-
+    lkas_active = enabled and not CS.steer_not_allowed and CS.lkMode #and not CS.left_blinker_on and not CS.right_blinker_on  # add LKAS button to toggle steering
+    
     # Send CAN commands.
     can_sends = []
 
@@ -179,7 +179,7 @@ class CarController():
       else:
         self.prev_lead_distance = CS.lead_distance
       '''
-      elif CS.out.cruiseState.standstill:
+    elif CS.out.cruiseState.standstill:
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.RES_ACCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
 
     else:
