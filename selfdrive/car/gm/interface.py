@@ -1,87 +1,21 @@
 #!/usr/bin/env python3
 from cereal import car
-from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.drive_helpers import create_event, EventTypes as ET
 from selfdrive.car.gm.values import CAR, Ecu, ECU_FINGERPRINT, CruiseButtons, \
                                     SUPERCRUISE_CARS, AccState, FINGERPRINTS
-from selfdrive.car.gm.carstate import CarState, CruiseButtons, get_powertrain_can_parser, get_chassis_can_parser
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
-
-FOLLOW_AGGRESSION = 0.15 # (Acceleration/Decel aggression) Lower is more aggressive
-
 
 ButtonType = car.CarState.ButtonEvent.Type
 
 class CarInterface(CarInterfaceBase):
-  def __init__(self, CP, CarController):
-    self.CP = CP
-
-    self.frame = 0
-    self.gas_pressed_prev = False
-    self.brake_pressed_prev = False
-    self.acc_active_prev = 0
-
-    # *** init the major players ***
-    canbus = CanBus()
-    self.CS = CarState(CP, canbus)
-    self.VM = VehicleModel(CP)
-    self.pt_cp = get_powertrain_can_parser(CP, canbus)
-    self.ch_cp = get_chassis_can_parser(CP, canbus)
-    self.ch_cp_dbc_name = DBC[CP.carFingerprint]['chassis']
-
-    self.CC = None
-    if CarController is not None:
-      self.CC = CarController(canbus, CP.carFingerprint)
 
   @staticmethod
   def compute_gb(accel, speed):
-  	# Ripped from compute_gb_honda in Honda's interface.py. Works well off shelf but may need more tuning
-    creep_brake = 0.0
-    creep_speed = 2.68
-    creep_brake_value = 0.10
-    if speed < creep_speed:
-      creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-    return float(accel) / 4.8 - creep_brake
+    return float(accel) / 4.0
 
   @staticmethod
-  
-  
-  def calc_accel_override(a_ego, a_target, v_ego, v_target):
-
-    # normalized max accel. Allowing max accel at low speed causes speed overshoots
-    max_accel_bp = [10, 20]    # m/s
-    max_accel_v = [0.85, 1.0] # unit of max accel
-    max_accel = interp(v_ego, max_accel_bp, max_accel_v)
-
-    # limit the pcm accel cmd if:
-    # - v_ego exceeds v_target, or
-    # - a_ego exceeds a_target and v_ego is close to v_target
-
-    eA = a_ego - a_target
-    valuesA = [1.0, 0.1]
-    bpA = [0.3, 1.1]
-
-    eV = v_ego - v_target
-    valuesV = [1.0, 0.1]
-    bpV = [0.0, 0.5]
-
-    valuesRangeV = [1., 0.]
-    bpRangeV = [-1., 0.]
-
-    # only limit if v_ego is close to v_target
-    speedLimiter = interp(eV, bpV, valuesV)
-    accelLimiter = max(interp(eA, bpA, valuesA), interp(eV, bpRangeV, valuesRangeV))
-
-    # accelOverride is more or less the max throttle allowed to pcm: usually set to a constant
-    # unless aTargetMax is very high and then we scale with it; this help in quicker restart
-
-    return float(max(max_accel, a_target / FOLLOW_AGGRESSION)) * min(speedLimiter, accelLimiter)
-
-  @staticmethod
-  
-  
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
     ret.carName = "gm"
@@ -110,14 +44,12 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.VOLT:
       # supports stop and go, but initial engage must be above 18mph (which include conservatism)
-      ret.minEnableSpeed = 8 * CV.MPH_TO_MS
+      ret.minEnableSpeed = 18 * CV.MPH_TO_MS
       ret.mass = 1607. + STD_CARGO_KG
       ret.wheelbase = 2.69
       ret.steerRatio = 15.7
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4 # wild guess
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.12], [0.05]]
-      ret.steerRateCost = 0.7
 
     elif candidate == CAR.MALIBU:
       # supports stop and go, but initial engage must be above 18mph (which include conservatism)
@@ -218,8 +150,6 @@ class CarInterface(CarInterfaceBase):
         if not (ret.cruiseState.enabled and ret.standstill):
           be.type = ButtonType.accelCruise # Suppress resume button if we're resuming from stop so we don't adjust speed.
       elif but == CruiseButtons.DECEL_SET:
-        if not cruiseEnabled and not self.CS.lkMode:
-          self.lkMode = True
         be.type = ButtonType.decelCruise
       elif but == CruiseButtons.CANCEL:
         be.type = ButtonType.cancel
@@ -228,14 +158,6 @@ class CarInterface(CarInterfaceBase):
       buttonEvents.append(be)
 
     ret.buttonEvents = buttonEvents
-    
-    if cruiseEnabled and self.CS.lka_button and self.CS.lka_button != self.CS.prev_lka_button:
-      self.CS.lkMode = not self.CS.lkMode
-
-    if self.CS.distance_button and self.CS.distance_button != self.CS.prev_distance_button:
-       self.CS.follow_level -= 1
-       if self.CS.follow_level < 1:
-         self.CS.follow_level = 3
 
     events = self.create_common_events(ret)
 
@@ -259,18 +181,11 @@ class CarInterface(CarInterfaceBase):
       # handle button presses
       for b in ret.buttonEvents:
         # do enable on both accel and decel buttons
-        # The ECM will fault if resume triggers an enable while speed is set to 0
-        if b.type == ButtonType.accelCruise and c.hudControl.setSpeed > 0 and c.hudControl.setSpeed < 70 and not b.pressed:
-          events.append(create_event('buttonEnable', [ET.ENABLE]))
-        if b.type == ButtonType.decelCruise and not b.pressed:
+        if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
           events.append(create_event('buttonEnable', [ET.ENABLE]))
         # do disable on button down
         if b.type == ButtonType.cancel and b.pressed:
           events.append(create_event('buttonCancel', [ET.USER_DISABLE]))
-        # The ECM independently tracks a ‘speed is set’ state that is reset on main off.
-        # To keep controlsd in sync with the ECM state, generate a RESET_V_CRUISE event on main cruise presses.
-        if b.type == ButtonType.altButton3 and b.pressed:
-          events.append(create_event('buttonCancel', [ET.RESET_V_CRUISE, ET.USER_DISABLE]))
 
     ret.events = events
 
