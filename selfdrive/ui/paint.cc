@@ -4,6 +4,7 @@
 #include <time.h>//clarity-bru: time
 #include <string.h>//clarity-bru: strcpy
 #include <unistd.h>//clarity-bru: files
+#include <fcntl.h>
 #include "ui.hpp"
 
 #include "common/util.h"
