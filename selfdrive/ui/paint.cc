@@ -994,7 +994,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     int fd;
 
     //Read the file with the CPU temp.  1 is equal to .1 degree Celius.
-    fd = open("/sys/class/thermal/thermal_zone6/temp", O_RDONLY);
+    fd = open("/sys/class/thermal/thermal_zone6/temp", "r");
     if(fd == -1)
     {
     //can't open
@@ -1034,7 +1034,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     }
 
     //Read the file with the battery temp.  1 is equal to .1 degree Celius.
-    fd = open("/sys/class/power_supply/battery/subsystem/battery/temp", O_RDONLY);
+    fd = open("/sys/class/power_supply/battery/subsystem/battery/temp", "r");
     if(fd == -1)
     {
       //can't open
@@ -1066,7 +1066,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     int fd;
   
     //Read the file with the battery level.  Not expecting anything above 100%
-    fd = open("/sys/class/power_supply/battery/capacity", O_RDONLY);
+    fd = open("/sys/class/power_supply/battery/capacity", "r");
     if(fd == -1)
     {
       //can't open
