@@ -1,20 +1,22 @@
-If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
-
-** If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing **
-
-If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch
 
 This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
 
-<b>ALSO IMPORTANT:</b> /data/kegman.json is a file that holds parameters and is used on various branches / forks.  When switching between forks (like @arne182 and @gernby), or between different branches within this repo (like non-gernby and gernby), it is best to delete or rename the existing file so there are no parameter conflicts. _Do this before rebooting the EON to compile on the new fork/branch.
+<b>NOTE: GM is still being worked on for 0.7.4</b> - please try untested-0.7.4-gm branch, have your Eon connected to the internet so that I can work through any errors
+
+If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
+
+
+** <b>0.7.3 and below only:</b> If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing - If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch **
+
   
 <b>WARNING:</b>  Do NOT depend on OP to stop the car in time if you are approaching an object which is not in motion in the same direction as your car.  The radar will NOT detect the stationary object in time to slow your car enough to stop.  If you are approaching a stopped vehicle you must disengage and brake as radars ignore objects that are not in motion.
 
 <b>NOTICE:</b>  Due to feedback I have turned on OTA updates.  You will receive updates automatically (after rebooting 2X) on your Eon so you don't have to reclone or git pull any longer to receive new features *MADE BETWEEN COMMA RELEASES*.  The reason why I separate the branches by release is because some releases can sometimes cause issues.  Features that I or others add, will continue to be updated when you are on the most current release.  If you DO NOT want OTA updates then create a file called "/data/no_ota_updates" and it will not perform OTA updates as long as that file exists.  
 
+
 I will attempt to detail the changes in each of the branches here: 
 
-Remember to manually flash panda after checking out.  cd /data/openpilot/panda/board && pkill -f boardd && make - then reboot for both branches
+
 
 <b>kegman</b> - this is the default branch
 
@@ -25,6 +27,9 @@ Remember to manually flash panda after checking out.  cd /data/openpilot/panda/b
 <b>kegman-Clarity</b> - for Honda Clarity models
 
 * Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
+
+Known bugs in 0.7.4:
+- GM not currently working
 
 Known bugs in 0.7.3:
 -Some people may get their panda stuck on blinking blue led.  Reflash Panda, disconnect power from the panda for 1 minute and reconnect power. Reboot Eon and restart car.
