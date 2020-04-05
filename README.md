@@ -30,6 +30,7 @@ I will attempt to detail the changes in each of the branches here:
 
 Known bugs in 0.7.4:
 - GM not currently working
+- Honda Stock AEB re-enabled as per Comma's requirements for custom forks - will try to work on disabling at a later time
 
 Known bugs in 0.7.3:
 -Some people may get their panda stuck on blinking blue led.  Reflash Panda, disconnect power from the panda for 1 minute and reconnect power. Reboot Eon and restart car.
