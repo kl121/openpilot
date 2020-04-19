@@ -10,6 +10,7 @@ CAMERA_OFFSET = float(kegman.conf['cameraOffset'])  # m from center car to camer
 def mean(numbers): 
      return float(sum(numbers)) / max(len(numbers), 1) 
 
+
 def compute_path_pinv(l=50):
   deg = 3
   x = np.arange(l*1.0)
@@ -22,11 +23,22 @@ def model_polyfit(points, path_pinv):
   return np.dot(path_pinv, [float(x) for x in points])
 
 
-def calc_d_poly(l_poly, r_poly, p_poly, l_prob, r_prob, lane_width):
+def eval_poly(poly, x):
+  return poly[3] + poly[2]*x + poly[1]*x**2 + poly[0]*x**3
+
+
+def calc_d_poly(l_poly, r_poly, p_poly, l_prob, r_prob, lane_width, v_ego):
   # This will improve behaviour when lanes suddenly widen
-  lane_width = min(3.5, lane_width)
-  l_prob = l_prob * interp(abs(l_poly[3]), [2, 2.5], [1.0, 0.0])
-  r_prob = r_prob * interp(abs(r_poly[3]), [2, 2.5], [1.0, 0.0])
+  # these numbers were tested on 2000segments and found to work well
+  lane_width = min(4.0, lane_width)
+  width_poly = l_poly - r_poly
+  prob_mods = []
+  for t_check in [0.0, 1.5, 3.0]:
+    width_at_t = eval_poly(width_poly, t_check * (v_ego + 7))
+    prob_mods.append(interp(width_at_t, [4.0, 5.0], [1.0, 0.0]))
+  mod = min(prob_mods)
+  l_prob = mod * l_prob
+  r_prob = mod * r_prob
 
   path_from_left_lane = l_poly.copy()
   path_from_left_lane[3] -= lane_width / 2.0
@@ -110,7 +122,8 @@ class LanePlanner():
     if abs(self.l_poly[3] - self.r_poly[3]) > self.lane_width:
       self.r_prob = self.r_prob / interp(self.l_prob, [0, 1], [1, 3])
     
-    self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width)
+
+    self.d_poly = calc_d_poly(self.l_poly, self.r_poly, self.p_poly, self.l_prob, self.r_prob, self.lane_width, v_ego)
 
   def update(self, v_ego, md):
     self.parse_model(md)

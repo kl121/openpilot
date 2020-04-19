@@ -129,7 +129,6 @@ struct FrameData {
   gainFrac @15 :Float32;
   focusVal @16 :List(Int16);
   focusConf @17 :List(UInt8);
-  
   frameType @7 :FrameType;
   timestampSof @8 :UInt64;
   transform @10 :List(Float32);
@@ -352,6 +351,25 @@ struct HealthData {
 
   enum FaultType {
     relayMalfunction @0;
+    unusedInterruptHandled @1;
+    interruptRateCan1 @2;
+    interruptRateCan2 @3;
+    interruptRateCan3 @4;
+    interruptRateTach @5;
+    interruptRateGmlan @6;
+    interruptRateInterrupts @7;
+    interruptRateSpiDma @8;
+    interruptRateSpiCs @9;
+    interruptRateUart1 @10;
+    interruptRateUart2 @11;
+    interruptRateUart3 @12;
+    interruptRateUart5 @13;
+    interruptRateUartDma @14;
+    interruptRateUsb @15;
+    interruptRateTim1 @16;
+    interruptRateTim3 @17;
+    registerDivergent @18;
+    # Update max fault type in boardd when adding faults
   }
 
   enum HwType {
@@ -805,7 +823,6 @@ struct PathPlan {
 
 struct LiveLocationKalman {
 
-  # More info on reference frames: 
   # https://github.com/commaai/openpilot/tree/master/common/transformations
 
   positionECEF @0 : Measurement;
@@ -1775,12 +1792,14 @@ struct UiLayoutState {
   activeApp @0 :App;
   sidebarCollapsed @1 :Bool;
   mapEnabled @2 :Bool;
+  mockEngaged @3 :Bool;
 
   enum App {
     home @0;
     music @1;
     nav @2;
     settings @3;
+    none @4;
   }
 }
 
@@ -1879,6 +1898,7 @@ struct DMonitoringState {
   awarenessPassive @12 :Float32;
   isLowStd @13 :Bool;
   hiStdCount @14 :UInt32;
+  isPreview @15 :Bool;
 }
 
 struct Boot {
@@ -1936,7 +1956,6 @@ struct KalmanOdometry {
   rotStd @3 :List(Float32); # std rad/s in device frame
 }
 
-
 struct Sentinel {
   enum SentinelType {
     endOfSegment @0;
@@ -1972,7 +1991,7 @@ struct Event {
     sendcan @17 :List(CanData);
     logMessage @18 :Text;
     liveCalibration @19 :LiveCalibrationData;
-    androidLogEntry @20 :AndroidLogEntry;
+    androidLog @20 :AndroidLogEntry;
     gpsLocation @21 :GpsLocationData;
     carState @22 :Car.CarState;
     carControl @23 :Car.CarControl;

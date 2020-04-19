@@ -4,7 +4,7 @@ from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.drive_helpers import create_event, EventTypes as ET
 from selfdrive.car.gm.values import CAR, Ecu, ECU_FINGERPRINT, CruiseButtons, \
-                                    SUPERCRUISE_CARS, AccState, FINGERPRINTS
+                                    AccState, FINGERPRINTS
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
@@ -74,9 +74,7 @@ class CarInterface(CarInterfaceBase):
     # Presence of a camera on the object bus is ok.
     # Have to go to read_only if ASCM is online (ACC-enabled cars),
     # or camera is on powertrain bus (LKA cars without ACC).
-    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or \
-                       has_relay or \
-                       candidate == CAR.CADILLAC_CT6
+    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
     ret.openpilotLongitudinalControl = ret.enableCamera
     tire_stiffness_factor = 0.444  # not optimized yet
 
@@ -232,47 +230,27 @@ class CarInterface(CarInterfaceBase):
        if self.CS.follow_level < 1:
          self.CS.follow_level = 3
 
-    events = self.create_common_events(ret)
+    events = self.create_common_events(ret, pcm_enable=False)
 
-    if self.CS.car_fingerprint in SUPERCRUISE_CARS:
-      if ret.cruiseState.enabled and not self.cruise_enabled_prev:
-        events.append(create_event('pcmEnable', [ET.ENABLE]))
-      if not ret.cruiseState.enabled:
-        events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
+    if ret.vEgo < self.CP.minEnableSpeed:
+      events.append(create_event('speedTooLow', [ET.NO_ENTRY]))
+    if self.CS.park_brake:
+      events.append(create_event('parkBrake', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    if ret.cruiseState.standstill:
+      events.append(create_event('resumeRequired', [ET.WARNING]))
+    if self.CS.pcm_acc_status == AccState.FAULTED:
+      events.append(create_event('controlsFailed', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
 
-    else:
-      # TODO: why is this only not supercruise? ignore supercruise?
-      if ret.vEgo < self.CP.minEnableSpeed:
-        events.append(create_event('speedTooLow', [ET.NO_ENTRY]))
-      if self.CS.park_brake:
-        events.append(create_event('parkBrake', [ET.NO_ENTRY, ET.USER_DISABLE]))
-      if ret.cruiseState.standstill:
-        events.append(create_event('resumeRequired', [ET.WARNING]))
-      if self.CS.pcm_acc_status == AccState.FAULTED:
-        events.append(create_event('controlsFailed', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
-
-      # handle button presses
-      for b in ret.buttonEvents:
-        # do enable on both accel and decel buttons
-        # The ECM will fault if resume triggers an enable while speed is set to 0
-        if b.type == ButtonType.accelCruise and c.hudControl.setSpeed > 0 and c.hudControl.setSpeed < 70 and not b.pressed:
-          events.append(create_event('buttonEnable', [ET.ENABLE]))
-        if b.type == ButtonType.decelCruise and not b.pressed:
-          events.append(create_event('buttonEnable', [ET.ENABLE]))
-        # do disable on button down
-        if b.type == ButtonType.cancel and b.pressed:
-          events.append(create_event('buttonCancel', [ET.USER_DISABLE]))
-        # The ECM independently tracks a ‘speed is set’ state that is reset on main off.
-        # To keep controlsd in sync with the ECM state, generate a RESET_V_CRUISE event on main cruise presses.
-        if b.type == ButtonType.altButton3 and b.pressed:
-          events.append(create_event('buttonCancel', [ET.RESET_V_CRUISE, ET.USER_DISABLE]))
+    # handle button presses
+    for b in ret.buttonEvents:
+      # do enable on both accel and decel buttons
+      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
+        events.append(create_event('buttonEnable', [ET.ENABLE]))
+      # do disable on button down
+      if b.type == ButtonType.cancel and b.pressed:
+        events.append(create_event('buttonCancel', [ET.USER_DISABLE]))
 
     ret.events = events
-
-    # update previous brake/gas pressed
-    self.cruise_enabled_prev = ret.cruiseState.enabled
-    self.gas_pressed_prev = ret.gasPressed
-    self.brake_pressed_prev = ret.brakePressed
 
     # copy back carState packet to CS
     self.CS.out = ret.as_reader()

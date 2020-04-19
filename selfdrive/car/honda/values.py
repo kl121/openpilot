@@ -137,7 +137,7 @@ FINGERPRINTS = {
   },
   # 2019 Ridgeline
   {
-    57: 3, 145: 8, 228: 5, 229: 4, 308: 5, 316: 8, 339: 7, 342: 6, 344: 8, 380: 8, 392: 6, 399: 7, 419: 8, 420: 8, 422:8, 425: 8, 426: 8, 427: 3, 432: 7, 464: 8, 476: 4, 490: 8, 545: 5, 546: 3, 597: 8, 660: 8, 773: 7, 777: 8, 795: 8, 800: 8, 804: 8, 808: 8, 819: 7, 821: 5, 871: 8, 882: 2, 884: 7, 892: 8, 923: 2, 929: 8, 963: 8, 965: 8, 966: 8, 967: 8, 983: 8, 985: 3, 1027: 5, 1029: 8, 1036: 8, 1039: 8, 1064: 7, 1088: 8, 1089: 8, 1092: 1, 1108: 8, 1125: 8, 1296: 8, 1365: 5, 424: 5, 1613: 5, 1616: 5, 1618: 5, 1623: 5, 1668: 5
+    57: 3, 145: 8, 228: 5, 229: 4, 308: 5, 316: 8, 339: 7, 342: 6, 344: 8, 380: 8, 392: 6, 399: 7, 419: 8, 420: 8, 422:8, 425: 8, 426: 8, 427: 3, 432: 7, 464: 8, 476: 4, 490: 8, 512: 6, 513: 6, 545: 5, 546: 3, 597: 8, 660: 8, 773: 7, 777: 8, 795: 8, 800: 8, 804: 8, 808: 8, 819: 7, 821: 5, 871: 8, 882: 2, 884: 7, 892: 8, 923: 2, 929: 8, 963: 8, 965: 8, 966: 8, 967: 8, 983: 8, 985: 3, 1027: 5, 1029: 8, 1036: 8, 1039: 8, 1064: 7, 1088: 8, 1089: 8, 1092: 1, 1108: 8, 1125: 8, 1296: 8, 1365: 5, 424: 5, 1613: 5, 1616: 5, 1618: 5, 1623: 5, 1668: 5
   }],
   # 2019 Insight
   CAR.INSIGHT: [{
@@ -221,11 +221,13 @@ FW_VERSIONS = {
       b'37805-6A0-A740\x00\x00',
       b'37805-6A0-A840\x00\x00',
       b'37805-6A0-A850\x00\x00',
+      b'37805-6A1-H650\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28101-6A7-A220\x00\x00',
       b'28101-6A7-A320\x00\x00',
       b'28101-6A7-A510\x00\x00',
+      b'28101-6A9-H140\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TVA-A230\x00\x00',
@@ -234,6 +236,7 @@ FW_VERSIONS = {
       b'46114-TVA-A050\x00\x00',
       b'46114-TVA-A060\x00\x00',
       b'46114-TVA-A120\x00\x00',
+      b'46114-TVE-H550\x00\x00',
     ],
     (Ecu.combinationMeter, 0x18da60f1, None): [
       b'78109-TVA-A010\x00\x00',
@@ -241,29 +244,35 @@ FW_VERSIONS = {
       b'78109-TVA-A220\x00\x00',
       b'78109-TVA-A310\x00\x00',
       b'78109-TWA-A210\x00\x00',
+      b'78109-TVE-H610\x00\x00',
     ],
     (Ecu.hud, 0x18da61f1, None): [
       b'78209-TVA-A010\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-TVA-A060\x00\x00',
+      b'36161-TVE-H050\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-TVA-A460\x00\x00',
+      b'77959-TVA-H230\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TVA-B050\x00\x00',
       b'57114-TVA-B040\x00\x00',
+      b'57114-TVE-H250\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TVA-A150\x00\x00',
       b'36802-TVA-A160\x00\x00',
       b'36802-TVA-A170\x00\x00',
+      b'36802-TVE-H070\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-TVA-A140\x00\x00',
       b'39990-TVA-A150\x00\x00',  # Are these two different steerRatio?
       b'39990-TVA-A160\x00\x00',  # Sport, Sport 2.0T and Touring 2.0T have different ratios
+      b'39990-TVE-H130\x00\x00',
     ],
   },
   CAR.ACCORDH: {
@@ -368,8 +377,10 @@ FW_VERSIONS = {
       b'37805-5AA-L950\x00\x00',
       b'37805-5AN-A750\x00\x00',
       b'37805-5AN-A830\x00\x00',
+      b'37805-5AN-A840\x00\x00',
       b'37805-5AN-A930\x00\x00',
       b'37805-5AN-A950\x00\x00',
+      b'37805-5AN-AH20\x00\x00',
       b'37805-5AN-L940\x00\x00',
       b'37805-5AN-LH20\x00\x00',
       b'37805-5AN-LJ20\x00\x00',
@@ -385,6 +396,7 @@ FW_VERSIONS = {
       b'28101-5CK-A140\x00\x00',
       b'28101-5CK-A150\x00\x00',
       b'28101-5CK-C130\x00\x00',
+      b'28101-5CK-C140\x00\x00',
       b'28101-5DJ-A710\x00\x00',
       b'28101-5DV-E330\x00\x00',
     ],
@@ -406,7 +418,6 @@ FW_VERSIONS = {
       b'77959-TBA-A060\x00\x00',
       b'77959-TGG-A020\x00\x00',
       b'77959-TGG-G010\x00\x00',
-      b'77959-TGG-A020\x00\x00',
     ],
     (Ecu.combinationMeter, 0x18da60f1, None): [
       b'78109-TBA-A910\x00\x00',
@@ -433,12 +444,25 @@ FW_VERSIONS = {
     (Ecu.unknown, 0x18daeff1, None): [
       b'38897-TBA-A110\x00\x00',
       b'38897-TBA-A020\x00\x00',
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-TBA-A110\x00\x00',
       b'38897-TBA-A020\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TBA-A110\x00\x00',
       b'38897-TBA-A020\x00\x00',
     ],
+  },
+  CAR.CIVIC_BOSCH_DIESEL: {
+    (Ecu.programmedFuelInjection, 0x18da10f1, None): [b'37805-59N-G830\x00\x00'],
+    (Ecu.transmission, 0x18da1ef1, None): [b'28101-59Y-G620\x00\x00'],
+    (Ecu.vsa, 0x18da28f1, None): [b'57114-TGN-E320\x00\x00'],
+    (Ecu.eps, 0x18da30f1, None): [b'39990-TFK-G020\x00\x00'],
+    (Ecu.srs, 0x18da53f1, None): [b'77959-TFK-G210\x00\x00'],
+    (Ecu.combinationMeter, 0x18da60f1, None): [b'78109-TFK-G020\x00\x00'],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [b'36802-TFK-G130\x00\x00'],
+    (Ecu.shiftByWire, 0x18da0bf1, None): [b'54008-TGN-E010\x00\x00'],
   },
   CAR.CIVIC_BOSCH_DIESEL: {
     (Ecu.programmedFuelInjection, 0x18da10f1, None): [b'37805-59N-G830\x00\x00'],
@@ -649,21 +673,26 @@ FW_VERSIONS = {
   CAR.RIDGELINE: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-T6Z-A020\x00\x00',
+      b'39990-T6Z-A030\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab0f1, None): [
       b'36161-T6Z-A310\x00\x00',
+      b'36161-T6Z-A520\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-T6Z-A010\x00\x00',
+      b'38897-T6Z-A110\x00\x00',
     ],
     (Ecu.combinationMeter, 0x18da60f1, None): [
       b'78109-T6Z-A420\x00\x00',
+      b'78109-T6Z-A510\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-T6Z-A020\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-T6Z-A130\x00\x00',
+      b'57114-T6Z-A520\x00\x00',
     ],
   },
   CAR.INSIGHT: {
@@ -703,7 +732,6 @@ DBC = {
   CAR.PILOT_2018: dbc_dict('honda_pilot_touring_2017_can_generated', 'acura_ilx_2016_nidec'),
   CAR.PILOT_2019: dbc_dict('honda_pilot_touring_2017_can_generated', 'acura_ilx_2016_nidec'),
   CAR.RIDGELINE: dbc_dict('honda_ridgeline_black_edition_2017_can_generated', 'acura_ilx_2016_nidec'),
-  CAR.INSIGHT: dbc_dict('honda_insight_ex_2019_can_generated', None),
 }
 
 STEER_THRESHOLD = {
@@ -727,7 +755,6 @@ STEER_THRESHOLD = {
   CAR.PILOT_2018: 1200,
   CAR.PILOT_2019: 1200,
   CAR.RIDGELINE: 1200,
-  CAR.INSIGHT: 1200,
 }
 
 SPEED_FACTOR = {
@@ -751,7 +778,6 @@ SPEED_FACTOR = {
   CAR.PILOT_2018: 1.,
   CAR.PILOT_2019: 1.,
   CAR.RIDGELINE: 1.,
-  CAR.INSIGHT: 1.,
 }
 
 # msgs sent for steering controller by camera module on can 0.
@@ -760,5 +786,4 @@ ECU_FINGERPRINT = {
   Ecu.fwdCamera: [0xE4, 0x194],   # steer torque cmd
 }
 
-# TODO: get these from dbc file
 HONDA_BOSCH = [CAR.ACCORD, CAR.ACCORD_15, CAR.ACCORDH, CAR.CIVIC_BOSCH, CAR.CIVIC_BOSCH_DIESEL, CAR.CRV_5G, CAR.CRV_HYBRID, CAR.INSIGHT]

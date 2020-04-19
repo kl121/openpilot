@@ -94,6 +94,12 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     driverMonitorLowAcc @68;
     manualSteeringRequired @69;
     manualSteeringRequiredBlinkersOn @70;
+    invalidLkasSetting @69;
+    speedTooHigh @70;
+    laneChangeBlocked @71;
+    relayMalfunction @72;
+    manualSteeringRequired @73;
+    manualSteeringRequiredBlinkersOn @74;
   }
 }
 
@@ -130,7 +136,7 @@ struct CarState {
   steeringRateLimited @29 :Bool;    # if the torque is limited by the rate limiter
   stockAeb @30 :Bool;
   stockFcw @31 :Bool;
-  espDisabled @32: Bool;
+  espDisabled @32 :Bool;
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -164,8 +170,8 @@ struct CarState {
   canMonoTimes @12: List(UInt64);
 
   # blindspot sensors
-  leftBlindspot @37 :Bool; # Is there something blocking the left lane chang e
-  rightBlindspot @38 :Bool; # Is there something blocking the right lane change
+  leftBlindspot @33 :Bool; # Is there something blocking the left lane change
+  rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -390,6 +396,7 @@ struct CarParams {
   radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
+  networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
@@ -457,7 +464,7 @@ struct CarParams {
     noOutput @19;  # like silent but without silent CAN TXs
     hondaBoschHarness @20;
     volkswagenPq @21;
-    subaruLegacy @22;  # pre-Global platform    
+    subaruLegacy @22;  # pre-Global platform
   }
 
   enum SteerControlType {
@@ -467,8 +474,9 @@ struct CarParams {
 
   enum TransmissionType {
     unknown @0;
-    automatic @1;
-    manual @2;
+    automatic @1;  # Traditional auto, including DSG
+    manual @2;  # True "stick shift" only
+    direct @3;  # Electric vehicle or other direct drive
   }
 
   struct CarFw {
@@ -490,7 +498,6 @@ struct CarParams {
     gateway @10; # can gateway
     hud @11; # heads up display
     combinationMeter @12; # instrument cluster
- 
     # Toyota only
     dsu @6;
     apgs @7;
@@ -506,5 +513,10 @@ struct CarParams {
     can @0;
     fw @1;
     fixed @2;
+  }
+
+  enum NetworkLocation {
+    fwdCamera @0;  # Standard/default integration at LKAS camera
+    gateway @1;    # Integration at vehicle's CAN gateway
   }
 }
