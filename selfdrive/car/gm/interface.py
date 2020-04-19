@@ -138,16 +138,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.49
 
-    elif candidate == CAR.CADILLAC_CT6:
-      # engage speed is decided by pcm
-      ret.minEnableSpeed = -1.
-      ret.mass = 4016. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.safetyModel = car.CarParams.SafetyModel.cadillac
-      ret.wheelbase = 3.11
-      ret.steerRatio = 14.6   # it's 16.3 without rear active steering
-      ret.steerRatioRear = 0. # TODO: there is RAS on this car!
-      ret.centerToFront = ret.wheelbase * 0.465
-
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
