@@ -168,8 +168,8 @@ struct CarState {
   canMonoTimes @12: List(UInt64);
 
   # blindspot sensors
-  leftBlindspot @33 :Bool; # Is there something blocking the left lane change
-  rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+  leftBlindspot @37 :Bool; # Is there something blocking the left lane change
+  rightBlindspot @38 :Bool; # Is there something blocking the right lane change
 
   struct WheelSpeeds {
     # optional wheel speeds
