@@ -133,8 +133,8 @@ void *safety_setter_thread(void *s) {
   capnp::FlatArrayMessageReader cmsg(amsg);
   cereal::CarParams::Reader car_params = cmsg.getRoot<cereal::CarParams>();
 
-  //LOGW("setting unsafety mode");
-  //libusb_control_transfer(dev_handle, 0x40, 0xdf, 2, 0, NULL, 0, TIMEOUT);
+  LOGW("setting unsafety mode");
+  libusb_control_transfer(dev_handle, 0x40, 0xdf, 2, 0, NULL, 0, TIMEOUT);
 
   int safety_model = int(car_params.getSafetyModel());
   auto safety_param = car_params.getSafetyParam();
