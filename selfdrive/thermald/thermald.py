@@ -17,6 +17,8 @@ from selfdrive.swaglog import cloudlog
 import cereal.messaging as messaging
 from selfdrive.loggerd.config import get_available_percent
 from selfdrive.pandad import get_expected_signature
+from selfdrive.kegman_conf import kegman_conf
+kegman = kegman_conf()
 from selfdrive.thermald.power_monitoring import PowerMonitoring, get_battery_capacity, get_battery_status, get_battery_current, get_battery_voltage, get_usb_present
 
 FW_SIGNATURE = get_expected_signature()
@@ -146,11 +148,31 @@ def handle_fan_uno(max_cpu_temp, bat_temp, fan_speed, ignition):
 
   return new_speed
 
+def check_car_battery_voltage(should_start, health, charging_disabled, msg):
+
+  # charging disallowed if:
+  #   - there are health packets from panda, and;
+  #   - 12V battery voltage is too low, and;
+  #   - onroad isn't started
+  print(health)
+  
+  if charging_disabled and (health is None or health.health.voltage > (int(kegman.conf['carVoltageMinEonShutdown'])+500)) and msg.thermal.batteryPercent < int(kegman.conf['battChargeMin']):
+    charging_disabled = False
+    os.system('echo "1" > /sys/class/power_supply/battery/charging_enabled')
+  elif not charging_disabled and (msg.thermal.batteryPercent > int(kegman.conf['battChargeMax']) or (health is not None and health.health.voltage < int(kegman.conf['carVoltageMinEonShutdown']) and not should_start)):
+    charging_disabled = True
+    os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
+  elif msg.thermal.batteryCurrent < 0 and msg.thermal.batteryPercent > int(kegman.conf['battChargeMax']):
+    charging_disabled = True
+    os.system('echo "0" > /sys/class/power_supply/battery/charging_enabled')
+
+  return charging_disabled
+
 
 def thermald_thread():
   # prevent LEECO from undervoltage
-  BATT_PERC_OFF = 10 if LEON else 3
-
+  BATT_PERC_OFF = int(kegman.conf['battPercOff'])
+  
   health_timeout = int(1000 * 2.5 * DT_TRML)  # 2.5x the expected health frequency
 
   # now loop
@@ -178,6 +200,7 @@ def thermald_thread():
   health_prev = None
   fw_version_match_prev = True
   current_connectivity_alert = None
+  charging_disabled = False
   time_valid_prev = True
   should_start_prev = False
   handle_fan = None
@@ -332,7 +355,7 @@ def thermald_thread():
     should_start = should_start and accepted_terms and completed_training and (not do_uninstall)
 
     # check for firmware mismatch
-    should_start = should_start and fw_version_match
+    #should_start = should_start and fw_version_match
 
     # check if system time is valid
     should_start = should_start and time_valid
@@ -382,6 +405,15 @@ def thermald_thread():
          started_seen and (sec_since_boot() - off_ts) > 60:
         os.system('LD_LIBRARY_PATH="" svc power shutdown')
 
+    charging_disabled = check_car_battery_voltage(should_start, health, charging_disabled, msg)
+
+    if msg.thermal.batteryCurrent > 0:
+      msg.thermal.batteryStatus = "Discharging"
+    else:
+      msg.thermal.batteryStatus = "Charging"
+
+    
+    msg.thermal.chargingDisabled = charging_disabled
     # Offroad power monitoring
     pm.calculate(health)
     msg.thermal.offroadPowerUsage = pm.get_power_used()
@@ -402,6 +434,8 @@ def thermald_thread():
     usb_power_prev = usb_power
     fw_version_match_prev = fw_version_match
     should_start_prev = should_start
+
+    print(msg)
 
     # report to server once per minute
     if (count % int(60. / DT_TRML)) == 0:
