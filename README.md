@@ -1,3 +1,5 @@
+** Note that Honda stock AEB is disabled in 0.7.5 because of occassional issues on double lane curved highways where stock AEB activates when oncoming car detected - in 0.7.4 Honda stock AEB is enabled because unsafe mode in panda was not available yet in devel**
+
 
 This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
 
@@ -27,7 +29,13 @@ I will attempt to detail the changes in each of the branches here:
 
 * Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
 
+
+Known bugs in 0.7.5:
+- GM stop and go may not work
+- Bosch lead distance resume spamming needs to be restored
+
 Known bugs in 0.7.4:
+- GM resume button may need to be pressed after coming to complete stop
 - GM working now thanks to @nic @clementcho and @beejayceeya for patient testing and error reporting
 - Honda Stock AEB re-enabled as per Comma's requirements for custom forks - will try to work on disabling at a later time
 
