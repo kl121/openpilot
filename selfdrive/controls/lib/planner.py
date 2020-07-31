@@ -24,7 +24,7 @@ AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distract
 
 # lookup tables VS speed to determine min and max accels in cruise
 # make sure these accelerations are smaller than mpc limits
-_A_CRUISE_MIN_V  = [-1.0, -.8, -.67, -.5, -.30]
+_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30]
 _A_CRUISE_MIN_BP = [   0., 5.,  10., 20.,  40.]
 
 # need fast accel at very low speed for stop and go
@@ -79,8 +79,6 @@ class Planner():
     self.a_acc = 0.0
     self.v_cruise = 0.0
     self.a_cruise = 0.0
-    self.v_model = 0.0
-    self.a_model = 0.0
 
     self.longitudinalPlanSource = 'cruise'
     self.fcw_checker = FCWChecker()
@@ -93,7 +91,7 @@ class Planner():
 
   def choose_solution(self, v_cruise_setpoint, enabled):
     if enabled:
-      solutions = {'model': self.v_model, 'cruise': self.v_cruise}
+      solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status:
@@ -112,9 +110,6 @@ class Planner():
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
-      elif slowest == 'model':
-        self.v_acc = self.v_model
-        self.a_acc = self.a_model
 
     self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
 
@@ -126,6 +121,8 @@ class Planner():
     long_control_state = sm['controlsState'].longControlState
     v_cruise_kph = sm['controlsState'].vCruise
     force_slow_decel = sm['controlsState'].forceDecel
+
+    v_cruise_kph = min(v_cruise_kph, V_CRUISE_MAX)
     v_cruise_setpoint = v_cruise_kph * CV.KPH_TO_MS
 
     lead_1 = sm['radarState'].leadOne
@@ -173,12 +170,6 @@ class Planner():
                                                     v_cruise_setpoint,
                                                     accel_limits_turns[1], accel_limits_turns[0],
                                                     jerk_limits[1], jerk_limits[0],
-                                                    LON_MPC_STEP)
-
-      self.v_model, self.a_model = speed_smoother(self.v_acc_start, self.a_acc_start,
-                                                    model_speed,
-                                                    2*accel_limits[1], accel_limits[0],
-                                                    2*jerk_limits[1], jerk_limits[0],
                                                     LON_MPC_STEP)
 
       # cruise speed can't be negative even is user is distracted

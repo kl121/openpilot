@@ -34,6 +34,7 @@ bool can_pop(can_ring *q, CAN_FIFOMailBox_TypeDef *elem);
 
 // Ignition detected from CAN meessages
 bool ignition_can = false;
+bool ignition_cadillac = false;
 uint32_t ignition_can_cnt = 0U;
 
 // end API
@@ -165,6 +166,7 @@ bool can_set_speed(uint8_t can_number) {
 void can_init_all(void) {
   bool ret = true;
   for (uint8_t i=0U; i < CAN_MAX; i++) {
+    can_clear(can_queues[i]);
     ret &= can_init(i);
   }
   UNUSED(ret);
@@ -352,10 +354,17 @@ void ignition_can_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   ignition_can_cnt = 0U;  // reset counter
 
   if (bus == 0) {
+    // TODO: verify on all supported GM models that we can reliably detect ignition using only this signal,
+    // since the 0x1F1 signal can briefly go low immediately after ignition
+    if ((addr == 0x160) && (len == 5)) {
+      // this message isn't all zeros when ignition is on
+      ignition_cadillac = GET_BYTES_04(to_push) != 0;
+    }
     // GM exception
     if ((addr == 0x1F1) && (len == 8)) {
-      //Bit 5 is ignition "on"
-      ignition_can = (GET_BYTE(to_push, 0) & 0x20) != 0;
+      // Bit 5 is ignition "on"
+      bool ignition_gm = ((GET_BYTE(to_push, 0) & 0x20) != 0);
+      ignition_can = ignition_gm || ignition_cadillac;
     }
     // Tesla exception
     if ((addr == 0x348) && (len == 8)) {

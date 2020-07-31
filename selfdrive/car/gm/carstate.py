@@ -5,8 +5,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from selfdrive.car.interfaces import CarStateBase
 from selfdrive.car.gm.values import DBC, CAR, AccState, CanBus, \
-                                    CruiseButtons, is_eps_status_ok, \
-                                    STEER_THRESHOLD
+                                    CruiseButtons, STEER_THRESHOLD
 
 
 class CarState(CarStateBase):
@@ -39,10 +38,7 @@ class CarState(CarStateBase):
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw < 0.01
-    
-    self.angle_steers = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
-    self.gear_shifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL"]['PRNDL'], None))
-    self.user_brake = pt_cp.vl["EBCMBrakePedalPosition"]['BrakePedalPosition']
+
     ret.steeringAngle = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL"]['PRNDL'], None))
     ret.brake = pt_cp.vl["EBCMBrakePedalPosition"]['BrakePedalPosition'] / 0xd0
@@ -58,9 +54,9 @@ class CarState(CarStateBase):
 
     # 1 - open, 0 - closed
     ret.doorOpen = (pt_cp.vl["BCMDoorBeltStatus"]['FrontLeftDoor'] == 1 or
-      pt_cp.vl["BCMDoorBeltStatus"]['FrontRightDoor'] == 1 or
-      pt_cp.vl["BCMDoorBeltStatus"]['RearLeftDoor'] == 1 or
-      pt_cp.vl["BCMDoorBeltStatus"]['RearRightDoor'] == 1)
+                    pt_cp.vl["BCMDoorBeltStatus"]['FrontRightDoor'] == 1 or
+                    pt_cp.vl["BCMDoorBeltStatus"]['RearLeftDoor'] == 1 or
+                    pt_cp.vl["BCMDoorBeltStatus"]['RearRightDoor'] == 1)
 
     # 1 - latched
     ret.seatbeltUnlatched = pt_cp.vl["BCMDoorBeltStatus"]['LeftSeatBelt'] == 0
@@ -76,8 +72,17 @@ class CarState(CarStateBase):
     if self.car_fingerprint == CAR.VOLT:
       regen_pressed = bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
 
+    self.park_brake = pt_cp.vl["EPBStatus"]['EPBClosed']
+    ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
+    ret.espDisabled = pt_cp.vl["ESPStatus"]['TractionControlOn'] != 1
+    self.pcm_acc_status = pt_cp.vl["AcceleratorPedal2"]['CruiseState']
+
+    ret.brakePressed = ret.brake > 1e-5
     # Regen braking is braking
     ret.brakePressed = ret.brake > 1e-5 or regen_pressed
+    if self.car_fingerprint == CAR.VOLT:
+      ret.brakePressed = ret.brakePressed or bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+
     ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF
     ret.cruiseState.standstill = self.pcm_acc_status == AccState.STANDSTILL
 

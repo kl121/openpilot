@@ -6,11 +6,6 @@
 #define DESIRE
 #define TRAFFIC_CONVENTION
 
-#ifdef QCOM
-#include <eigen3/Eigen/Dense>
-#else
-#include <Eigen/Dense>
-#endif
 
 #include "common/mat.h"
 #include "common/util.h"
@@ -18,9 +13,7 @@
 #include "commonmodel.h"
 #include "runners/run.h"
 
-#include "cereal/gen/cpp/log.capnp.h"
 #include <czmq.h>
-#include <capnp/serialize.h>
 #include "messaging.hpp"
 
 #define MODEL_WIDTH 512
@@ -41,6 +34,9 @@
 #define MDN_GROUP_SIZE 11
 #define TIME_DISTANCE 100
 #define POSE_SIZE 12
+
+#define MODEL_FREQ 20
+#define MAX_FRAME_DROP 0.05
 
 struct ModelDataRaw {
     float *path;
@@ -78,8 +74,8 @@ ModelDataRaw model_eval_frame(ModelState* s, cl_command_queue q,
 void model_free(ModelState* s);
 void poly_fit(float *in_pts, float *in_stds, float *out);
 
-void model_publish(PubSocket* sock, uint32_t frame_id,
-                   const ModelDataRaw data, uint64_t timestamp_eof);
-void posenet_publish(PubSocket* sock, uint32_t frame_id,
-                   const ModelDataRaw data, uint64_t timestamp_eof);
+void model_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
+                   uint32_t vipc_dropped_frames, float frame_drop, const ModelDataRaw &data, uint64_t timestamp_eof);
+void posenet_publish(PubMaster &pm, uint32_t vipc_frame_id, uint32_t frame_id,
+                     uint32_t vipc_dropped_frames, float frame_drop, const ModelDataRaw &data, uint64_t timestamp_eof);
 #endif

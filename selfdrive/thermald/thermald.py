@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 import os
 import json
 import copy
@@ -19,7 +19,8 @@ from selfdrive.loggerd.config import get_available_percent
 from selfdrive.pandad import get_expected_signature
 from selfdrive.kegman_conf import kegman_conf
 kegman = kegman_conf()
-from selfdrive.thermald.power_monitoring import PowerMonitoring, get_battery_capacity, get_battery_status, get_battery_current, get_battery_voltage, get_usb_present
+from selfdrive.thermald.power_monitoring import PowerMonitoring, get_battery_capacity, get_battery_status, \
+                                                get_battery_current, get_battery_voltage, get_usb_present
 
 FW_SIGNATURE = get_expected_signature()
 
@@ -30,6 +31,10 @@ CURRENT_TAU = 15.   # 15s time constant
 CPU_TEMP_TAU = 5.   # 5s time constant
 DAYS_NO_CONNECTIVITY_MAX = 7  # do not allow to engage after a week without internet
 DAYS_NO_CONNECTIVITY_PROMPT = 4  # send an offroad prompt after 4 days with no internet
+DISCONNECT_TIMEOUT = 5.  # wait 5 seconds before going offroad after disconnect so you get an alert
+
+LEON = False
+last_eon_fan_val = None
 
 LEON = False
 last_eon_fan_val = None
@@ -101,7 +106,7 @@ def set_eon_fan(val):
         else:
           #bus.write_i2c_block_data(0x67, 0x45, [0])
           bus.write_i2c_block_data(0x67, 0xa, [0x20])
-          bus.write_i2c_block_data(0x67, 0x8, [(val-1)<<6])
+          bus.write_i2c_block_data(0x67, 0x8, [(val - 1) << 6])
     else:
       bus.write_byte_data(0x21, 0x04, 0x2)
       bus.write_byte_data(0x21, 0x03, (val*2)+1)
@@ -205,9 +210,11 @@ def thermald_thread():
   should_start_prev = False
   handle_fan = None
   is_uno = False
+  has_relay = False
 
   params = Params()
   pm = PowerMonitoring()
+  no_panda_cnt = 0
 
   while 1:
     health = messaging.recv_sock(health_sock, wait=True)
@@ -222,6 +229,37 @@ def thermald_thread():
       # Setup fan handler on first connect to panda
       if handle_fan is None and health.health.hwType != log.HealthData.HwType.unknown:
         is_uno = health.health.hwType == log.HealthData.HwType.uno
+
+        if is_uno or not ANDROID:
+          cloudlog.info("Setting up UNO fan handler")
+          handle_fan = handle_fan_uno
+        else:
+          cloudlog.info("Setting up EON fan handler")
+          setup_eon_fan()
+          handle_fan = handle_fan_eon
+
+      # Handle disconnect
+      if health_prev is not None:
+        if health.health.hwType == log.HealthData.HwType.unknown and \
+          health_prev.health.hwType != log.HealthData.HwType.unknown:
+          params.panda_disconnect()
+      health_prev = health
+
+      # If we lose connection to the panda, wait 5 seconds before going offroad
+      if health.health.hwType == log.HealthData.HwType.unknown:
+        no_panda_cnt += 1
+        if no_panda_cnt > DISCONNECT_TIMEOUT / DT_TRML:
+          if ignition:
+            cloudlog.error("Lost panda connection while onroad")
+          ignition = False
+      else:
+        no_panda_cnt = 0
+        ignition = health.health.ignitionLine or health.health.ignitionCan
+
+      # Setup fan handler on first connect to panda
+      if handle_fan is None and health.health.hwType != log.HealthData.HwType.unknown:
+        is_uno = health.health.hwType == log.HealthData.HwType.uno
+        has_relay = health.health.hwType in [log.HealthData.HwType.blackPanda, log.HealthData.HwType.uno, log.HealthData.HwType.dos]
 
         if is_uno or not ANDROID:
           cloudlog.info("Setting up UNO fan handler")
@@ -278,14 +316,16 @@ def thermald_thread():
       fan_speed = handle_fan(max_cpu_temp, bat_temp, fan_speed, ignition)
       msg.thermal.fanSpeed = fan_speed
 
-    # thermal logic with hysterisis
-    if max_cpu_temp > 107. or bat_temp >= 63.:
+    # If device is offroad we want to cool down before going onroad
+    # since going onroad increases load and can make temps go over 107
+    # We only do this if there is a relay that prevents the car from faulting
+    if max_cpu_temp > 107. or bat_temp >= 63. or (has_relay and (started_ts is None) and max_cpu_temp > 70.0):
       # onroad not allowed
       thermal_status = ThermalStatus.danger
-    elif max_comp_temp > 92.5 or bat_temp > 60.:  # CPU throttling starts around ~90C
+    elif max_comp_temp > 96.0 or bat_temp > 60.:
       # hysteresis between onroad not allowed and engage not allowed
       thermal_status = clip(thermal_status, ThermalStatus.red, ThermalStatus.danger)
-    elif max_cpu_temp > 87.5:
+    elif max_cpu_temp > 94.0:
       # hysteresis between engage not allowed and uploader not allowed
       thermal_status = clip(thermal_status, ThermalStatus.yellow, ThermalStatus.red)
     elif max_cpu_temp > 80.0:

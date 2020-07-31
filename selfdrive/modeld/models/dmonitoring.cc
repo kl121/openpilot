@@ -3,7 +3,6 @@
 #include "common/mat.h"
 #include "common/timing.h"
 
-// #include <fastcv.h>
 #include <libyuv.h>
 
 #define MODEL_WIDTH 160
@@ -27,6 +26,14 @@ void dmonitoring_init(DMonitoringModelState* s) {
   s->is_rhd_checked = false;
 }
 
+template <class T>
+static inline T *get_buffer(std::vector<T> &buf, const size_t size) {
+  if (buf.size() < size) {
+    buf.resize(size);
+  }
+  return buf.data();
+}
+
 DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_buf, int width, int height) {
 
   uint8_t *raw_buf = (uint8_t*) stream_buf;
@@ -40,8 +47,7 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
   int resized_width = MODEL_WIDTH;
   int resized_height = MODEL_HEIGHT;
 
-  uint8_t *cropped_buf = new uint8_t[cropped_width*cropped_height*3/2];
-  uint8_t *cropped_y_buf = cropped_buf;
+  uint8_t *cropped_y_buf = get_buffer(s->cropped_buf, cropped_width*cropped_height*3/2);
   uint8_t *cropped_u_buf = cropped_y_buf + (cropped_width * cropped_height);
   uint8_t *cropped_v_buf = cropped_u_buf + ((cropped_width/2) * (cropped_height/2));
 
@@ -54,8 +60,7 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
     }
   } else {
     // not tested
-    uint8_t *premirror_cropped_buf = new uint8_t[cropped_width*cropped_height*3/2];
-    uint8_t *premirror_cropped_y_buf = premirror_cropped_buf;
+    uint8_t *premirror_cropped_y_buf = get_buffer(s->premirror_cropped_buf, cropped_width*cropped_height*3/2);
     uint8_t *premirror_cropped_u_buf = premirror_cropped_y_buf + (cropped_width * cropped_height);
     uint8_t *premirror_cropped_v_buf = premirror_cropped_u_buf + ((cropped_width/2) * (cropped_height/2));
     for (int r = 0; r < height/2; r++) {
@@ -71,10 +76,9 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
                        cropped_u_buf, cropped_width/2,
                        cropped_v_buf, cropped_width/2,
                        cropped_width, cropped_height);
-    delete[] premirror_cropped_buf;
   }
 
-  uint8_t *resized_buf = new uint8_t[resized_width*resized_height*3/2];
+  uint8_t *resized_buf = get_buffer(s->resized_buf, resized_width*resized_height*3/2);
   uint8_t *resized_y_buf = resized_buf;
   uint8_t *resized_u_buf = resized_y_buf + (resized_width * resized_height);
   uint8_t *resized_v_buf = resized_u_buf + ((resized_width/2) * (resized_height/2));
@@ -91,8 +95,7 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
                     mode);
 
   int yuv_buf_len = (MODEL_WIDTH/2) * (MODEL_HEIGHT/2) * 6; // Y|u|v -> y|y|y|y|u|v
-
-  float *net_input_buf = new float[yuv_buf_len];
+  float *net_input_buf = get_buffer(s->net_input_buf, yuv_buf_len);
   // one shot conversion, O(n) anyway
   // yuvframe2tensor, normalize
   for (int r = 0; r < MODEL_HEIGHT/2; r++) {
@@ -121,10 +124,7 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
   //fwrite(net_input_buf, MODEL_HEIGHT*MODEL_WIDTH*3/2, sizeof(float), dump_yuv_file2);
   //fclose(dump_yuv_file2);
 
-  delete[] cropped_buf;
-  delete[] resized_buf;
   s->m->execute(net_input_buf, yuv_buf_len);
-  delete[] net_input_buf;
 
   DMonitoringResult ret = {0};
   memcpy(&ret.face_orientation, &s->output[0], sizeof ret.face_orientation);
@@ -144,7 +144,7 @@ DMonitoringResult dmonitoring_eval_frame(DMonitoringModelState* s, void* stream_
   return ret;
 }
 
-void dmonitoring_publish(PubSocket* sock, uint32_t frame_id, const DMonitoringResult res) {
+void dmonitoring_publish(PubMaster &pm, uint32_t frame_id, const DMonitoringResult &res){
   // make msg
   capnp::MallocMessageBuilder msg;
   cereal::Event::Builder event = msg.initRoot<cereal::Event>();
@@ -167,10 +167,7 @@ void dmonitoring_publish(PubSocket* sock, uint32_t frame_id, const DMonitoringRe
   framed.setLeftBlinkProb(res.left_blink_prob);
   framed.setRightBlinkProb(res.right_blink_prob);
 
-  // send message
-  auto words = capnp::messageToFlatArray(msg);
-  auto bytes = words.asBytes();
-  sock->send((char*)bytes.begin(), bytes.size());
+  pm.send("driverState", msg);
 }
 
 void dmonitoring_free(DMonitoringModelState* s) {

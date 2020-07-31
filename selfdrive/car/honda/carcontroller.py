@@ -102,8 +102,8 @@ class CarController():
 
     self.params = CarControllerParams(CP)
 
-  def update(self, enabled, CS, frame, actuators, \
-             pcm_speed, pcm_override, pcm_cancel_cmd, pcm_accel, \
+  def update(self, enabled, CS, frame, actuators,
+             pcm_speed, pcm_override, pcm_cancel_cmd, pcm_accel,
              hud_v_cruise, hud_show_lanes, hud_show_car, hud_alert):
 
     P = self.params
@@ -145,9 +145,6 @@ class CarController():
     apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
     apply_steer = int(interp(-actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
 
-    apply_brake = int(clip(self.brake_last * P.BRAKE_MAX, 0, P.BRAKE_MAX - 1))
-    apply_steer = int(interp(-actuators.steer * P.STEER_MAX, P.STEER_LOOKUP_BP, P.STEER_LOOKUP_V))
-
     lkas_active = enabled and not CS.steer_not_allowed and CS.lkMode #and not CS.left_blinker_on and not CS.right_blinker_on  # add LKAS button to toggle steering
     
     # Send CAN commands.
@@ -164,6 +161,9 @@ class CarController():
       can_sends.extend(hondacan.create_ui_commands(self.packer, pcm_speed, hud, CS.CP.carFingerprint, CS.is_metric, idx, CS.CP.isPandaBlack, CS.stock_hud))
 
     if CS.CP.radarOffCan:
+      if (frame % 2) == 0:
+        idx = frame // 2
+        can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, CS.CP.carFingerprint, idx, CS.CP.isPandaBlack))
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
         can_sends.append(hondacan.spam_buttons_command(self.packer, CruiseButtons.CANCEL, idx, CS.CP.carFingerprint, CS.CP.isPandaBlack))
