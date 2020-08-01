@@ -53,9 +53,7 @@ class CAR:
   }],
   '''
   
-=======
   INSIGHT = "HONDA INSIGHT 2019 TOURING"
->>>>>>> upstream/devel
 
 # diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
 DIAG_MSGS = {1600: 5, 1601: 8}
