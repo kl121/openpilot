@@ -13,6 +13,7 @@ from selfdrive.controls.lib.speed_smoother import speed_smoother
 from selfdrive.controls.lib.longcontrol import LongCtrlState, MIN_CAN_SPEED
 from selfdrive.controls.lib.fcw import FCWChecker
 from selfdrive.controls.lib.long_mpc import LongitudinalMpc
+from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 from selfdrive.kegman_conf import kegman_conf
 
 
