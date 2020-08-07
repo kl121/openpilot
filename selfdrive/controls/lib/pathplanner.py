@@ -9,11 +9,15 @@ from selfdrive.kegman_conf import kegman_conf
 from common.numpy_fast import interp
 import cereal.messaging as messaging
 from cereal import log
+from selfdrive.config import Conversions as CV
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 LOG_MPC = os.environ.get('LOG_MPC', True)
+
+LANE_CHANGE_SPEED_MIN = 30 * CV.MPH_TO_MS
+LANE_CHANGE_TIME_MAX = 10.
 
 DESIRES = {
   LaneChangeDirection.none: {
