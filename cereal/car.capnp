@@ -114,6 +114,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     modeldLagging @89;
     manualSteeringRequired @90;
     manualSteeringRequiredBlinkersOn @91;
+    deviceFalling @92;
   }
 }
 
@@ -483,6 +484,7 @@ struct CarParams {
     volkswagenPq @21;
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
+    hyundaiCommunity @24;
   }
 
   enum SteerControlType {

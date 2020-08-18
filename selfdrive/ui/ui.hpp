@@ -93,8 +93,6 @@ typedef struct UIScene {
   int frontview;
   int fullview;
 
-  int transformed_width, transformed_height;
-
   ModelData model;
 
   float mpc_x[50];
@@ -150,6 +148,7 @@ typedef struct UIScene {
   cereal::RadarState::LeadData::Reader lead_data[2];
   cereal::ControlsState::Reader controls_state;
   cereal::DriverState::Reader driver_state;
+  cereal::DMonitoringState::Reader dmonitoring_state;
 } UIScene;
 
 typedef struct {
@@ -178,7 +177,6 @@ typedef struct UIState {
   NVGcontext *vg;
 
   // fonts and images
-  int font_courbd;
   int font_sans_regular;
   int font_sans_semibold;
   int font_sans_bold;
@@ -222,7 +220,6 @@ typedef struct UIState {
 
   int rgb_width, rgb_height, rgb_stride;
   size_t rgb_buf_len;
-  mat4 rgb_transform;
 
   int rgb_front_width, rgb_front_height, rgb_front_stride;
   size_t rgb_front_buf_len;
@@ -252,7 +249,6 @@ typedef struct UIState {
   float alert_blinking_alpha;
   bool alert_blinked;
   bool started;
-  bool preview_started;
   bool vision_seen;
 
   std::atomic<float> light_sensor;
