@@ -1,10 +1,17 @@
-** Note that Honda stock AEB is disabled in 0.7.5 because of occassional issues on double lane curved highways where stock AEB activates when oncoming car detected - in 0.7.4 Honda stock AEB is enabled because unsafe mode in panda was not available yet in devel**
-
-
 This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
 
 
 If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
+
+Loading instructions:
+SSH into your Eon - google this if you don't know how
+
+Issue the following commands:
+cd /data
+mv ./openpilot ./openpilot_backup
+git clone https://github.com/kegman/openpilot
+cd openpilot
+git checkout [insert branchname here]  (you can find branchnames on github page or issue "git branch" command)
 
 
 ** <b>0.7.3 and below only:</b> If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing - If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch **
@@ -29,6 +36,13 @@ I will attempt to detail the changes in each of the branches here:
 
 * Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
 
+
+Nuances in 0.7.8
+- brake light in UI not working yet
+
+Nuances in 0.7.7
+- sr_boost needs to be increased about 50% to maintain turning sharpness
+- GM Volt stop'n go working again
 
 Known bugs in 0.7.5:
 - GM stop and go may not work
