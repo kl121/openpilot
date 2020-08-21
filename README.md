@@ -7,12 +7,13 @@ Loading instructions:
 SSH into your Eon - google this if you don't know how
 
 Issue the following commands:
-cd /data
-mv ./openpilot ./openpilot_backup
-git clone https://github.com/kegman/openpilot
-cd openpilot
-git checkout [insert branchname here]  (you can find branchnames on github page or issue "git branch" command)
 
+->cd /data
+->mv ./openpilot ./openpilot_backup
+->git clone https://github.com/kegman/openpilot
+->cd openpilot
+->git checkout [insert branchname here]  (you can find branchnames on github page or issue "git branch" command)
+->reboot
 
 ** <b>0.7.3 and below only:</b> If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing - If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch **
 
