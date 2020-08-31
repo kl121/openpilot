@@ -376,32 +376,19 @@ void handle_message(UIState *s, SubMaster &sm) {
     scene.driver_state = sm["driverState"].getDriverState();
   }
   if (sm.updated("dMonitoringState")) {
-//<<<<<<< HEAD
-//    auto data = sm["dMonitoringState"].getDMonitoringState();
-//    scene.is_rhd = data.getIsRHD();
-//    s->preview_started = data.getIsPreview();
-//  } else if (sm.updated("carState")) {
-//    auto data = sm["carState"].getCarState();
-//    s->scene.brakeLights = data.getBrakeLights();
-//    s->scene.engineRPM = data.getEngineRPM();
-//    s->scene.aEgo = data.getAEgo();
-//    s->scene.steeringTorqueEps = data.getSteeringTorqueEps();
-//  } 
-  
-//  s->started = scene.thermal.getStarted() || s->preview_started;
-//=======
     scene.dmonitoring_state = sm["dMonitoringState"].getDMonitoringState();
     scene.is_rhd = scene.dmonitoring_state.getIsRHD();
     scene.frontview = scene.dmonitoring_state.getIsPreview();
-  }
-
-  // timeout on frontview
-  if ((sm.frame - sm.rcv_frame("dMonitoringState")) > 1*UI_FREQ) {
-    scene.frontview = false;
-  }
-
+  } 
+  if (sm.updated("carState")) {
+    auto data = sm["carState"].getCarState();
+    s->scene.brakeLights = data.getBrakeLights();
+    s->scene.engineRPM = data.getEngineRPM();
+    s->scene.aEgo = data.getAEgo();
+    s->scene.steeringTorqueEps = data.getSteeringTorqueEps();
+  } 
+  
   s->started = scene.thermal.getStarted() || scene.frontview;
-//>>>>>>> 0aa4867be... openpilot v0.7.8 release
   // Handle onroad/offroad transition
   if (!s->started) {
     if (s->status != STATUS_STOPPED) {

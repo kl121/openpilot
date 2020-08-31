@@ -116,8 +116,6 @@ typedef struct UIScene {
   int lead_status;
   float lead_d_rel, lead_v_rel;
 
-  int front_box_x, front_box_y, front_box_width, front_box_height;
-
   std::string alert_text1;
   std::string alert_text2;
   std::string alert_type;
@@ -136,9 +134,6 @@ typedef struct UIScene {
   float aEgo;
   float cpu0Temp;
   int cpuPerc;
-
-  // Used to show gps planner status
-  bool gps_planner_active;
 
   cereal::HealthData::HwType hwType;
   int satelliteCount;
