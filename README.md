@@ -9,11 +9,17 @@ SSH into your Eon - google this if you don't know how
 Issue the following commands:
 
 ->cd /data
+
 ->mv ./openpilot ./openpilot_backup
+
 ->git clone https://github.com/kegman/openpilot
+
 ->cd openpilot
+
 ->git checkout [insert branchname here]  (you can find branchnames on github page or issue "git branch" command)
+
 ->reboot
+
 
 
 *** Note that driver monitoring wheelTouchSeconds is not working without the following MANUAL tweak:  You must uncomment the following line in selfdrive/monitoring/driver_monitor.py by removing the "#" at the beginning of the line.  This is due to Comma policy on not touching the wheelTouch timing for forks under threat of ban.  
