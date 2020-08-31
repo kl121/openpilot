@@ -15,6 +15,13 @@ Issue the following commands:
 ->git checkout [insert branchname here]  (you can find branchnames on github page or issue "git branch" command)
 ->reboot
 
+
+*** Note that driver monitoring wheelTouchSeconds is not working without the following MANUAL tweak:  You must uncomment the following line in selfdrive/monitoring/driver_monitor.py by removing the "#" at the beginning of the line.  This is due to Comma policy on not touching the wheelTouch timing for forks under threat of ban.  
+
+https://github.com/kegman/openpilot/blob/kegman-0.7.8/selfdrive/monitoring/driver_monitor.py#L21  
+
+
+
 ** <b>0.7.3 and below only:</b> If you get a red screen with "Communications Mismatch" please manually reflash panda.  Instructions are here:  https://community.comma.ai/wiki/index.php/Panda_Flashing - If you are using a GM model like the Volt and you get the communications mismatch, please try the -gm branch **
 
   
@@ -38,16 +45,16 @@ I will attempt to detail the changes in each of the branches here:
 * Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
 
 
-Nuances in 0.7.8
-- brake light in UI not working yet
 
-Nuances in 0.7.7
-- sr_boost needs to be increased about 50% to maintain turning sharpness
+Nuances in 0.7.7 and 0.7.8
+- steerRatio needs to be increased about 20-30% to maintain turning sharpness
 - GM Volt stop'n go working again
+- Nudgeless lane changes disabled
 
 Known bugs in 0.7.5:
 - GM stop and go may not work
 - Bosch lead distance resume spamming needs to be restored
+- Nudgeless lane changes disabled
 
 Known bugs in 0.7.4:
 - GM resume button may need to be pressed after coming to complete stop
@@ -168,7 +175,7 @@ Everything inbetween -0.25 m/s and 3 m/s is interpolated, which adjusts the dist
 
 "lastTrMode": "2",      (last distance interval bars you used - (auto generated - do not touch this)
 
-"wheelTouchSeconds": "180"  (time interval between wheel touches when driver facial monitoring is not on - MAX LIMIT 600 seconds)
+"wheelTouchSeconds": "180"  (time interval between wheel touches when driver facial monitoring is not on - MAX LIMIT 600 seconds) - see Note at beginning of this README to see how to manually enable this in the code.
 
 
 ^^^ This file is auto generated here:  <b>/data/kegman.json</b> so it will remain even when you do a fresh clone.  If you mess something up, just delete the file and it will auto generate to default values.  Use vim or nano to edit this file to your heart's content.
