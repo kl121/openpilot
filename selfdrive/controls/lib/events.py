@@ -472,8 +472,8 @@ EVENTS = {
     ET.WARNING: Alert(
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",
-      AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 3.),
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, 1., 2., 3.),
   },
 
   # ********** events that affect controls state transitions **********
