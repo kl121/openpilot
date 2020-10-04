@@ -246,3 +246,50 @@ Enjoy everyone.
 <b>NOTE:</b> If you have upgraded at any time to v0.5.10, v0.6.x and you want to go back to a branch with v0.5.9 or v0.5.8, then you have to SSH into the Eon and edit the file /data/params/d/ControlsParams and rename "angle_model_bias" to "angle_offset" or your car will have Dash Errors and you'll be scratching your head for hours! 
 
 <b>Pedal Users:</b> Also note that you need to flash your Pedal to go to v0.5.10.  If you want to go back to 0.5.9 or 0.5.8 you need to flash your pedal back to 0.5.9.  Instructions are here:  https://medium.com/@jfrux/comma-pedal-updating-the-firmware-over-can-fa438a3cf910.  Also. After you flash your Pedal..  All hell will break loose on your dash.  Traction control error, Power Steering Error, Trailer Error, OMFG the sky is falling error etc.  DON'T PANIC.  Just drive around a bit and it will disappear after about 2-3 restarts of the car.  Don't rush it I believe it's time dependent as well.  Just drive as normal.  They'll go away.
+
+
+
+kegman.json for Kegman's Honda Pilot 2018 EX-L:
+  1 {
+  2   "1barBP0": "-0.4",
+  3   "1barBP1": "2.1",
+  4   "1barHwy": "0.4",
+  5   "1barMax": "2.2",
+  6   "2barBP0": "-0.4",
+  7   "2barBP1": "1.9",
+  8   "2barHwy": "0.3",
+  9   "2barMax": "2.2",
+ 10   "3barBP0": "0.0",
+ 11   "3barBP1": "3.0",
+ 12   "3barHwy": "0.1",
+ 13   "3barMax": "2.1",
+ 14   "ALCminSpeed": "16.66667",
+ 15   "ALCnudgeLess": "0",
+ 16   "ALCtimer": "2.0",
+ 17   "CruiseDelta": "5",
+ 18   "CruiseEnableMin": "40",
+ 19   "Kf": "0.00006",
+ 20   "Ki": "0.21",
+ 21   "Kp": "0.45",
+ 22   "accelerationMode": "2",
+ 23   "battChargeMax": "80",
+ 24   "battChargeMin": "70",
+ 25   "battPercOff": "25",
+ 26   "brakeStoppingTarget": "0.05",
+ 27   "cameraOffset": "0.075",
+ 28   "carVoltageMinEonShutdown": "11800",
+ 29   "deadzone": "0.0",
+ 30   "epsModded": "0",
+ 31   "lastTrMode": "1",
+ 32   "leadDistance": "5",
+ 33   "liveParams": "1",
+ 34   "sR_BP0": "2.5",
+ 35   "sR_BP1": "10",
+ 36   "sR_boost": "6.0",
+ 37   "sR_time": "2.5",
+ 38   "slowOnCurves": "0",
+ 39   "steerRateCost": "0.35",
+ 40   "steerRatio": "13.5",
+ 41   "tuneGernby": "1",
+ 42   "wheelTouchSeconds": "300"
+ 43 }
