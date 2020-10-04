@@ -250,46 +250,88 @@ Enjoy everyone.
 
 
 kegman.json for Kegman's Honda Pilot 2018 EX-L:
-  1 {
-  2   "1barBP0": "-0.4",
-  3   "1barBP1": "2.1",
-  4   "1barHwy": "0.4",
-  5   "1barMax": "2.2",
-  6   "2barBP0": "-0.4",
-  7   "2barBP1": "1.9",
-  8   "2barHwy": "0.3",
-  9   "2barMax": "2.2",
- 10   "3barBP0": "0.0",
- 11   "3barBP1": "3.0",
- 12   "3barHwy": "0.1",
- 13   "3barMax": "2.1",
- 14   "ALCminSpeed": "16.66667",
- 15   "ALCnudgeLess": "0",
- 16   "ALCtimer": "2.0",
- 17   "CruiseDelta": "5",
- 18   "CruiseEnableMin": "40",
- 19   "Kf": "0.00006",
- 20   "Ki": "0.21",
- 21   "Kp": "0.45",
- 22   "accelerationMode": "2",
- 23   "battChargeMax": "80",
- 24   "battChargeMin": "70",
- 25   "battPercOff": "25",
- 26   "brakeStoppingTarget": "0.05",
- 27   "cameraOffset": "0.075",
- 28   "carVoltageMinEonShutdown": "11800",
- 29   "deadzone": "0.0",
- 30   "epsModded": "0",
- 31   "lastTrMode": "1",
- 32   "leadDistance": "5",
- 33   "liveParams": "1",
- 34   "sR_BP0": "2.5",
- 35   "sR_BP1": "10",
- 36   "sR_boost": "6.0",
- 37   "sR_time": "2.5",
- 38   "slowOnCurves": "0",
- 39   "steerRateCost": "0.35",
- 40   "steerRatio": "13.5",
- 41   "tuneGernby": "1",
- 42   "wheelTouchSeconds": "300"
- 43 }
+
+  {
+     "1barBP0": "-0.4",
+     
+     "1barBP1": "2.1",
+     
+     "1barHwy": "0.4",
+     
+     "1barMax": "2.2",
+     
+     "2barBP0": "-0.4",
+     
+     "2barBP1": "1.9",
+     
+     "2barHwy": "0.3",
+     
+     "2barMax": "2.2",
+     
+    "3barBP0": "0.0",
+    
+    "3barBP1": "3.0",
+    
+    "3barHwy": "0.1",
+    
+    "3barMax": "2.1",
+    
+    "ALCminSpeed": "16.66667",
+    
+    "ALCnudgeLess": "0",
+    
+    "ALCtimer": "2.0",
+    
+    "CruiseDelta": "5",
+    
+    "CruiseEnableMin": "40",
+    
+    "Kf": "0.00006",
+    
+    "Ki": "0.21",
+    
+    "Kp": "0.45",
+    
+    "accelerationMode": "2",
+    
+    "battChargeMax": "80",
+    
+    "battChargeMin": "70",
+    
+    "battPercOff": "25",
+    
+    "brakeStoppingTarget": "0.05",
+    
+    "cameraOffset": "0.075",
+    
+    "carVoltageMinEonShutdown": "11800",
+    
+    "deadzone": "0.0",
+    
+    "epsModded": "0",
+    
+    "lastTrMode": "1",
+    
+    "leadDistance": "5",
+    
+    "liveParams": "1",
+    
+    "sR_BP0": "2.5",
+    
+    "sR_BP1": "10",
+    
+    "sR_boost": "6.0",
+    
+    "sR_time": "2.5",
+    
+    "slowOnCurves": "0",
+    
+    "steerRateCost": "0.35",
+    
+    "steerRatio": "13.5",
+    
+    "tuneGernby": "1",
+    
+    "wheelTouchSeconds": "300"
+    
+  }
