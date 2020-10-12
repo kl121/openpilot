@@ -18,10 +18,7 @@ from selfdrive.kegman_conf import kegman_conf
 
 kegman = kegman_conf()
 
-MAX_SPEED = 255.0
-
 LON_MPC_STEP = 0.2  # first step is 0.2s
-MAX_SPEED_ERROR = 2.0
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
 
 # lookup tables VS speed to determine min and max accels in cruise
@@ -43,9 +40,6 @@ _A_CRUISE_MAX_BP = [0., 5., 10., 20., 55.]
 # Lookup table for turns
 _A_TOTAL_MAX_V = [3.5, 4.0, 5.0]
 _A_TOTAL_MAX_BP = [0., 25., 55.]
-
-# 75th percentile
-SPEED_PERCENTILE_IDX = 7
 
 
 def calc_cruise_accel_limits(v_ego, following, accelMode):
@@ -200,8 +194,8 @@ class Planner():
     self.mpc1.set_cur_state(self.v_acc_start, self.a_acc_start)
     self.mpc2.set_cur_state(self.v_acc_start, self.a_acc_start)
 
-    self.mpc1.update(pm, sm['carState'], lead_1, v_cruise_setpoint)
-    self.mpc2.update(pm, sm['carState'], lead_2, v_cruise_setpoint)
+    self.mpc1.update(pm, sm['carState'], lead_1)
+    self.mpc2.update(pm, sm['carState'], lead_2)
 
     self.choose_solution(v_cruise_setpoint, enabled)
 

@@ -28,10 +28,10 @@ _DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
 _FACE_THRESHOLD = 0.6
 _EYE_THRESHOLD = 0.6
 _SG_THRESHOLD = 0.5
-_BLINK_THRESHOLD = 0.5  # 0.225
+_BLINK_THRESHOLD = 0.5
 _BLINK_THRESHOLD_SLACK = 0.65
 _BLINK_THRESHOLD_STRICT = 0.5
-_PITCH_WEIGHT = 1.35  # 1.5  # pitch matters a lot more
+_PITCH_WEIGHT = 1.35  # pitch matters a lot more
 _POSESTD_THRESHOLD = 0.14
 _METRIC_THRESHOLD = 0.4
 _METRIC_THRESHOLD_SLACK = 0.55
@@ -120,6 +120,7 @@ class DriverStatus():
     self.step_change = 0.
     self.active_monitoring_mode = True
     self.hi_stds = 0
+    self.hi_std_alert_enabled = True
     self.threshold_prompt = _DISTRACTED_PROMPT_TIME_TILL_TERMINAL / _DISTRACTED_TIME
 
     self.is_rhd_region = False
@@ -216,7 +217,7 @@ class DriverStatus():
     self._set_timers(self.face_detected and not is_model_uncertain)
     if self.face_detected and not self.pose.low_std:
       if not is_model_uncertain:
-        self.step_change *= max(0, (model_std_max-0.5)*(model_std_max-2))
+        self.step_change *= min(1.0, max(0.6, 1.6*(model_std_max-0.5)*(model_std_max-2)))
       self.hi_stds += 1
     elif self.face_detected and self.pose.low_std:
       self.hi_stds = 0
@@ -260,6 +261,7 @@ class DriverStatus():
     elif self.awareness <= self.threshold_prompt:
       # prompt orange alert
       alert = EventName.promptDriverDistracted if self.active_monitoring_mode else EventName.promptDriverUnresponsive
+      self.hi_std_alert_enabled = True
     elif self.awareness <= self.threshold_pre:
       # pre green alert
       alert = EventName.preDriverDistracted if self.active_monitoring_mode else EventName.preDriverUnresponsive
