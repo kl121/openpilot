@@ -44,9 +44,6 @@ DISCONNECT_TIMEOUT = 5.  # wait 5 seconds before going offroad after disconnect 
 LEON = False
 last_eon_fan_val = None
 
-LEON = False
-last_eon_fan_val = None
-
 
 def get_thermal_config():
   # (tz, scale)
@@ -231,27 +228,7 @@ def thermald_thread():
 
     if health is not None:
       usb_power = health.health.usbPowerMode != log.HealthData.UsbPowerMode.client
-      ignition = health.health.ignitionLine or health.health.ignitionCan
-
-      # Setup fan handler on first connect to panda
-      if handle_fan is None and health.health.hwType != log.HealthData.HwType.unknown:
-        is_uno = health.health.hwType == log.HealthData.HwType.uno
-
-        if is_uno or not ANDROID:
-          cloudlog.info("Setting up UNO fan handler")
-          handle_fan = handle_fan_uno
-        else:
-          cloudlog.info("Setting up EON fan handler")
-          setup_eon_fan()
-          handle_fan = handle_fan_eon
-
-      # Handle disconnect
-      if health_prev is not None:
-        if health.health.hwType == log.HealthData.HwType.unknown and \
-          health_prev.health.hwType != log.HealthData.HwType.unknown:
-          params.panda_disconnect()
-      health_prev = health
-
+      
       # If we lose connection to the panda, wait 5 seconds before going offroad
       if health.health.hwType == log.HealthData.HwType.unknown:
         no_panda_cnt += 1
