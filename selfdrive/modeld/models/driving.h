@@ -14,10 +14,6 @@
 #include "commonmodel.h"
 #include "runners/run.h"
 
-<<<<<<< HEAD
-#include <czmq.h>
-=======
->>>>>>> upstream/devel
 #include <memory>
 #include "messaging.hpp"
 
