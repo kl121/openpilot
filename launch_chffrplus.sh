@@ -12,8 +12,8 @@ function two_init {
   # Restrict Android and other system processes to the first two cores
   echo 0-1 > /dev/cpuset/background/cpus
   echo 0-1 > /dev/cpuset/system-background/cpus
-  echo 0-1 > /dev/cpuset/foreground/boost/cpus
   echo 0-1 > /dev/cpuset/foreground/cpus
+  echo 0-1 > /dev/cpuset/foreground/boost/cpus
   echo 0-1 > /dev/cpuset/android/cpus
 
   # openpilot gets all the cores
@@ -43,10 +43,6 @@ function two_init {
     fi
 
     "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update.json"
-  else
-    if [[ $(uname -v) == "#1 SMP PREEMPT Wed Jun 10 12:40:53 PDT 2020" ]]; then
-      "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update_kernel.json"
-    fi
   fi
 
   # One-time fix for a subset of OP3T with gyro orientation offsets.
@@ -66,43 +62,43 @@ function launch {
   # Wifi scan
   wpa_cli IFNAME=wlan0 SCAN
 
-  # apply update only if no_ota_updates does not exist in /data directory
-  file="/data/no_ota_updates"
-  if ! [ -f "$file" ]; then
-    # Check to see if there's a valid overlay-based update available. Conditions
-    # are as follows:
-    #
-    # 1. The BASEDIR init file has to exist, with a newer modtime than anything in
-    #    the BASEDIR Git repo. This checks for local development work or the user
-    #    switching branches/forks, which should not be overwritten.
-    # 2. The FINALIZED consistent file has to exist, indicating there's an update
-    #    that completed successfully and synced to disk.
+  # Remove orphaned git lock if it exists on boot
+  [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
 
-    if [ -f "${BASEDIR}/.overlay_init" ]; then
-      find ${BASEDIR}/.git -newer ${BASEDIR}/.overlay_init | grep -q '.' 2> /dev/null
-      if [ $? -eq 0 ]; then
-        echo "${BASEDIR} has been modified, skipping overlay update installation"
-      else
-        if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
-          if [ ! -d /data/safe_staging/old_openpilot ]; then
-            echo "Valid overlay update found, installing"
-            LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
+  # Check to see if there's a valid overlay-based update available. Conditions
+  # are as follows:
+  #
+  # 1. The BASEDIR init file has to exist, with a newer modtime than anything in
+  #    the BASEDIR Git repo. This checks for local development work or the user
+  #    switching branches/forks, which should not be overwritten.
+  # 2. The FINALIZED consistent file has to exist, indicating there's an update
+  #    that completed successfully and synced to disk.
 
-            mv $BASEDIR /data/safe_staging/old_openpilot
-            mv "${STAGING_ROOT}/finalized" $BASEDIR
-            cd $BASEDIR
+  if [ -f "${BASEDIR}/.overlay_init" ]; then
+    find ${BASEDIR}/.git -newer ${BASEDIR}/.overlay_init | grep -q '.' 2> /dev/null
+    if [ $? -eq 0 ]; then
+      echo "${BASEDIR} has been modified, skipping overlay update installation"
+    else
+      if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
+        if [ ! -d /data/safe_staging/old_openpilot ]; then
+          echo "Valid overlay update found, installing"
+          LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
 
-            # Partial mitigation for symlink-related filesystem corruption
-            # Ensure all files match the repo versions after update
-            git reset --hard
-            git submodule foreach --recursive git reset --hard
+          mv $BASEDIR /data/safe_staging/old_openpilot
+          mv "${STAGING_ROOT}/finalized" $BASEDIR
+          cd $BASEDIR
 
-            echo "Restarting launch script ${LAUNCHER_LOCATION}"
-            exec "${LAUNCHER_LOCATION}"
-          else
-            echo "openpilot backup found, not updating"
-            # TODO: restore backup? This means the updater didn't start after swapping
-          fi
+          # Partial mitigation for symlink-related filesystem corruption
+          # Ensure all files match the repo versions after update
+          git reset --hard
+          git submodule foreach --recursive git reset --hard
+
+          echo "Restarting launch script ${LAUNCHER_LOCATION}"
+          unset REQUIRED_NEOS_VERSION
+          exec "${LAUNCHER_LOCATION}"
+        else
+          echo "openpilot backup found, not updating"
+          # TODO: restore backup? This means the updater didn't start after swapping
         fi
       fi
     fi
@@ -116,6 +112,9 @@ function launch {
   # handle pythonpath
   ln -sfn $(pwd) /data/pythonpath
   export PYTHONPATH="$PWD"
+
+  # write tmux scrollback to a file
+  tmux capture-pane -pq -S-1000 > /tmp/launch_log
 
   # start manager
   cd selfdrive

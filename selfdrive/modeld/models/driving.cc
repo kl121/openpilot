@@ -54,7 +54,11 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context, int t
   s->traffic_convention = std::make_unique<float[]>(TRAFFIC_CONVENTION_LEN);
   s->m->addTrafficConvention(s->traffic_convention.get(), TRAFFIC_CONVENTION_LEN);
 
+<<<<<<< HEAD
   bool is_rhd = read_db_bool("IsRHD");
+=======
+  bool is_rhd = Params().read_db_bool("IsRHD");
+>>>>>>> upstream/devel
   if (is_rhd) {
     s->traffic_convention[1] = 1.0;
   } else {

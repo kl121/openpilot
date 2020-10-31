@@ -12,6 +12,7 @@ def mean(numbers):
 
 
 
+
 def compute_path_pinv(l=50):
   deg = 3
   x = np.arange(l*1.0)

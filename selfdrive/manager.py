@@ -13,13 +13,13 @@ from typing import Dict, List
 from selfdrive.swaglog import cloudlog, add_logentries_handler
 
 
-from common.basedir import BASEDIR, PARAMS
+from common.basedir import BASEDIR
 from common.hardware import HARDWARE, ANDROID, PC
 WEBCAM = os.getenv("WEBCAM") is not None
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 os.environ['BASEDIR'] = BASEDIR
 
-TOTAL_SCONS_NODES = 1005
+TOTAL_SCONS_NODES = 1040
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
 # Create folders needed for msgq
@@ -208,9 +208,6 @@ interrupt_processes: List[str] = []
 # processes to end with SIGKILL instead of SIGTERM
 kill_processes = ['sensord']
 
-# processes to end if thermal conditions exceed Green parameters
-green_temp_processes = ['uploader']
-
 persistent_processes = [
   'thermald',
   'logmessaged',
@@ -221,13 +218,10 @@ persistent_processes = [
 
 if not PC:
   persistent_processes += [
+    'updated',
     'logcatd',
     'tombstoned',
-  ]
-
-if ANDROID:
-  persistent_processes += [
-    'updated',
+    'sensord',
   ]
 
 car_started_processes = [
@@ -258,7 +252,6 @@ if WEBCAM:
 if not PC:
   car_started_processes += [
     'ubloxd',
-    'sensord',
     'dmonitoringd',
     'dmonitoringmodeld',
   ]
@@ -451,9 +444,6 @@ def manager_thread():
   # now loop
   thermal_sock = messaging.sub_sock('thermal')
 
-  if os.getenv("GET_CPU_USAGE"):
-    proc_sock = messaging.sub_sock('procLog', conflate=True)
-
   cloudlog.info("manager start")
   cloudlog.info({"environ": os.environ})
 
@@ -485,28 +475,15 @@ def manager_thread():
   started_prev = False
   logger_dead = False
 
-  start_t = time.time()
-  first_proc = None
-
   while 1:
     msg = messaging.recv_sock(thermal_sock, wait=True)
-
-    # heavyweight batch processes are gated on favorable thermal conditions
-    if msg.thermal.thermalStatus >= ThermalStatus.yellow:
-      for p in green_temp_processes:
-        if p in persistent_processes:
-          kill_managed_process(p)
-    else:
-      for p in green_temp_processes:
-        if p in persistent_processes:
-          start_managed_process(p)
 
     if msg.thermal.freeSpace < 0.05:
       logger_dead = True
 
     if msg.thermal.started:
       for p in car_started_processes:
-        if (p == "loggerd" and logger_dead) or p == "uploader":
+        if p == "loggerd" and logger_dead:
           kill_managed_process(p)
         else:
           start_managed_process(p)
@@ -539,20 +516,6 @@ def manager_thread():
     if params.get("DoUninstall", encoding='utf8') == "1":
       break
 
-    if os.getenv("GET_CPU_USAGE"):
-      dt = time.time() - start_t
-
-      # Get first sample
-      if dt > 30 and first_proc is None:
-        first_proc = messaging.recv_sock(proc_sock)
-
-      # Get last sample and exit
-      if dt > 90:
-        last_proc = messaging.recv_sock(proc_sock, wait=True)
-
-        cleanup_all_processes(None, None)
-        sys.exit(print_cpu_usage(first_proc, last_proc))
-
 def manager_prepare(spinner=None):
   # build all processes
   os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -573,8 +536,6 @@ def uninstall():
   HARDWARE.reboot(reason="recovery")
 
 def main():
-  os.environ['PARAMS_PATH'] = PARAMS
-
   if ANDROID:
     # the flippening!
     os.system('LD_LIBRARY_PATH="" content insert --uri content://settings/system --bind name:s:user_rotation --bind value:i:1')
@@ -627,8 +588,6 @@ def main():
 
   try:
     manager_thread()
-  except SystemExit:
-    raise
   except Exception:
     traceback.print_exc()
     crash.capture_exception()

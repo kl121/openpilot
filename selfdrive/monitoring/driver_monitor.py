@@ -17,10 +17,11 @@ EventName = car.CarEvent.EventName
 #  We recommend that you do not change these numbers from the defaults.
 # ******************************************************************************************
 
-_AWARENESS_TIME = 70.  # one minute limit without user touching steering wheels make the car enter a terminal status
+_AWARENESS_TIME = 35.  # passive wheel touch total timeout
 #_AWARENESS_TIME = min(int(kegman.conf['wheelTouchSeconds']), 600)    # x minutes limit without user touching steering wheels make the car enter a terminal status
-_AWARENESS_PRE_TIME_TILL_TERMINAL = 15.  # a first alert is issued 25s before expiration
-_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.  # a second alert is issued 15s before start decelerating the car
+_AWARENESS_PRE_TIME_TILL_TERMINAL = 7.
+_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 5.
+
 _DISTRACTED_TIME = 11.
 _DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
 _DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
@@ -234,8 +235,9 @@ class DriverStatus():
     awareness_prev = self.awareness
 
     # Disabling the most annoying alert imaginable on a non Comma2
-    #if self.face_detected and self.hi_stds * DT_DMON > _HI_STD_TIMEOUT:
+    #if self.face_detected and self.hi_stds * DT_DMON > _HI_STD_TIMEOUT and self.hi_std_alert_enabled:
     #  events.add(EventName.driverMonitorLowAcc)
+    # self.hi_std_alert_enabled = False # only showed once until orange prompt resets it
 
     if (driver_attentive and self.face_detected and self.pose.low_std and self.awareness > 0):
       # only restore awareness when paying attention and alert is not red
