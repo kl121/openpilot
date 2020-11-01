@@ -5,6 +5,7 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.lateral_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
 from selfdrive.controls.lib.lane_planner import LanePlanner
+from common.params import Params
 from selfdrive.kegman_conf import kegman_conf
 from common.numpy_fast import interp
 import cereal.messaging as messaging
