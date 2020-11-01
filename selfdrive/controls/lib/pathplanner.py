@@ -175,7 +175,7 @@ class PathPlanner():
 
     if (not active) or (self.lane_change_timer > LANE_CHANGE_TIME_MAX) or (not self.lane_change_enabled):
       self.lane_change_state = LaneChangeState.off
-      self.pre_lane_change_timer = 0.0
+      self.lane_change_direction = LaneChangeDirection.none
     else:
       torque_applied = sm['carState'].steeringPressed and \
                        ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
@@ -186,7 +186,10 @@ class PathPlanner():
 
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
-      if self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker:
+      # State transitions
+      # off
+
+      if self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker and not below_lane_change_speed:
         self.lane_change_state = LaneChangeState.preLaneChange
         self.lane_change_ll_prob = 1.0
 
@@ -220,8 +223,8 @@ class PathPlanner():
       self.lane_change_timer += DT_MDL
 
     self.prev_one_blinker = one_blinker
-
-    desire = DESIRES[lane_change_direction][self.lane_change_state]
+    
+    desire = DESIRES[self.lane_change_direction][self.lane_change_state]
 
     # Turn off lanes during lane change
     if desire == log.PathPlan.Desire.laneChangeRight or desire == log.PathPlan.Desire.laneChangeLeft:
