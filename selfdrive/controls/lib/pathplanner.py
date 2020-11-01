@@ -87,6 +87,7 @@ class PathPlanner():
     self.alc_timer = float(kegman.conf['ALCtimer'])
 
     self.lane_change_state = LaneChangeState.off
+    self.lane_change_direction = LaneChangeDirection.none
     self.lane_change_timer = 0.0
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
@@ -164,8 +165,8 @@ class PathPlanner():
     self.LP.parse_model(sm['model'])
 
     # Lane change logic
-    lane_change_direction = LaneChangeDirection.none
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
+    below_lane_change_speed = v_ego < self.alc_min_speed
 
     if sm['carState'].leftBlinker:
       self.lane_change_direction = LaneChangeDirection.left
