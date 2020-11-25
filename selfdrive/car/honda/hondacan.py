@@ -8,7 +8,12 @@ from selfdrive.car.honda.values import HONDA_BOSCH
 # 2 = ACC-CAN - camera side
 # 3 = F-CAN A - OBDII port
 
-def get_pt_bus(car_fingerprint):
+# CAN bus layout with giraffe
+# 0 = F-CAN B - powertrain
+# 1 = ACC-CAN - camera side
+# 2 = ACC-CAN - radar side
+
+def get_pt_bus(car_fingerprint, has_relay):
   return 1 if car_fingerprint in HONDA_BOSCH and has_relay else 0
 
 
@@ -100,9 +105,9 @@ def create_bosch_supplemental_1(packer, car_fingerprint, idx, has_relay):
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", bus, values, idx)
 
 
-def create_ui_commands(packer, pcm_speed, hud, car_fingerprint, is_metric, idx, openpilot_longitudinal_control, stock_hud):
+def create_ui_commands(packer, pcm_speed, hud, car_fingerprint, is_metric, idx, has_relay, openpilot_longitudinal_control, stock_hud):
   commands = []
-  bus_pt = get_pt_bus(car_fingerprint)
+  bus_pt = get_pt_bus(car_fingerprint, has_relay)
 
   if car_fingerprint not in HONDA_BOSCH:
     is_eon_metric = Params().get("IsMetric", encoding='utf8') == "1"
@@ -110,7 +115,7 @@ def create_ui_commands(packer, pcm_speed, hud, car_fingerprint, is_metric, idx, 
       speed_units = 2
     else:
       speed_units = 3
-  
+      
   radar_disabled = car_fingerprint in HONDA_BOSCH and openpilot_longitudinal_control
   bus_lkas = get_lkas_cmd_bus(car_fingerprint, has_relay, radar_disabled)
 
