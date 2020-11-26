@@ -103,34 +103,10 @@ function launch {
   #    that completed successfully and synced to disk.
 
   if ! [ -f "$file" ]; then
-    if [ -f "${BASEDIR}/.overlay_init" ]; then
-      find ${BASEDIR}/.git -newer ${BASEDIR}/.overlay_init | grep -q '.' 2> /dev/null
-      if [ $? -eq 0 ]; then
-        echo "${BASEDIR} has been modified, skipping overlay update installation"
-      else
-        if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
-          if [ ! -d /data/safe_staging/old_openpilot ]; then
-            echo "Valid overlay update found, installing"
-            LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
-
-            mv $BASEDIR /data/safe_staging/old_openpilot
-            mv "${STAGING_ROOT}/finalized" $BASEDIR
-            cd $BASEDIR
-
-            # Partial mitigation for symlink-related filesystem corruption
-            # Ensure all files match the repo versions after update
-            git reset --hard
-            git submodule foreach --recursive git reset --hard
-
-            echo "Restarting launch script ${LAUNCHER_LOCATION}"
-            unset REQUIRED_NEOS_VERSION
-            exec "${LAUNCHER_LOCATION}"
-          else
-            echo "openpilot backup found, not updating"
-            # TODO: restore backup? This means the updater didn't start after swapping
-          fi
-	fi
-      fi
+    if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+      git reset --hard @{u} &&
+      git clean -xdf &&
+      exec "${BASH_SOURCE[0]}"
     fi
   fi
 
