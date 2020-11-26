@@ -4,6 +4,9 @@ if [ -z "$BASEDIR" ]; then
   BASEDIR="/data/openpilot"
 fi
 
+file="/data/no_ota_updates"
+
+
 source "$BASEDIR/launch_env.sh"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
@@ -50,19 +53,22 @@ function two_init {
   [ -d "/proc/irq/733" ] && echo 3 > /proc/irq/733/smp_affinity_list # USB for LeEco
   [ -d "/proc/irq/736" ] && echo 3 > /proc/irq/736/smp_affinity_list # USB for OP3T
 
-  # Check for NEOS update
-  if [ $(< /VERSION) != "$REQUIRED_NEOS_VERSION" ]; then
-    if [ -f "$DIR/scripts/continue.sh" ]; then
-      cp "$DIR/scripts/continue.sh" "/data/data/com.termux/files/continue.sh"
-    fi
+  
+  if ! [ -f "$file" ]; then
+    # Check for NEOS update
+    if [ $(< /VERSION) != "$REQUIRED_NEOS_VERSION" ]; then
+      if [ -f "$DIR/scripts/continue.sh" ]; then
+        cp "$DIR/scripts/continue.sh" "/data/data/com.termux/files/continue.sh"
+      fi
 
-    if [ ! -f "$BASEDIR/prebuilt" ]; then
-      # Clean old build products, but preserve the scons cache
-      cd $DIR
-      scons --clean
-      git clean -xdf
-      git submodule foreach --recursive git clean -xdf
-    fi
+      if [ ! -f "$BASEDIR/prebuilt" ]; then
+        # Clean old build products, but preserve the scons cache
+        cd $DIR
+        scons --clean
+        git clean -xdf
+        git submodule foreach --recursive git clean -xdf
+      fi
+    fi  
 
     "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update.json"
   fi
@@ -96,32 +102,34 @@ function launch {
   # 2. The FINALIZED consistent file has to exist, indicating there's an update
   #    that completed successfully and synced to disk.
 
-  if [ -f "${BASEDIR}/.overlay_init" ]; then
-    find ${BASEDIR}/.git -newer ${BASEDIR}/.overlay_init | grep -q '.' 2> /dev/null
-    if [ $? -eq 0 ]; then
-      echo "${BASEDIR} has been modified, skipping overlay update installation"
-    else
-      if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
-        if [ ! -d /data/safe_staging/old_openpilot ]; then
-          echo "Valid overlay update found, installing"
-          LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
+  if ! [ -f "$file" ]; then
+    if [ -f "${BASEDIR}/.overlay_init" ]; then
+      find ${BASEDIR}/.git -newer ${BASEDIR}/.overlay_init | grep -q '.' 2> /dev/null
+      if [ $? -eq 0 ]; then
+        echo "${BASEDIR} has been modified, skipping overlay update installation"
+      else
+        if [ -f "${STAGING_ROOT}/finalized/.overlay_consistent" ]; then
+          if [ ! -d /data/safe_staging/old_openpilot ]; then
+            echo "Valid overlay update found, installing"
+            LAUNCHER_LOCATION="${BASH_SOURCE[0]}"
 
-          mv $BASEDIR /data/safe_staging/old_openpilot
-          mv "${STAGING_ROOT}/finalized" $BASEDIR
-          cd $BASEDIR
+            mv $BASEDIR /data/safe_staging/old_openpilot
+            mv "${STAGING_ROOT}/finalized" $BASEDIR
+            cd $BASEDIR
 
-          # Partial mitigation for symlink-related filesystem corruption
-          # Ensure all files match the repo versions after update
-          git reset --hard
-          git submodule foreach --recursive git reset --hard
+            # Partial mitigation for symlink-related filesystem corruption
+            # Ensure all files match the repo versions after update
+            git reset --hard
+            git submodule foreach --recursive git reset --hard
 
-          echo "Restarting launch script ${LAUNCHER_LOCATION}"
-          unset REQUIRED_NEOS_VERSION
-          exec "${LAUNCHER_LOCATION}"
-        else
-          echo "openpilot backup found, not updating"
-          # TODO: restore backup? This means the updater didn't start after swapping
-        fi
+            echo "Restarting launch script ${LAUNCHER_LOCATION}"
+            unset REQUIRED_NEOS_VERSION
+            exec "${LAUNCHER_LOCATION}"
+          else
+            echo "openpilot backup found, not updating"
+            # TODO: restore backup? This means the updater didn't start after swapping
+          fi
+	fi
       fi
     fi
   fi
