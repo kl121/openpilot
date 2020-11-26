@@ -68,9 +68,9 @@ function two_init {
         git clean -xdf
         git submodule foreach --recursive git clean -xdf
       fi
-    fi  
-
-    "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update.json"
+  
+      "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update.json"
+    fi
   fi
 
   # One-time fix for a subset of OP3T with gyro orientation offsets.
