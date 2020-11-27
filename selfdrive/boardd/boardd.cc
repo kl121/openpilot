@@ -109,12 +109,9 @@ void safety_setter_thread() {
   cereal::CarParams::Reader car_params = cmsg.getRoot<cereal::CarParams>();
   cereal::CarParams::SafetyModel safety_model = car_params.getSafetyModel();
 
-<<<<<<< HEAD
-  panda->set_unsafe_mode(0);  // see safety_declarations.h for allowed values
-=======
-  LOGW("setting unsafety mode");
-  libusb_control_transfer(dev_handle, 0x40, 0xdf, 2, 0, NULL, 0, TIMEOUT);
->>>>>>> e1f894088... Disable Honda Stock AEB using Panda unsafe_mode
+  panda->set_unsafe_mode(2);  // see safety_declarations.h for allowed values
+  //LOGW("setting unsafety mode");
+  //libusb_control_transfer(dev_handle, 0x40, 0xdf, 2, 0, NULL, 0, TIMEOUT);
 
   auto safety_param = car_params.getSafetyParam();
   LOGW("setting safety model: %d with param %d", (int)safety_model, safety_param);
