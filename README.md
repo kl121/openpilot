@@ -1,4 +1,4 @@
-This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable.  <b>Use at your own risk.</b>
+This is a fork of comma's openpilot: https://github.com/commaai/openpilot, and contains tweaks for Hondas and GM vehicles.  It is open source and inherits MIT license.  By installing this software you accept all responsibility for anything that might occur while you use it.  All contributors to this fork are not liable, including me.  <b>Use at your own risk.</b>
 
 
 If you wish you can buy me a beer or 3:  https://www.patreon.com/kegman
@@ -33,29 +33,19 @@ https://github.com/kegman/openpilot/blob/kegman-0.7.8/selfdrive/monitoring/drive
   
 <b>WARNING:</b>  Do NOT depend on OP to stop the car in time if you are approaching an object which is not in motion in the same direction as your car.  The radar will NOT detect the stationary object in time to slow your car enough to stop.  If you are approaching a stopped vehicle you must disengage and brake as radars ignore objects that are not in motion.
 
-<b>NOTICE:</b>  Due to feedback I have turned on OTA updates.  You will receive updates automatically (after rebooting 2X) on your Eon so you don't have to reclone or git pull any longer to receive new features *MADE BETWEEN COMMA RELEASES*.  The reason why I separate the branches by release is because some releases can sometimes cause issues.  Features that I or others add, will continue to be updated when you are on the most current release.  If you DO NOT want OTA updates then create a file called "/data/no_ota_updates" and it will not perform OTA updates as long as that file exists.  
+<b>NOTICE:</b>  Due to feedback I have turned on OTA updates.  You will receive updates automatically (after rebooting 2X) on your Eon so you don't have to reclone or git pull any longer to receive new features *MADE BETWEEN COMMA RELEASES*.  The reason why I separate the branches by release is because some releases can sometimes cause issues.  Features that I or others add, will continue to be updated when you are on the most current release.  If you DO NOT want OTA updates then create a file called "/data/no_ota_updates" and it will not perform OTA updates as long as that file exists.   Do not press the upgrade button on the Eon if it shows up 
 
 
-I will attempt to detail the changes in each of the branches here: 
-
-
-
-<b>kegman</b> - this is the default branch
-
-<b>kegman-BoschGasPress</b> - this branch gives Honda Bosch users the ability to press the gas without disengaging OP for more "stock ACC"-like behaviour.  
-
-<b>kegman-gm</b> - this branch contains default untouched panda directories for GMs having trouble with communication mismatch.  Reflash panda after branch checkout.  (Seems Volt 2017 requires this)
-
-<b>kegman-Clarity</b> - for Honda Clarity models
-
-* Thanks to @Clarity.bru and @wirelessnet2 for restoring the dashcam in 0.7.2
-
-
+Notes for 0.8
+- Grey panda is re-enabled.  Please upgrade to Comma 2 as soon as possible to support Comma. I will try to support Grey Panda as long as I can.
+- stockAEB is disabled thru new comma call method - need someone to verify it still is disabled
+- fixed no_ota_updates - still needs testing
 
 Nuances in 0.7.7 and 0.7.8
 - steerRatio needs to be increased about 20-30% to maintain turning sharpness
 - GM Volt stop'n go working again
 - Nudgeless lane changes disabled
+- stockAEB disable not working - careful on 2 way highways oncoming traffic can trigger stock AEB
 
 Known bugs in 0.7.5:
 - GM stop and go may not work
