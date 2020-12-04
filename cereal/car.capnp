@@ -102,6 +102,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     cameraMalfunction @92;
     manualSteeringRequired @94;
     manualSteeringRequiredBlinkersOn @95;
+    autoHoldActivated @96;
 
     gasUnavailableDEPRECATED @3;
     dataNeededDEPRECATED @16;
@@ -192,6 +193,9 @@ struct CarState {
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+
+  # autoHold Active Information
+  autoHoldActivated @42 :Bool;
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -334,6 +338,7 @@ struct CarControl {
       seatbeltUnbuckled @5;
       speedTooHigh @6;
       ldw @7;
+      autoHoldActivated @8;
     }
 
     enum AudibleAlert {
