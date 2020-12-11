@@ -451,6 +451,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
   },
 
+  EventName.manualSteeringRequired: {
+    ET.WARNING: Alert(
+      "Lane Keeping Assist is OFF",
+      "Manual Steering Required",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
+  },
+
   EventName.steerSaturated: {
     ET.WARNING: Alert(
       "TAKE CONTROL",
