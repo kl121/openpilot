@@ -14,7 +14,6 @@
 #include "ui.hpp"
 #include "paint.hpp"
 #include "android/sl_sound.hpp"
-#include "dashcam.h"
 
 volatile sig_atomic_t do_exit = 0;
 static void set_do_exit(int sig) {
@@ -162,11 +161,7 @@ int main(int argc, char* argv[]) {
       handle_sidebar_touch(s, touch_x, touch_y);
       handle_vision_touch(s, touch_x, touch_y);
     }
-    
-    if (s->awake) {
-      dashcam(s, touch_x, touch_y);
-    }
-    
+
     // Don't waste resources on drawing in case screen is off
     handle_display_state(s, touched == 1);
     if (!s->awake) {
