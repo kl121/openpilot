@@ -58,7 +58,7 @@ class CarInterfaceBase():
     # standard ALC params
     ret.steerControlType = car.CarParams.SteerControlType.torque
     ret.steerMaxBP = [0.]
-    ret.steerMaxV = [1.]
+    ret.steerMaxV = [1.1]
     ret.minSteerSpeed = 0.
 
     # stock ACC by default
@@ -91,7 +91,7 @@ class CarInterfaceBase():
   def apply(self, c):
     raise NotImplementedError
 
-  def create_common_events(self, cs_out, extra_gears=[], gas_resume_speed=-1, pcm_enable=True):  # pylint: disable=dangerous-default-value
+  def create_common_events(self, cs_out, extra_gears=[], gas_resume_speed=-1):  # pylint: disable=dangerous-default-value
     events = Events()
 
     if cs_out.doorOpen:
@@ -106,16 +106,12 @@ class CarInterfaceBase():
       events.add(EventName.wrongCarMode)
     if cs_out.espDisabled:
       events.add(EventName.espDisabled)
-    if cs_out.gasPressed:
-      events.add(EventName.gasPressed)
     if cs_out.stockFcw:
       events.add(EventName.stockFcw)
     if cs_out.stockAeb:
       events.add(EventName.stockAeb)
     if cs_out.vEgo > MAX_CTRL_SPEED:
       events.add(EventName.speedTooHigh)
-    if cs_out.cruiseState.nonAdaptive:
-      events.add(EventName.wrongCruiseMode)
 
     if cs_out.steerError:
       events.add(EventName.steerUnavailable)
@@ -123,18 +119,13 @@ class CarInterfaceBase():
       events.add(EventName.steerTempUnavailable)
 
     # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
-    # Optionally allow to press gas at zero speed to resume.
-    # e.g. Chrysler does not spam the resume button yet, so resuming with gas is handy. FIXME!
-    if (cs_out.gasPressed and (not self.CS.out.gasPressed) and cs_out.vEgo > gas_resume_speed) or \
-       (cs_out.brakePressed and (not self.CS.out.brakePressed or not cs_out.standstill)):
+    if cs_out.brakePressed and (not self.CS.out.brakePressed or not cs_out.standstill):
       events.add(EventName.pedalPressed)
 
-    # we engage when pcm is active (rising edge)
-    if pcm_enable:
-      if cs_out.cruiseState.enabled and not self.CS.out.cruiseState.enabled:
-        events.add(EventName.pcmEnable)
-      elif not cs_out.cruiseState.enabled:
-        events.add(EventName.pcmDisable)
+    if cs_out.cruiseState.enabled and not self.CS.out.cruiseState.enabled:
+      events.add(EventName.pcmEnable)
+    elif not cs_out.cruiseState.enabled:
+      events.add(EventName.pcmDisable)
 
     return events
 
