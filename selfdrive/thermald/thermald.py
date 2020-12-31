@@ -161,7 +161,7 @@ def check_car_battery_voltage(should_start, health, charging_disabled, msg):
   #   - there are health packets from panda, and;
   #   - 12V battery voltage is too low, and;
   #   - onroad isn't started
-  print(health)
+  # print(health)
   
   if charging_disabled and (health is None or health.health.voltage > (int(kegman.conf['carVoltageMinEonShutdown'])+500)) and msg.thermal.batteryPercent < int(kegman.conf['battChargeMin']):
     charging_disabled = False
@@ -435,7 +435,7 @@ def thermald_thread():
     msg.thermal.thermalStatus = thermal_status
     thermal_sock.send(msg.to_bytes())
 
-    print(msg)
+    # print(msg)
     set_offroad_alert_if_changed("Offroad_ChargeDisabled", (not usb_power))
 
     should_start_prev = should_start

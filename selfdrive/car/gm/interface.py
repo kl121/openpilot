@@ -181,14 +181,14 @@ class CarInterface(CarInterfaceBase):
     ret = self.CS.update(self.cp)
 
     cruiseEnabled = self.CS.pcm_acc_status != AccState.OFF
-    ret.cruiseState.enabled = cruiseEnabled
+    ret.cruiseState.enabled = cruiseEnabled or self.CS.main_on
 
     ret.readdistancelines = self.CS.follow_level
     
     ret.canValid = self.cp.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
     
-    ret.engineRPM = self.CS.engineRPM
+    # ret.engineRPM = self.CS.engineRPM
 
     buttonEvents = []
 
@@ -223,7 +223,7 @@ class CarInterface(CarInterfaceBase):
        if self.CS.follow_level < 1:
          self.CS.follow_level = 3
 
-    events = self.create_common_events(ret, pcm_enable=False)
+    events = self.create_common_events(ret)
 
     if ret.vEgo < self.CP.minEnableSpeed:
       events.add(EventName.belowEngageSpeed)
@@ -233,8 +233,8 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.controlsFailed)
     if ret.vEgo < self.CP.minSteerSpeed:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
-    if self.CS.autoHoldActivated:
-      events.add(car.CarEvent.EventName.autoHoldActivated)
+    # if self.CS.autoHoldActivated:
+    #   events.add(car.CarEvent.EventName.autoHoldActivated)
     # handle button presses
     for b in ret.buttonEvents:
       # do enable on both accel and decel buttons
@@ -251,27 +251,7 @@ class CarInterface(CarInterfaceBase):
 
     return self.CS.out
 
-    events = self.create_common_events(ret)
 
-    if ret.vEgo < self.CP.minEnableSpeed:
-      events.add(EventName.belowEngageSpeed)
-    if self.CS.park_brake:
-      events.add(EventName.parkBrake)
-    if ret.vEgo < self.CP.minSteerSpeed:
-      events.add(car.CarEvent.EventName.belowSteerSpeed)
-
-    # handle button presses
-    for b in ret.buttonEvents:
-      # do enable on both accel and decel buttons
-      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-        events.add(EventName.buttonEnable)
-
-    ret.events = events.to_msg()
-
-    # copy back carState packet to CS
-    self.CS.out = ret.as_reader()
-
-    return self.CS.out
 
   def apply(self, c):
     hud_v_cruise = c.hudControl.setSpeed
@@ -286,13 +266,13 @@ class CarInterface(CarInterfaceBase):
     self.frame += 1
 
     # Release Auto Hold and creep smoothly when regenpaddle pressed
-    if self.CS.regenPaddlePressed and self.CS.autoHold:
-      self.CS.autoHoldActive = False
-
-    if self.CS.autoHold and not self.CS.autoHoldActive and not self.CS.regenPaddlePressed:
-      if self.CS.out.vEgo > 0.02:
-        self.CS.autoHoldActive = True
-      elif self.CS.out.vEgo < 0.01 and self.CS.out.brakePressed:
-        self.CS.autoHoldActive = True
+    # if self.CS.regenPaddlePressed and self.CS.autoHold:
+    #   self.CS.autoHoldActive = False
+    #
+    # if self.CS.autoHold and not self.CS.autoHoldActive and not self.CS.regenPaddlePressed:
+    #   if self.CS.out.vEgo > 0.02:
+    #     self.CS.autoHoldActive = True
+    #   elif self.CS.out.vEgo < 0.01 and self.CS.out.brakePressed:
+    #     self.CS.autoHoldActive = True
         
     return can_sends

@@ -28,17 +28,9 @@ function two_init {
   echo 0-3 > /dev/cpuset/app/cpus
 
   # set up governors
+
   # +50mW offroad, +500mW onroad for 30% more RAM bandwidth
-  echo "performance" > /sys/class/devfreq/soc:qcom,cpubw/governor
-  echo 1056000 > /sys/class/devfreq/soc:qcom,m4m/max_freq
-  echo "performance" > /sys/class/devfreq/soc:qcom,m4m/governor
 
-  # unclear if these help, but they don't seem to hurt
-  echo "performance" > /sys/class/devfreq/soc:qcom,memlat-cpu0/governor
-  echo "performance" > /sys/class/devfreq/soc:qcom,memlat-cpu2/governor
-
-  # GPU
-  echo "performance" > /sys/class/devfreq/b00000.qcom,kgsl-3d0/governor
 
   # /sys/class/devfreq/soc:qcom,mincpubw is the only one left at "powersave"
   # it seems to gain nothing but a wasted 500mW
@@ -53,7 +45,7 @@ function two_init {
   [ -d "/proc/irq/733" ] && echo 3 > /proc/irq/733/smp_affinity_list # USB for LeEco
   [ -d "/proc/irq/736" ] && echo 3 > /proc/irq/736/smp_affinity_list # USB for OP3T
 
-  
+
   if ! [ -f "$file" ]; then
     # Check for NEOS update
     if [ $(< /VERSION) != "$REQUIRED_NEOS_VERSION" ]; then
@@ -68,7 +60,7 @@ function two_init {
         git clean -xdf
         git submodule foreach --recursive git clean -xdf
       fi
-  
+
       "$DIR/installer/updater/updater" "file://$DIR/installer/updater/update.json"
     fi
   fi
@@ -84,6 +76,18 @@ function two_init {
       echo "restart" > /sys/kernel/debug/msm_subsys/slpi &&
       sleep 5  # Give Android sensor subsystem a moment to recover
   fi
+
+
+  echo 1056000 > /sys/class/devfreq/soc:qcom,m4m/max_freq
+  echo "performance" > /sys/class/devfreq/soc:qcom,m4m/governor
+
+  # unclear if these help, but they don't seem to hurt
+  echo "performance" > /sys/class/devfreq/soc:qcom,memlat-cpu0/governor
+  echo "performance" > /sys/class/devfreq/soc:qcom,memlat-cpu2/governor
+
+  # GPU
+  echo "performance" > /sys/class/devfreq/b00000.qcom,kgsl-3d0/governor
+  echo "performance" > /sys/class/devfreq/soc:qcom,cpubw/governor
 }
 
 function launch {
@@ -118,6 +122,9 @@ function launch {
   if [ -f /TICI ]; then
     tici_init
   fi
+
+  make -f installer/fonts/Makefile
+
 
   # handle pythonpath
   ln -sfn $(pwd) /data/pythonpath

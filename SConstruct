@@ -8,6 +8,8 @@ import numpy as np
 
 TICI = os.path.isfile('/TICI')
 Decider('MD5-timestamp')
+SetOption('num_jobs', 4)
+CacheDir('/data/build_cache')
 
 AddOption('--test',
           action='store_true',
@@ -199,7 +201,7 @@ if os.environ.get('SCONS_CACHE'):
   if QCOM_REPLAY:
     cache_dir = '/tmp/scons_cache_qcom_replay'
 
-  CacheDir(cache_dir)
+
 
 node_interval = 5
 node_count = 0

@@ -106,6 +106,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
 
     startupOneplus @82;
 
+
     gasUnavailableDEPRECATED @3;
     dataNeededDEPRECATED @16;
     modelCommIssueDEPRECATED @27;
@@ -198,6 +199,7 @@ struct CarState {
 
   # autoHold Active Information
   autoHoldActivated @42 :Bool;
+  # hvBpower @43 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
