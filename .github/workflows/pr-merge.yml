@@ -34,7 +34,7 @@ jobs:
           use-black: false
           use-mypy: false
           use-isort: false
-          extra-pylint-options: --disable=E0401,W0612,W0101,W0611
+          extra-pylint-options: --disable=C,R,E0401,W0612,W0101,W0611,W0613,W0511,W0311
           extra-flake8-options: --select=F21,F822,F823,F831,F811,F812,E999
 
 
