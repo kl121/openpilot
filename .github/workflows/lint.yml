@@ -1,0 +1,38 @@
+# This is a basic workflow to help you get started with Actions
+
+name: python lint
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the 075-kegman-lqr branch
+on: push
+
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  python_linter:
+    name: python linting
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+
+
+      - name: Python Linter
+        uses: ricardochaves/python-lint@v1.3.0
+        with:
+          python-root-list: selfdrive/car/gm/** selfdrive/car/*.py
+          use-pylint: true
+          use-pycodestyle: false
+          use-flake8: true
+          use-black: false
+          use-mypy: false
+          use-isort: false
+          extra-pylint-options: --disable=E0401,W0612,W0101,W0611,W0311
+          extra-flake8-options: --select=F21,F822,F823,F831,F811,F812,E999
+
