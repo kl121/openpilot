@@ -18,8 +18,14 @@ class CarState(CarStateBase):
     self.prev_lka_button = 0
     self.lka_button = 0
     self.distance_button = 0
-    self.follow_level = 3
-    #self.engineRPM = 0
+    self.follow_level = 2
+    self.lkMode = True
+    self.autoHold = False
+    self.autoHoldActive = False
+    self.autoHoldActivated = False
+    self.regenPaddlePressed = 0
+    self.cruiseMain = False
+    # self.engineRPM = 0
     self.HVBvoltage = 0
     self.HVBcurrent = 0
 

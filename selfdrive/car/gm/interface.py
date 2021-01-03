@@ -16,7 +16,7 @@ EventName = car.CarEvent.EventName
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def compute_gb(accel, speed):
-  	# Ripped from compute_gb_honda in Honda's interface.py. Works well off shelf but may need more tuning
+    # Ripped from compute_gb_honda in Honda's interface.py. Works well off shelf but may need more tuning
     creep_brake = 0.0
     creep_speed = 2.68
     creep_brake_value = 0.10
