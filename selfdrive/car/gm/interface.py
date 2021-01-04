@@ -16,7 +16,7 @@ EventName = car.CarEvent.EventName
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def compute_gb(accel, speed):
-  	# Ripped from compute_gb_honda in Honda's interface.py. Works well off shelf but may need more tuning
+    # Ripped from compute_gb_honda in Honda's interface.py. Works well off shelf but may need more tuning
     creep_brake = 0.0
     creep_speed = 2.68
     creep_brake_value = 0.10
@@ -84,73 +84,31 @@ class CarInterface(CarInterfaceBase):
     ret.steerRateCost = 2.0
     ret.steerActuatorDelay = 0.2  # Default delay, not measured yet
 
-    if candidate == CAR.VOLT:
-      # supports stop and go, but initial engage must be above 18mph (which include conservatism)
-      ret.minEnableSpeed = -1
-      ret.mass = 1607. + STD_CARGO_KG
-      ret.wheelbase = 2.69
-      ret.steerRatio = 15.7
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.4  # wild guess
-
-    elif candidate == CAR.BOLT:
+    #if candidate == CAR.BOLT:
+    #this forks for BOLT only, so dosen't care about car models.
       # initial engage unkown - copied from Volt. Stop and go unknown.
-      ret.minEnableSpeed = -1
-      ret.mass = 1616. + STD_CARGO_KG
-      ret.safetyModel = car.CarParams.SafetyModel.gm
-      ret.wheelbase = 2.60096
-      ret.steerRatio = 16.8
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.4 # wild guess
-      #PID tunning not to prevent oversteer
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 25.0], [10., 25.0]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.1, 0.12], [0.008, 0.016]]
-      ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [0.7]  #corolla from shane fork : 0.725
-      ret.lateralTuning.pid.kf = 0.00006
-      tire_stiffness_factor = 0.5
+    ret.minEnableSpeed = -1
+    ret.mass = 1616. + STD_CARGO_KG
+    ret.safetyModel = car.CarParams.SafetyModel.gm
+    ret.wheelbase = 2.60096
+    ret.steerRatio = 16.8
+    ret.steerRatioRear = 0.
+    ret.centerToFront = ret.wheelbase * 0.4 # wild guess
+    #PID tunning not to prevent oversteer
+    ret.lateralTuning.init('lqr')
 
-    elif candidate == CAR.MALIBU:
-      # supports stop and go, but initial engage must be above 18mph (which include conservatism)
-      ret.minEnableSpeed = 18 * CV.MPH_TO_MS
-      ret.mass = 1496. + STD_CARGO_KG
-      ret.wheelbase = 2.83
-      ret.steerRatio = 15.8
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.4  # wild guess
+    ret.lateralTuning.lqr.scale = 1950.0
+    ret.lateralTuning.lqr.ki = 0.024
 
-    elif candidate == CAR.HOLDEN_ASTRA:
-      ret.mass = 1363. + STD_CARGO_KG
-      ret.wheelbase = 2.662
-      # Remaining parameters copied from Volt for now
-      ret.centerToFront = ret.wheelbase * 0.4
-      ret.minEnableSpeed = 18 * CV.MPH_TO_MS
-      ret.steerRatio = 15.7
-      ret.steerRatioRear = 0.
+    ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+    ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+    ret.lateralTuning.lqr.c = [1., 0.]
+    ret.lateralTuning.lqr.k = [-110., 451.]
+    ret.lateralTuning.lqr.l = [0.33, 0.318]
+    ret.lateralTuning.lqr.dcGain = 0.00225
+    tire_stiffness_factor = 0.5
 
-    elif candidate == CAR.ACADIA:
-      ret.minEnableSpeed = -1.  # engage speed is decided by pcm
-      ret.mass = 4353. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.wheelbase = 2.86
-      ret.steerRatio = 14.4  # end to end is 13.46
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.4
 
-    elif candidate == CAR.BUICK_REGAL:
-      ret.minEnableSpeed = 18 * CV.MPH_TO_MS
-      ret.mass = 3779. * CV.LB_TO_KG + STD_CARGO_KG  # (3849+3708)/2
-      ret.wheelbase = 2.83  # 111.4 inches in meters
-      ret.steerRatio = 14.4  # guess for tourx
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.4  # guess for tourx
-
-    elif candidate == CAR.CADILLAC_ATS:
-      ret.minEnableSpeed = 18 * CV.MPH_TO_MS
-      ret.mass = 1601. + STD_CARGO_KG
-      ret.wheelbase = 2.78
-      ret.steerRatio = 15.3
-      ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.49
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
