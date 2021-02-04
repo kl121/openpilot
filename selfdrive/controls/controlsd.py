@@ -235,7 +235,7 @@ class Controls:
       self.events.add(EventName.relayMalfunction)
     if self.sm['plan'].fcw:
       self.events.add(EventName.fcw)
-    if self.sm['model'].frameDropPerc > 1 and (not SIMULATION):
+    if self.sm['model'].frameDropPerc > 20 and (not SIMULATION):
         self.events.add(EventName.modeldLagging)
 
     # Only allow engagement with brake pressed when stopped behind another stopped car
