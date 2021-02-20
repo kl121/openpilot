@@ -1,5 +1,7 @@
 [![](https://avatars.githubusercontent.com/u/59207321?s=400&u=6b596f8dc650351e0d948a1551cb5da7e0cc11ef&v=4)](#)
 
+** Special thanks to @steveham3 for tidying up this readme **
+
 Table of Contents
 =======================
 
