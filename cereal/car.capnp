@@ -103,7 +103,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     autoHoldActivated @96;
     gpsMalfunction @97;
     startupOneplus @82;
-    processNotRunning @95;
+    processNotRunning @98;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -119,7 +119,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     invalidGiraffeToyotaDEPRECATED @60;
     internetConnectivityNeededDEPRECATED @61;
     whitePandaUnsupportedDEPRECATED @81;
-    startupGreyPanda @97;
+    startupGreyPanda @99;
     commIssueWarningDEPRECATED @83;
     focusRecoverActiveDEPRECATED @86;
     neosUpdateRequiredDEPRECATED @88;
