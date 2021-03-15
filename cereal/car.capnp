@@ -186,6 +186,9 @@ struct CarState {
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
+  # HV Battery Power
+  hvBpower @37 :Float32;
+
   struct WheelSpeeds {
     # optional wheel speeds
     fl @0 :Float32;
@@ -427,6 +430,8 @@ struct CarParams {
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
     kf @4 :Float32;
+    kdBP @5 :List(Float32);
+    kdV @6 :List(Float32);
   }
 
   struct LongitudinalPIDTuning {

@@ -26,7 +26,7 @@ class CarState(CarStateBase):
     ret.wheelSpeeds.rr = pt_cp.vl["EBCMWheelSpdRear"]['RRWheelSpd'] * CV.KPH_TO_MS
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.vEgoRaw < 0.01
+    ret.standstill = ret.vEgoRaw < 0.1
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL"]['PRNDL'], None))
     ret.brake = pt_cp.vl["EBCMBrakePedalPosition"]['BrakePedalPosition'] / 0xd0
@@ -59,17 +59,27 @@ class CarState(CarStateBase):
     ret.rightBlinker = pt_cp.vl["BCMTurnSignals"]['TurnSignals'] == 2
 
     self.park_brake = pt_cp.vl["EPBStatus"]['EPBClosed']
-    ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
+    self.main_on = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.espDisabled = pt_cp.vl["ESPStatus"]['TractionControlOn'] != 1
-    self.pcm_acc_status = pt_cp.vl["AcceleratorPedal2"]['CruiseState']
+    self.pcm_acc_status = pt_cp.vl["ASCMActiveCruiseControlStatus"]['ACCCmdActive']
+    ret.cruiseState.available = self.main_on
+    ret.cruiseState.enabled = self.pcm_acc_status != 0
+    ret.cruiseState.standstill = False
 
     ret.brakePressed = ret.brake > 1e-5
-    # Regen braking is braking
-    if self.car_fingerprint == CAR.VOLT:
-      ret.brakePressed = ret.brakePressed or bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+    self.regen_pressed = False
+    if self.car_fingerprint == CAR.VOLT or self.car_fingerprint == CAR.BOLT:
+      self.regen_pressed or bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+    brake_light_enable = False
+    if self.car_fingerprint == CAR.BOLT:
+      if ret.aEgo < -1.3:
+        brake_light_enable = True
+    ret.brakeLights = ret.brakePressed or self.regen_pressed or brake_light_enable
 
-    ret.cruiseState.enabled = self.pcm_acc_status != AccState.OFF
-    ret.cruiseState.standstill = self.pcm_acc_status == AccState.STANDSTILL
+    if self.car_fingerprint == CAR.BOLT:
+      self.HVBvoltage = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryVoltage']
+      self.HVBcurrent = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryCurrent']
+      ret.hvBpower = self.HVBvoltage * self.HVBcurrent / 1000   #kW
 
     return ret
 
@@ -102,11 +112,15 @@ class CarState(CarStateBase):
       ("TractionControlOn", "ESPStatus", 0),
       ("EPBClosed", "EPBStatus", 0),
       ("CruiseMainOn", "ECMEngineStatus", 0),
+      ("ACCCmdActive", "ASCMActiveCruiseControlStatus", 0),
+      ("LKATotalTorqueDelivered", "PSCMStatus", 0),
     ]
 
-    if CP.carFingerprint == CAR.VOLT:
+    if CP.carFingerprint == CAR.VOLT or CP.carFingerprint == CAR.BOLT:
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
+        ("HVBatteryVoltage", "BECMBatteryVoltageCurrent", 0),
+        ("HVBatteryCurrent", "BECMBatteryVoltageCurrent", 0),
       ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
