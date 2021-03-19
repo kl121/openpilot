@@ -280,6 +280,7 @@ static void ui_draw_vision_header(UIState *s) {
 
 static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
+  ui_draw_vision_brake(s);
 }
 
 static float get_alert_alpha(float blink_rate) {
