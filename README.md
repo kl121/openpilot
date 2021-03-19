@@ -68,8 +68,14 @@ Release Notes
 
 See openpilot's official release notes here: https://github.com/commaai/openpilot/blob/master/RELEASES.md
 
+#### v0.8.2
+- Grey panda still working - will continue to support as long as I can
+- OG Eon still working - will continue to support as long as I can
+- Reverted to standard thermald.py - no more battery management as most people don't have a need for this anymore with C2
+
 #### v0.8.1
 - Nudgeless lane change no longer working until comma stabilizes their lane change code
+- Grey panda still working
 
 #### v0.8.0
 - Grey Panda is re-enabled.  Please upgrade to Comma 2 as soon as possible to support Comma. I will try to support Grey Panda as long as I can.
