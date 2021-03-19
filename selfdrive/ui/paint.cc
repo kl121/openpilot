@@ -179,25 +179,6 @@ static void ui_draw_world(UIState *s) {
   nvgResetScissor(s->vg);
 }
 
-static void ui_draw_vision_maxspeed(UIState *s) {
-  const int SET_SPEED_NA = 255;
-  float maxspeed = s->scene.controls_state.getVCruise();
-  const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA;
-  if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
-
-  const Rect rect = {s->viz_rect.x + (bdr_s * 2), int(s->viz_rect.y + (bdr_s * 1.5)), 184, 202};
-  ui_fill_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 30.);
-  ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
-
-  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  ui_draw_text(s, rect.centerX(), 148, "MAX", 26 * 2.5, COLOR_WHITE_ALPHA(is_cruise_set ? 200 : 100), "sans-regular");
-  if (is_cruise_set) {
-    const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
-    ui_draw_text(s, rect.centerX(), 242, maxspeed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
-  } else {
-    ui_draw_text(s, rect.centerX(), 242, "N/A", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
-  }
-}
 
 static void ui_draw_vision_speed(UIState *s) {
   const float speed = std::max(0.0, s->scene.car_state.getVEgo() * (s->scene.is_metric ? 3.6 : 2.2369363));
@@ -227,6 +208,13 @@ static void ui_draw_vision_face(UIState *s) {
   const int face_x = (s->viz_rect.x + face_size + (bdr_s * 2));
   const int face_y = (s->viz_rect.bottom() - footer_h + ((footer_h - face_size) / 2));
   ui_draw_circle_image(s, face_x, face_y, face_size, "driver_face", s->scene.dmonitoring_state.getIsActiveMode());
+}
+
+static void ui_draw_vision_brake(UIState *s) {
+  const int brake_size = 96;
+  const int brake_x = (s->viz_rect.x + brake_size + (bdr_s * 2) + 255);
+  const int brake_y = (s->viz_rect.bottom() - footer_h + ((footer_h - brake_size) / 2));
+  ui_draw_circle_image(s, brake_x, brake_y, brake_size, "brake_img", s->scene.brakeLights);
 }
 
 static void ui_draw_driver_view(UIState *s) {
@@ -270,6 +258,12 @@ static void ui_draw_driver_view(UIState *s) {
   const int icon_x = is_rhd ? rect.right() - face_size - bdr_s * 2 : rect.x + face_size + bdr_s * 2;
   const int icon_y = rect.bottom() - face_size - bdr_s * 2.5;
   ui_draw_circle_image(s, icon_x, icon_y, face_size, "driver_face", face_detected);
+
+  //draw brake icon
+  const int brake_size = 85;
+  const int x2 = rect.x + brake_size + bdr_s * 2 + 200;
+  const int y2 = rect.bottom() - brake_size - (bdr_s * 2.5);
+  ui_draw_circle_image(s, x2, y2, brake_size, "brake_img", s->scene.brakeLights);
 }
 
 static void ui_draw_vision_header(UIState *s) {
@@ -280,7 +274,6 @@ static void ui_draw_vision_header(UIState *s) {
 
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
-  ui_draw_vision_maxspeed(s);
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }
@@ -522,6 +515,7 @@ void ui_nvg_init(UIState *s) {
       {"button_settings", "../assets/images/button_settings.png"},
       {"button_home", "../assets/images/button_home.png"},
       {"battery", "../assets/images/battery.png"},
+	  {"brake_img", "../assets/img_brake_disc.png"},
       {"battery_charging", "../assets/images/battery_charging.png"},
       {"network_0", "../assets/images/network_0.png"},
       {"network_1", "../assets/images/network_1.png"},
