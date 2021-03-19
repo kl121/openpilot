@@ -304,7 +304,7 @@ static void ui_draw_vision_alert(UIState *s) {
                      .h = alr_h};
 
   ui_fill_rect(s->vg, rect, color);
-  ui_fill_rect(s->vg, rect, nvgLinearGradient(s->vg, rect.x, rect.y, rect.x, rect.bottom(), 
+  ui_fill_rect(s->vg, rect, nvgLinearGradient(s->vg, rect.x, rect.y, rect.x, rect.bottom(),
                                             nvgRGBAf(0.0, 0.0, 0.0, 0.05), nvgRGBAf(0.0, 0.0, 0.0, 0.35)));
 
   nvgFillColor(s->vg, COLOR_WHITE);
@@ -516,7 +516,7 @@ void ui_nvg_init(UIState *s) {
       {"button_settings", "../assets/images/button_settings.png"},
       {"button_home", "../assets/images/button_home.png"},
       {"battery", "../assets/images/battery.png"},
-	  {"brake_img", "../assets/img_brake_disc.png"},
+	    {"brake_img", "../assets/img_brake_disc.png"},
       {"battery_charging", "../assets/images/battery_charging.png"},
       {"network_0", "../assets/images/network_0.png"},
       {"network_1", "../assets/images/network_1.png"},
