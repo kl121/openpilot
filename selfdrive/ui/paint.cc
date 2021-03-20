@@ -331,17 +331,17 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    if (s->scene.lead_status) {
+    if (scene.lead_status) {
       //show RED if less than 10 meters
       //show orange if less than 30 meters
-      if((int)(s->scene.lead_d_rel) < 30) {
+      if((int)(scene.lead_d_rel) < 30) {
         val_color = nvgRGBA(255, 188, 3, 200);
       }
-      if((int)(s->scene.lead_d_rel) < 10) {
+      if((int)(scene.lead_d_rel) < 10) {
         val_color = nvgRGBA(255, 0, 0, 200);
       }
       // lead car relative distance is always in meters
-      snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_d_rel);
+      snprintf(val_str, sizeof(val_str), "%d", (int)scene.lead_d_rel);
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
@@ -358,17 +358,17 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    if (s->scene.lead_status) {
+    if (scene.lead_status) {
       //show Orange if negative speed (approaching)
       //show Orange if negative speed faster than 5mph (approaching fast)
-      if((int)(s->scene.lead_v_rel) < 0) {
+      if((int)(scene.lead_v_rel) < 0) {
         val_color = nvgRGBA(255, 188, 3, 200);
       }
-      if((int)(s->scene.lead_v_rel) < -5) {
+      if((int)(scene.lead_v_rel) < -5) {
         val_color = nvgRGBA(255, 0, 0, 200);
       }
       // lead car relative speed is always in meters
-      if (s->scene.is_metric) {
+      if (scene.is_metric) {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
       } else {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
@@ -376,7 +376,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
-    if (s->scene.is_metric) {
+    if (scene.is_metric) {
       snprintf(uom_str, sizeof(uom_str), "km/h");;
     } else {
       snprintf(uom_str, sizeof(uom_str), "mph");
