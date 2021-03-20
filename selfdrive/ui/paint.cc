@@ -368,7 +368,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         val_color = nvgRGBA(255, 0, 0, 200);
       }
       // lead car relative speed is always in meters
-      if (s->is_metric) {
+      if (s->scene.is_metric) {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
       } else {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
@@ -376,7 +376,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
-    if (s->is_metric) {
+    if (s->scene.is_metric) {
       snprintf(uom_str, sizeof(uom_str), "km/h");;
     } else {
       snprintf(uom_str, sizeof(uom_str), "mph");
@@ -400,8 +400,8 @@ static void bb_ui_draw_UI(UIState *s)
 {
   //const UIScene *scene = &s->scene;
   const int bb_dmr_w = 180;
-  const int bb_dmr_x = s->viz_rect.x + s->viz_rect.w - bb_dmr_w - (bdr_is * 2);
-  const int bb_dmr_y = (s->viz_rect.y + (bdr_is * 1.5)) + 220;
+  const int bb_dmr_x = s->viz_rect.x + s->viz_rect.w - bb_dmr_w - (bdr_s * 2);
+  const int bb_dmr_y = (s->viz_rect.y + (bdr_s * 1.5)) + 220;
 
   bb_ui_draw_measures_left(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
 }
