@@ -134,7 +134,11 @@ typedef struct UIScene {
   float light_sensor, accel_sensor, gyro_sensor;
   bool started, ignition, is_metric, longitudinal_control;
   uint64_t started_frame;
+
+  //Add-on
   bool brakeLights;
+  int lead_status;
+  float lead_d_rel, lead_v_rel;
 } UIScene;
 
 typedef struct UIState {

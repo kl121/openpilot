@@ -158,6 +158,10 @@ static void update_sockets(UIState *s) {
       line = sm["modelV2"].getModelV2().getPosition();
     }
     update_leads(s, sm["radarState"].getRadarState(), line);
+    auto radar_state = sm["radarState"].getRadarState();
+    s->scene.lead_v_rel = radar_state.getLeadOne().getVRel();
+    s->scene.lead_d_rel = radar_state.getLeadOne().getDRel();
+    s->scene.lead_status = radar_state.getLeadOne().getStatus();
   }
   if (sm.updated("liveCalibration")) {
     scene.world_objects_visible = true;

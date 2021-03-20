@@ -278,9 +278,138 @@ static void ui_draw_vision_header(UIState *s) {
   ui_draw_vision_event(s);
 }
 
+//BB START: functions added for the display of various items
+static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
+    int bb_x, int bb_y, int bb_uom_dx,
+    NVGcolor bb_valueColor, NVGcolor bb_labelColor, NVGcolor bb_uomColor,
+    int bb_valueFontSize, int bb_labelFontSize, int bb_uomFontSize )  {
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+  int dx = 0;
+  if (strlen(bb_uom) > 0) {
+    dx = (int)(bb_uomFontSize*2.5/2);
+   }
+  //print value
+  nvgFontFace(s->vg, "sans-semibold");
+  nvgFontSize(s->vg, bb_valueFontSize*2.5);
+  nvgFillColor(s->vg, bb_valueColor);
+  nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
+  //print label
+  nvgFontFace(s->vg, "sans-regular");
+  nvgFontSize(s->vg, bb_labelFontSize*2.5);
+  nvgFillColor(s->vg, bb_labelColor);
+  nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
+  //print uom
+  if (strlen(bb_uom) > 0) {
+      nvgSave(s->vg);
+    int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
+    int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
+    nvgTranslate(s->vg,rx,ry);
+    nvgRotate(s->vg, -1.5708); //-90deg in radians
+    nvgFontFace(s->vg, "sans-regular");
+    nvgFontSize(s->vg, (int)(bb_uomFontSize*2.5));
+    nvgFillColor(s->vg, bb_uomColor);
+    nvgText(s->vg, 0, 0, bb_uom, NULL);
+    nvgRestore(s->vg);
+  }
+  return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
+}
+
+static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
+  const UIScene *scene = &s->scene;
+  int bb_rx = bb_x + (int)(bb_w/2);
+  int bb_ry = bb_y;
+  int bb_h = 5;
+  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
+  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
+  int value_fontSize=30;
+  int label_fontSize=15;
+  int uom_fontSize = 15;
+  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
+
+  //add visual radar relative distance
+  if (true) {
+    char val_str[16];
+    char uom_str[6];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    if (s->scene.lead_status) {
+      //show RED if less than 10 meters
+      //show orange if less than 30 meters
+      if((int)(s->scene.lead_d_rel) < 30) {
+        val_color = nvgRGBA(255, 188, 3, 200);
+      }
+      if((int)(s->scene.lead_d_rel) < 10) {
+        val_color = nvgRGBA(255, 0, 0, 200);
+      }
+      // lead car relative distance is always in meters
+      snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_d_rel);
+    } else {
+       snprintf(val_str, sizeof(val_str), "-");
+    }
+    snprintf(uom_str, sizeof(uom_str), "m");
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL DIST",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
+  //add visual radar relative speed
+  if (true) {
+    char val_str[16];
+    char uom_str[6];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    if (s->scene.lead_status) {
+      //show Orange if negative speed (approaching)
+      //show Orange if negative speed faster than 5mph (approaching fast)
+      if((int)(s->scene.lead_v_rel) < 0) {
+        val_color = nvgRGBA(255, 188, 3, 200);
+      }
+      if((int)(s->scene.lead_v_rel) < -5) {
+        val_color = nvgRGBA(255, 0, 0, 200);
+      }
+      // lead car relative speed is always in meters
+      if (s->is_metric) {
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
+      } else {
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
+      }
+    } else {
+       snprintf(val_str, sizeof(val_str), "-");
+    }
+    if (s->is_metric) {
+      snprintf(uom_str, sizeof(uom_str), "km/h");;
+    } else {
+      snprintf(uom_str, sizeof(uom_str), "mph");
+    }
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL SPEED",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+  //finally draw the frame
+  bb_h += 20;
+  nvgBeginPath(s->vg);
+    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
+    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
+    nvgStrokeWidth(s->vg, 6);
+    nvgStroke(s->vg);
+}
+
+static void bb_ui_draw_UI(UIState *s)
+{
+  //const UIScene *scene = &s->scene;
+  const int bb_dmr_w = 180;
+  const int bb_dmr_x = s->viz_rect.x + s->viz_rect.w - bb_dmr_w - (bdr_is * 2);
+  const int bb_dmr_y = (s->viz_rect.y + (bdr_is * 1.5)) + 220;
+
+  bb_ui_draw_measures_left(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
+}
+
 static void ui_draw_vision_footer(UIState *s) {
   ui_draw_vision_face(s);
   ui_draw_vision_brake(s);
+  bb_ui_draw_UI(s);
 }
 
 static float get_alert_alpha(float blink_rate) {
