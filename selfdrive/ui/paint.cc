@@ -400,8 +400,8 @@ static void bb_ui_draw_UI(UIState *s)
 {
   //const UIScene *scene = &s->scene;
   const int bb_dml_w = 180;
-  const int bb_dml_x = (s->viz_rect.x + (bdr_is * 2));
-  const int bb_dml_y = (s->viz_rect.y + (bdr_is * 1.5)) + 220;
+  const int bb_dml_x = (s->viz_rect.x + (bdr_s * 2));
+  const int bb_dml_y = (s->viz_rect.y + (bdr_s * 1.5)) + 220;
 
   bb_ui_draw_measures_left(s, bb_dml_x, bb_dml_y, bb_dml_w);
 }
