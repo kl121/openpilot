@@ -76,11 +76,6 @@ class CarState(CarStateBase):
         brake_light_enable = True
     ret.brakeLights = ret.brakePressed or self.regen_pressed or brake_light_enable
 
-    if self.car_fingerprint == CAR.BOLT:
-      self.HVBvoltage = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryVoltage']
-      self.HVBcurrent = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryCurrent']
-      ret.hvBpower = self.HVBvoltage * self.HVBcurrent / 1000   #kW
-
     return ret
 
   @staticmethod
