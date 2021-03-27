@@ -53,4 +53,4 @@ class CarState(CarStateBase):
       ("Brake_Lights", "BCM_to_HS_Body", 0.),
     ]
     checks = []
-    return None
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)

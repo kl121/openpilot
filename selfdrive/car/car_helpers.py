@@ -10,12 +10,11 @@ from selfdrive.swaglog import cloudlog
 import cereal.messaging as messaging
 from selfdrive.car import gen_empty_fingerprint
 
-from cereal import car, log
+from cereal import car
 EventName = car.CarEvent.EventName
-HwType = log.PandaState.PandaType
 
 
-def get_startup_event(car_recognized, controller_available, hw_type):
+def get_startup_event(car_recognized, controller_available):
   if comma_remote and tested_branch:
     event = EventName.startup
   else:
@@ -25,8 +24,6 @@ def get_startup_event(car_recognized, controller_available, hw_type):
     event = EventName.startupNoCar
   elif car_recognized and not controller_available:
     event = EventName.startupNoControl
-  elif hw_type == HwType.greyPanda:
-    event = EventName.startupGreyPanda
   return event
 
 
@@ -145,8 +142,7 @@ def fingerprint(logcan, sendcan, has_relay):
       # Toyota needs higher time to fingerprint, since DSU does not broadcast immediately
       if only_toyota_left(candidate_cars[b]):
         frame_fingerprint = 100  # 1s
-      if len(candidate_cars[b]) == 1:
-        if frame > frame_fingerprint:
+      if len(candidate_cars[b]) == 1 and frame > frame_fingerprint:
           # fingerprint done
           car_fingerprint = candidate_cars[b][0]
 
@@ -172,8 +168,8 @@ def fingerprint(logcan, sendcan, has_relay):
   return car_fingerprint, finger, vin, car_fw, source
 
 
-def get_car(logcan, sendcan, has_relay=False):
-  candidate, fingerprints, vin, car_fw, source = fingerprint(logcan, sendcan, has_relay)
+def get_car(logcan, sendcan):
+  candidate, fingerprints, vin, car_fw, source = fingerprint(logcan, sendcan)
 
   if candidate is None:
     cloudlog.warning("car doesn't match any fingerprints: %r", fingerprints)

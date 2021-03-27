@@ -4,38 +4,10 @@ from common.numpy_fast import interp
 from selfdrive.config import Conversions as CV
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.gm import gmcan
-from selfdrive.car.gm.values import DBC, AccState, CanBus, CarControllerParams
+from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-
-
-class CarControllerParams():
-  def __init__(self):
-    self.STEER_MAX = 300
-    self.STEER_STEP = 2              # how often we update the steer cmd
-    self.STEER_DELTA_UP = 7          # ~0.75s time to peak torque (255/50hz/0.75s)
-    self.STEER_DELTA_DOWN = 17       # ~0.3s from peak torque to zero
-    self.MIN_STEER_SPEED = 3.
-    self.STEER_DRIVER_ALLOWANCE = 50   # allowed driver torque before start limiting
-    self.STEER_DRIVER_MULTIPLIER = 4   # weight driver torque heavily
-    self.STEER_DRIVER_FACTOR = 100     # from dbc
-    self.NEAR_STOP_BRAKE_PHASE = 0.5  # m/s, more aggressive braking near full stop
-
-    # Takes case of "Service Adaptive Cruise" and "Service Front Camera"
-    # dashboard messages.
-    self.ADAS_KEEPALIVE_STEP = 100
-    self.CAMERA_KEEPALIVE_STEP = 100
-
-    # pedal lookups, only for Volt
-    MAX_GAS = 3072              # Only a safety limit
-    self.ZERO_GAS = 2048
-    MAX_BRAKE = 350             # Should be around 3.5m/s^2, including regen
-    self.MAX_ACC_REGEN = 1404  # ACC Regen braking is slightly less powerful than max regen paddle
-    self.GAS_LOOKUP_BP = [-0.25, 0., 0.5]
-    self.GAS_LOOKUP_V = [self.MAX_ACC_REGEN, self.ZERO_GAS, MAX_GAS]
-    self.BRAKE_LOOKUP_BP = [-1., -0.25]
-    self.BRAKE_LOOKUP_V = [MAX_BRAKE, 0]
 
 
 class CarController():
@@ -60,9 +32,9 @@ class CarController():
 
     # STEER
     if (frame % P.STEER_STEP) == 0:
-      lkas_enabled = enabled and not CS.out.steerWarning and CS.lkMode and CS.out.vEgo > P.MIN_STEER_SPEED
+      lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED
       if lkas_enabled:
-        new_steer = actuators.steer * P.STEER_MAX
+        new_steer = int(round(actuators.steer * P.STEER_MAX))
         apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, P)
         self.steer_rate_limited = new_steer != apply_steer
       else:
@@ -89,36 +61,11 @@ class CarController():
     # Gas/regen and brakes - all at 25Hz
     if (frame % 4) == 0:
       idx = (frame // 4) % 4
-      if CS.cruiseMain and not enabled and CS.autoHold and CS.autoHoldActive and not CS.out.gasPressed and CS.out.gearShifter == 'drive' and CS.out.vEgo < 0.01 and not CS.regenPaddlePressed:
-        # Auto Hold State
-        car_stopping = apply_gas < P.ZERO_GAS
-        standstill = CS.pcm_acc_status == AccState.STANDSTILL
 
-        at_full_stop = standstill and car_stopping
-        near_stop = (CS.out.vEgo < P.NEAR_STOP_BRAKE_PHASE) and car_stopping
-        can_sends.append(gmcan.create_friction_brake_command(self.packer_ch, CanBus.CHASSIS, apply_brake, idx, near_stop, at_full_stop))
-        CS.autoHoldActivated = True
-
-      else : 
-        car_stopping = apply_gas < P.ZERO_GAS
-        standstill = CS.pcm_acc_status == AccState.STANDSTILL
-
-        at_full_stop = enabled and standstill and car_stopping
-        near_stop = enabled and (CS.out.vEgo < P.NEAR_STOP_BRAKE_PHASE) and car_stopping
-        can_sends.append(gmcan.create_friction_brake_command(self.packer_ch, CanBus.CHASSIS, apply_brake, idx, near_stop, at_full_stop))
-        CS.autoHoldActivated = False
-
-        # Auto-resume from full stop by resetting ACC control
-        acc_enabled = enabled
-      
-        if standstill and not car_stopping:
-          acc_enabled = False
-      
-        can_sends.append(gmcan.create_gas_regen_command(self.packer_pt, CanBus.POWERTRAIN, apply_gas, idx, acc_enabled, at_full_stop))
-
-   
-
-    follow_level = CS.get_follow_level()
+      at_full_stop = enabled and CS.out.standstill
+      near_stop = enabled and (CS.out.vEgo < P.NEAR_STOP_BRAKE_PHASE)
+      can_sends.append(gmcan.create_friction_brake_command(self.packer_ch, CanBus.CHASSIS, apply_brake, idx, near_stop, at_full_stop))
+      can_sends.append(gmcan.create_gas_regen_command(self.packer_pt, CanBus.POWERTRAIN, apply_gas, idx, enabled, at_full_stop))
 
     # Send dashboard UI commands (ACC status), 25hz
     if (frame % 4) == 0:

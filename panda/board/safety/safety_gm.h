@@ -187,12 +187,6 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   // LKA STEER: safety check
   if (addr == 384) {
-    uint32_t vals[4];
-    vals[0] = 0x00000000U;
-    vals[1] = 0x10000fffU;
-    vals[2] = 0x20000ffeU;
-    vals[3] = 0x30000ffdU;
-    int rolling_counter = GET_BYTE(to_send, 0) >> 4;
     int desired_torque = ((GET_BYTE(to_send, 0) & 0x7U) << 8) + GET_BYTE(to_send, 1);
     uint32_t ts = TIM2->CNT;
     bool violation = 0;

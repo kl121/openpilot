@@ -253,12 +253,12 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
-  EventName.startupGreyPanda: {
+  EventName.dashcamMode: {
     ET.PERMANENT: Alert(
-      "WARNING: Grey panda is not supported.",
-      "But Kegman re-enabled it.  Enjoy.",
-      AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      "Dashcam Mode",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
 
   EventName.invalidLkasSetting: {
@@ -329,6 +329,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.vehicleModelInvalid: {
+    ET.NO_ENTRY: NoEntryAlert("Vehicle Parameter Identification Failed"),
     ET.WARNING: Alert(
       "Vehicle Parameter Identification Failed",
       "",
@@ -452,20 +453,12 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .0, .1, .1),
   },
 
-  EventName.manualSteeringRequired: {
-    ET.WARNING: Alert(
-      "Lane Keeping Assist is OFF",
-      "Manual Steering Required",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .1, .1),
-  },
-
   EventName.steerSaturated: {
     ET.WARNING: Alert(
       "TAKE CONTROL",
       "Turn Exceeds Steering Limit",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, 1., 1., 1.),
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 1., 1.),
   },
 
   EventName.fanMalfunction: {
@@ -703,7 +696,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Reverse Gear"),
     ET.NO_ENTRY: NoEntryAlert("Reverse Gear"),
   },
- 
+
   EventName.cruiseDisabled: {
     ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Cruise Is Off"),
   },
@@ -739,7 +732,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.speedTooHigh: {
     ET.WARNING: Alert(
       "Speed Too High",
-      "Slow down to resume operation",
+      "Model uncertain at this speed",
       AlertStatus.normal, AlertSize.mid,
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.none, 2.2, 3., 4.),
     ET.NO_ENTRY: Alert(
@@ -756,14 +749,6 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       AlertStatus.normal, AlertSize.small,
       Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
     ET.NO_ENTRY: NoEntryAlert("Cruise Fault: Restart the Car"),
-  },
-
-  EventName.autoHoldActivated: {
-    ET.PERMANENT: Alert(
-      "AutoHold Activated",
-      "You can rest your foot now.",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0.4, .3),
   },
 
 }

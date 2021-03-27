@@ -15,8 +15,8 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / CarControllerParams.ACCEL_SCALE
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):  # pylint: disable=dangerous-default-value
-    ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]):  # pylint: disable=dangerous-default-value
+    ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
 
     ret.carName = "toyota"
     ret.safetyModel = car.CarParams.SafetyModel.toyota
@@ -278,7 +278,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.3], [0.05]]
       ret.lateralTuning.pid.kf = 0.00007
 
-    elif candidate == CAR.LEXUS_NXH:
+    elif candidate in [CAR.LEXUS_NXH, CAR.LEXUS_NX]:
       stop_and_go = True
       ret.safetyParam = 73
       ret.wheelbase = 2.66
@@ -310,7 +310,7 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
+    ret.enableCamera = True
     # Detect smartDSU, which intercepts ACC_CMD from the DSU allowing openpilot to send it
     smartDsu = 0x2FF in fingerprint[0]
     # TODO: use FW query for the enableDsu flag
@@ -353,8 +353,6 @@ class CarInterface(CarInterfaceBase):
     # events
     events = self.create_common_events(ret)
 
-    if self.cp_cam.can_invalid_cnt >= 200 and self.CP.enableCamera and not self.CP.isPandaBlack:
-      events.add(EventName.invalidGiraffeToyota)
     if self.CS.low_speed_lockout and self.CP.openpilotLongitudinalControl:
       events.add(EventName.lowSpeedLockout)
     if ret.vEgo < self.CP.minEnableSpeed and self.CP.openpilotLongitudinalControl:

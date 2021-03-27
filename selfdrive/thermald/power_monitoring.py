@@ -19,53 +19,6 @@ CAR_CHARGING_RATE_W = 45
 VBATT_PAUSE_CHARGING = 11.0
 MAX_TIME_OFFROAD_S = 30*3600
 
-# Parameters
-def get_battery_capacity():
-  return _read_param("/sys/class/power_supply/battery/capacity", int)
-
-
-def get_battery_status():
-  # This does not correspond with actual charging or not.
-  # If a USB cable is plugged in, it responds with 'Charging', even when charging is disabled
-  return _read_param("/sys/class/power_supply/battery/status", lambda x: x.strip(), '')
-
-
-def get_battery_current():
-  return _read_param("/sys/class/power_supply/battery/current_now", int)
-
-
-def get_battery_voltage():
-  return _read_param("/sys/class/power_supply/battery/voltage_now", int)
-
-
-def get_usb_present():
-  return _read_param("/sys/class/power_supply/usb/present", lambda x: bool(int(x)), False)
-
-
-def get_battery_charging():
-  # This does correspond with actually charging
-  return _read_param("/sys/class/power_supply/battery/charge_type", lambda x: x.strip() != "N/A", True)
-
-
-def set_battery_charging(on):
-  with open('/sys/class/power_supply/battery/charging_enabled', 'w') as f:
-    f.write(f"{1 if on else 0}\n")
-
-
-# Helpers
-def _read_param(path, parser, default=0):
-  try:
-    with open(path) as f:
-      return parser(f.read())
-  except Exception:
-    return default
-
-
-def panda_current_to_actual_current(panda_current):
-  # From white/grey panda schematic
-  return (3.3 - (panda_current * 3.3 / 4096)) / 8.25
-
-
 class PowerMonitoring:
   def __init__(self):
     self.params = Params()
@@ -222,7 +175,7 @@ class PowerMonitoring:
 
     now = sec_since_boot()
     panda_charging = (pandaState.pandaState.usbPowerMode != log.PandaState.UsbPowerMode.client)
-    BATT_PERC_OFF = 101
+    BATT_PERC_OFF = 10 if LEON else 3
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
