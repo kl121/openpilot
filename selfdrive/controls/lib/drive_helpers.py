@@ -11,10 +11,11 @@ V_CRUISE_DELTA = int(kegman.conf['CruiseDelta'])
 V_CRUISE_ENABLE_MIN = int(kegman.conf['CruiseEnableMin'])
 clip(V_CRUISE_DELTA, 2, 16)
 clip(V_CRUISE_ENABLE_MIN, 1, 80)
+MPC_N = 16
+CAR_ROTATION_RADIUS = 0.0
 
 class MPC_COST_LAT:
   PATH = 1.0
-  LANE = 3.0
   HEADING = 1.0
   STEER_RATE = 1.0
 
