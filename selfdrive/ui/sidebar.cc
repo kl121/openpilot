@@ -30,6 +30,14 @@ static void draw_network_strength(UIState *s) {
   ui_draw_image(s, {58, 196, 176, 27}, util::string_format("network_%d", img_idx).c_str(), 1.0f);
 }
 
+static void draw_battery_icon(UIState *s) {
+  const char *battery_img = s->scene.deviceState.getBatteryStatus() == "Charging" ? "battery_charging" : "battery";
+  const Rect rect = {160, 255, 76, 36};
+  ui_fill_rect(s->vg, {rect.x + 6, rect.y + 5,
+              int((rect.w - 19) * s->scene.deviceState.getBatteryPercent() * 0.01), rect.h - 11}, COLOR_WHITE);
+  ui_draw_image(s, rect, battery_img, 1.0f);
+}
+
 static void draw_network_type(UIState *s) {
   static std::map<cereal::DeviceState::NetworkType, const char *> network_type_map = {
       {cereal::DeviceState::NetworkType::NONE, "--"},
@@ -47,6 +55,9 @@ static void draw_network_type(UIState *s) {
   nvgFontFace(s->vg, "sans-regular");
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
   nvgTextBox(s->vg, network_x, network_y, network_w, network_type ? network_type : "--", NULL);
+
+  std::string ip = s->scene.deviceState.getWifiIpAddress();
+  nvgTextBox(s->vg, network_x-20, network_y + 60, 250, ip.c_str(), NULL);
 }
 
 static void draw_metric(UIState *s, const char *label_str, const char *value_str, const int severity, const int y_offset, const char *message_str) {
@@ -137,6 +148,7 @@ void ui_draw_sidebar(UIState *s) {
   draw_home_button(s);
   draw_network_strength(s);
   draw_network_type(s);
+  draw_battery_icon(s);
   draw_temp_metric(s);
   draw_panda_metric(s);
   draw_connectivity(s);
