@@ -102,7 +102,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     manualSteeringRequiredBlinkersOn @95;
     autoHoldActivated @96;
     gpsMalfunction @97;
-    startupOneplus @82;
+
     processNotRunning @98;
     dashcamMode @99;
 
