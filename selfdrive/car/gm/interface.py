@@ -105,7 +105,7 @@ class CarInterface(CarInterfaceBase):
     cruiseEnabled = self.CS.pcm_acc_status != AccState.OFF
     ret.cruiseState.enabled = cruiseEnabled or self.CS.main_on
 
-    ret.readdistancelines = self.CS.follow_level
+    # ret.readdistancelines = self.CS.follow_level
 
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons and self.CS.prev_cruise_buttons != CruiseButtons.INIT:
       be = car.CarState.ButtonEvent.new_message()
@@ -134,10 +134,10 @@ class CarInterface(CarInterfaceBase):
     if cruiseEnabled and self.CS.lka_button and self.CS.lka_button != self.CS.prev_lka_button:
       self.CS.lkMode = not self.CS.lkMode
 
-    if self.CS.distance_button and self.CS.distance_button != self.CS.prev_distance_button:
-       self.CS.follow_level -= 1
-       if self.CS.follow_level < 1:
-         self.CS.follow_level = 3
+    # if self.CS.distance_button and self.CS.distance_button != self.CS.prev_distance_button:
+    #    self.CS.follow_level -= 1
+    #    if self.CS.follow_level < 1:
+    #      self.CS.follow_level = 3
 
     events = self.create_common_events(ret)
 
