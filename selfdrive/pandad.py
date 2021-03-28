@@ -11,6 +11,7 @@ from selfdrive.hardware.tici.pins import GPIO_HUB_RST_N, GPIO_STM_BOOT0, GPIO_ST
 from selfdrive.swaglog import cloudlog
 
 PANDA_FW_FN = os.path.join(PANDA_BASEDIR, "board", "obj", "panda.bin.signed")
+PANDA_FW_FN_UNSIGNED = os.path.join(PANDA_BASEDIR, "board", "obj", "panda.bin")
 
 
 def set_panda_power(power=True):
@@ -30,7 +31,12 @@ def set_panda_power(power=True):
 
 def get_expected_signature():
   try:
-    return Panda.get_signature_from_firmware(PANDA_FW_FN)
+    if os.path.exists(PANDA_FW_FN):
+      return Panda.get_signature_from_firmware(PANDA_FW_FN)
+    elif os.path.exists(PANDA_FW_FN_UNSIGNED):
+      return Panda.get_signature_from_firmware(PANDA_FW_FN_UNSIGNED)
+    else:
+      return b""
   except Exception:
     cloudlog.exception("Error computing expected signature")
     return b""
