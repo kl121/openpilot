@@ -19,7 +19,7 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 4.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=None):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(),has_relay=True, car_fw=None):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
     ret.carName = "gm"
     ret.safetyModel = car.CarParams.SafetyModel.gm
@@ -102,6 +102,10 @@ class CarInterface(CarInterfaceBase):
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
     buttonEvents = []
+    cruiseEnabled = self.CS.pcm_acc_status != AccState.OFF
+    ret.cruiseState.enabled = cruiseEnabled or self.CS.main_on
+
+    ret.readdistancelines = self.CS.follow_level
 
     if self.CS.cruise_buttons != self.CS.prev_cruise_buttons and self.CS.prev_cruise_buttons != CruiseButtons.INIT:
       be = car.CarState.ButtonEvent.new_message()
@@ -156,17 +160,10 @@ class CarInterface(CarInterfaceBase):
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
 
+
     ret.events = events.to_msg()
 
-    # copy back carState packet to CS
-    self.CS.out = ret.as_reader()
-
-    return self.CS.out
-
-
-
-
-    events = self.create_common_events(ret, pcm_enable=False)
+    events = self.create_common_events(ret)
 
     if ret.vEgo < self.CP.minEnableSpeed:
       events.add(EventName.belowEngageSpeed)
@@ -193,7 +190,11 @@ class CarInterface(CarInterfaceBase):
     # copy back carState packet to CS
     self.CS.out = ret.as_reader()
 
+
     return self.CS.out
+
+
+
 
   def apply(self, c):
     hud_v_cruise = c.hudControl.setSpeed

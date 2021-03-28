@@ -45,12 +45,12 @@ class CarInterfaceBase():
     raise NotImplementedError
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=None):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=True, car_fw=None):
     raise NotImplementedError
 
   # returns a set of default params to avoid repetition in car specific params
   @staticmethod
-  def get_std_params(candidate, fingerprint, has_relay):
+  def get_std_params(candidate, fingerprint, has_relay=True):
     ret = car.CarParams.new_message()
     ret.carFingerprint = candidate
     ret.isPandaBlack = has_relay
@@ -91,7 +91,7 @@ class CarInterfaceBase():
   def apply(self, c):
     raise NotImplementedError
 
-  def create_common_events(self, cs_out, extra_gears=[], gas_resume_speed=-1):  # pylint: disable=dangerous-default-value
+  def create_common_events(self, cs_out, extra_gears=[], gas_resume_speed=-1, pcm_enable=True):  # pylint: disable=dangerous-default-value
     events = Events()
 
     if cs_out.doorOpen:
