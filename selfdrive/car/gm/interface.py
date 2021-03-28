@@ -12,9 +12,7 @@ EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
 
-    eA = a_ego - a_target
-    valuesA = [1.0, 0.1]
-    bpA = [0.3, 1.1]
+
 
   @staticmethod
   def compute_gb(accel, speed):
