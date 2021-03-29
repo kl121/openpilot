@@ -296,7 +296,7 @@ void Panda::can_send(capnp::List<cereal::CanData>::Reader can_data_list){
     memcpy(&send[i*4+2], can_data.begin(), can_data.size());
   }
 
-  usb_bulk_write(3, (unsigned char*)send.data(), send.size(), 0);
+  usb_bulk_write(3, (unsigned char*)send.data(), send.size(), 5);
 }
 
 int Panda::can_receive(kj::Array<capnp::word>& out_buf) {
