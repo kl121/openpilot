@@ -226,47 +226,47 @@ class InvalidSubFunctioneError(Exception):
   pass
 
 _negative_response_codes = {
-  0x00: 'positive response',
-  0x10: 'general reject',
-  0x11: 'service not supported',
-  0x12: 'sub-function not supported',
-  0x13: 'incorrect message length or invalid format',
-  0x14: 'response too long',
-  0x21: 'busy repeat request',
-  0x22: 'conditions not correct',
-  0x24: 'request sequence error',
-  0x25: 'no response from subnet component',
-  0x26: 'failure prevents execution of requested action',
-  0x31: 'request out of range',
-  0x33: 'security access denied',
-  0x35: 'invalid key',
-  0x36: 'exceed numebr of attempts',
-  0x37: 'required time delay not expired',
-  0x70: 'upload download not accepted',
-  0x71: 'transfer data suspended',
-  0x72: 'general programming failure',
-  0x73: 'wrong block sequence counter',
-  0x78: 'request correctly received - response pending',
-  0x7e: 'sub-function not supported in active session',
-  0x7f: 'service not supported in active session',
-  0x81: 'rpm too high',
-  0x82: 'rpm too low',
-  0x83: 'engine is running',
-  0x84: 'engine is not running',
-  0x85: 'engine run time too low',
-  0x86: 'temperature too high',
-  0x87: 'temperature too low',
-  0x88: 'vehicle speed too high',
-  0x89: 'vehicle speed too low',
-  0x8a: 'throttle/pedal too high',
-  0x8b: 'throttle/pedal too low',
-  0x8c: 'transmission not in neutral',
-  0x8d: 'transmission not in gear',
-  0x8f: 'brake switch(es) not closed',
-  0x90: 'shifter lever not in park',
-  0x91: 'torque converter clutch locked',
-  0x92: 'voltage too high',
-  0x93: 'voltage too low',
+    0x00: 'positive response',
+    0x10: 'general reject',
+    0x11: 'service not supported',
+    0x12: 'sub-function not supported',
+    0x13: 'incorrect message length or invalid format',
+    0x14: 'response too long',
+    0x21: 'busy repeat request',
+    0x22: 'conditions not correct',
+    0x24: 'request sequence error',
+    0x25: 'no response from subnet component',
+    0x26: 'failure prevents execution of requested action',
+    0x31: 'request out of range',
+    0x33: 'security access denied',
+    0x35: 'invalid key',
+    0x36: 'exceed numebr of attempts',
+    0x37: 'required time delay not expired',
+    0x70: 'upload download not accepted',
+    0x71: 'transfer data suspended',
+    0x72: 'general programming failure',
+    0x73: 'wrong block sequence counter',
+    0x78: 'request correctly received - response pending',
+    0x7e: 'sub-function not supported in active session',
+    0x7f: 'service not supported in active session',
+    0x81: 'rpm too high',
+    0x82: 'rpm too low',
+    0x83: 'engine is running',
+    0x84: 'engine is not running',
+    0x85: 'engine run time too low',
+    0x86: 'temperature too high',
+    0x87: 'temperature too low',
+    0x88: 'vehicle speed too high',
+    0x89: 'vehicle speed too low',
+    0x8a: 'throttle/pedal too high',
+    0x8b: 'throttle/pedal too low',
+    0x8c: 'transmission not in neutral',
+    0x8d: 'transmission not in gear',
+    0x8f: 'brake switch(es) not closed',
+    0x90: 'shifter lever not in park',
+    0x91: 'torque converter clutch locked',
+    0x92: 'voltage too high',
+    0x93: 'voltage too low',
 }
 
 
@@ -747,32 +747,32 @@ class UdsClient():
     data = b''
     # dtc_status_mask_type
     if dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_DTC_BY_STATUS_MASK or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_BY_STATUS_MASK or \
-            dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_BY_STATUS_MASK or \
-            dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_MIRROR_MEMORY_DTC_BY_STATUS_MASK or \
-            dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_EMISSIONS_RELATED_OBD_DTC_BY_STATUS_MASK or \
-            dtc_report_type == DTC_REPORT_TYPE.EMISSIONS_RELATED_OBD_DTC_BY_STATUS_MASK:
-      data += bytes([dtc_status_mask_type])
+       dtc_report_type == DTC_REPORT_TYPE.DTC_BY_STATUS_MASK or \
+       dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_BY_STATUS_MASK or \
+       dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_MIRROR_MEMORY_DTC_BY_STATUS_MASK or \
+       dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_EMISSIONS_RELATED_OBD_DTC_BY_STATUS_MASK or \
+       dtc_report_type == DTC_REPORT_TYPE.EMISSIONS_RELATED_OBD_DTC_BY_STATUS_MASK:
+       data += bytes([dtc_status_mask_type])
     # dtc_mask_record
     if dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_IDENTIFICATION or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_DTC_NUMBER or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER or \
-            dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER or \
-            dtc_report_type == DTC_REPORT_TYPE.SEVERITY_INFORMATION_OF_DTC:
-      data += struct.pack('!I', dtc_mask_record)[1:]  # 3 bytes
+       dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_DTC_NUMBER or \
+       dtc_report_type == DTC_REPORT_TYPE.DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER or \
+       dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER or \
+       dtc_report_type == DTC_REPORT_TYPE.SEVERITY_INFORMATION_OF_DTC:
+       data += struct.pack('!I', dtc_mask_record)[1:]  # 3 bytes
     # dtc_snapshot_record_num
     if dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_IDENTIFICATION or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_DTC_NUMBER or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_RECORD_NUMBER:
-      data += bytes([dtc_snapshot_record_num])
+       dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_DTC_NUMBER or \
+       dtc_report_type == DTC_REPORT_TYPE.DTC_SNAPSHOT_RECORD_BY_RECORD_NUMBER:
+       data += bytes([dtc_snapshot_record_num])
     # dtc_extended_record_num
     if dtc_report_type == DTC_REPORT_TYPE.DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER or \
-            dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER:
-      data += bytes([dtc_extended_record_num])
+       dtc_report_type == DTC_REPORT_TYPE.MIRROR_MEMORY_DTC_EXTENDED_DATA_RECORD_BY_DTC_NUMBER:
+       data += bytes([dtc_extended_record_num])
     # dtc_severity_mask_type
     if dtc_report_type == DTC_REPORT_TYPE.NUMBER_OF_DTC_BY_SEVERITY_MASK_RECORD or \
-            dtc_report_type == DTC_REPORT_TYPE.DTC_BY_SEVERITY_MASK_RECORD:
-      data += bytes([dtc_severity_mask_type, dtc_status_mask_type])
+       dtc_report_type == DTC_REPORT_TYPE.DTC_BY_SEVERITY_MASK_RECORD:
+       data += bytes([dtc_severity_mask_type, dtc_status_mask_type])
 
     resp = self._uds_request(SERVICE_TYPE.READ_DTC_INFORMATION, subfunction=dtc_report_type, data=data)
 
