@@ -26,6 +26,9 @@ class CarInterfaceBase():
     self.frame = 0
     self.low_speed_alert = False
 
+    ####added by jc01rho
+    self.initial_pcmEnable =True
+
     if CarState is not None:
       self.CS = CarState(CP)
       self.cp = self.CS.get_can_parser(CP)
@@ -126,6 +129,11 @@ class CarInterfaceBase():
       events.add(EventName.pcmEnable)
     elif not cs_out.cruiseState.enabled:
       events.add(EventName.pcmDisable)
+
+    #Added by jc01rho inspired by JangPoo
+    if self.initial_pcmEnable and cs_out.cruiseState.enabled and cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 2 :
+      events.add(EventName.pcmEnable)
+      self.initial_pcmEnable = False
 
     return events
 
