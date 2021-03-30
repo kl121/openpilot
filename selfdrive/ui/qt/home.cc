@@ -153,7 +153,7 @@ void OffroadHome::refresh() {
   // update alerts
 
   alerts_widget->refresh();
-  if (!alerts_widget->alerts.size() && !alerts_widget->updateAvailable) {
+  if (!alerts_widget->alertCount && !alerts_widget->updateAvailable) {
     emit closeAlerts();
     alert_notification->setVisible(false);
     return;
@@ -162,7 +162,7 @@ void OffroadHome::refresh() {
   if (alerts_widget->updateAvailable) {
     alert_notification->setText("UPDATE");
   } else {
-    int alerts = alerts_widget->alerts.size();
+    int alerts = alerts_widget->alertCount;
     alert_notification->setText(QString::number(alerts) + " ALERT" + (alerts == 1 ? "" : "S"));
   }
 
@@ -321,7 +321,7 @@ void GLWindow::paintGL() {
 
     double cur_draw_t = millis_since_boot();
     double dt = cur_draw_t - prev_draw_t;
-    if (dt > 66 && onroad){
+    if (dt > 66 && onroad && !ui_state.scene.driver_view) {
       // warn on sub 15fps
       LOGW("slow frame(%llu) time: %.2f", ui_state.sm->frame, dt);
     }
