@@ -9,6 +9,7 @@
 #include "common/visionimg.h"
 #include "ui.hpp"
 #include "paint.hpp"
+#include "dashcam.h"
 
 
 int write_param_float(float param, const char* param_name, bool persistent_param) {
@@ -71,6 +72,8 @@ void ui_init(UIState *s) {
   s->vipc_client_rear = new VisionIpcClient("camerad", VISION_STREAM_RGB_BACK, true);
   s->vipc_client_front = new VisionIpcClient("camerad", VISION_STREAM_RGB_FRONT, true);
   s->vipc_client = s->vipc_client_rear;
+
+  touch_init(&(s->touch));
 }
 
 static int get_path_length_idx(const cereal::ModelDataV2::XYZTData::Reader &line, const float path_height) {
@@ -150,6 +153,7 @@ static void update_sockets(UIState *s) {
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();
+	  s->scene.brakeLights = scene.car_state.getBrakeLights();
   }
   if (sm.updated("radarState")) {
     std::optional<cereal::ModelDataV2::XYZTData::Reader> line;
@@ -157,6 +161,10 @@ static void update_sockets(UIState *s) {
       line = sm["modelV2"].getModelV2().getPosition();
     }
     update_leads(s, sm["radarState"].getRadarState(), line);
+    auto radar_state = sm["radarState"].getRadarState();
+    s->scene.lead_v_rel = radar_state.getLeadOne().getVRel();
+    s->scene.lead_d_rel = radar_state.getLeadOne().getDRel();
+    s->scene.lead_status = radar_state.getLeadOne().getStatus();
   }
   if (sm.updated("liveCalibration")) {
     scene.world_objects_visible = true;
@@ -349,10 +357,21 @@ static void update_status(UIState *s) {
   started_prev = s->scene.started;
 }
 
+static void update_extras(UIState *s) {
+#if UI_FEATURE_DASHCAM
+   if(s->awake && s->status != STATUS_OFFROAD) {
+        int touch_x = -1, touch_y = -1;
+        int touched = touch_poll(&(s->touch), &touch_x, &touch_y, 0);
+        dashcam(s, touch_x, touch_y);
+   }
+#endif
+}
+
 void ui_update(UIState *s) {
   update_params(s);
   update_sockets(s);
   update_status(s);
   update_alert(s);
   update_vision(s);
+  update_extras(s);
 }

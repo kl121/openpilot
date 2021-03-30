@@ -14,30 +14,11 @@ class CarState(CarStateBase):
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
     self.shifter_values = can_define.dv["ECMPRDNL"]["PRNDL"]
 
-    self.prev_distance_button = 0
-    self.prev_lka_button = 0
-    self.lka_button = 0
-    self.distance_button = 0
-    self.follow_level = 2
-    self.lkMode = True
-    self.autoHold = False
-    self.autoHoldActive = False
-    self.autoHoldActivated = False
-    self.regenPaddlePressed = 0
-    self.cruiseMain = False
-    # self.engineRPM = 0
-    self.HVBvoltage = 0
-    self.HVBcurrent = 0
-
   def update(self, pt_cp):
     ret = car.CarState.new_message()
 
     self.prev_cruise_buttons = self.cruise_buttons
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]['ACCButtons']
-    self.prev_lka_button = self.lka_button
-    self.lka_button = pt_cp.vl["ASCMSteeringButton"]["LKAButton"]
-    self.prev_distance_button = self.distance_button
-    self.distance_button = pt_cp.vl["ASCMSteeringButton"]["DistanceButton"]
 
     ret.wheelSpeeds.fl = pt_cp.vl["EBCMWheelSpdFront"]['FLWheelSpd'] * CV.KPH_TO_MS
     ret.wheelSpeeds.fr = pt_cp.vl["EBCMWheelSpdFront"]['FRWheelSpd'] * CV.KPH_TO_MS
@@ -45,9 +26,8 @@ class CarState(CarStateBase):
     ret.wheelSpeeds.rr = pt_cp.vl["EBCMWheelSpdRear"]['RRWheelSpd'] * CV.KPH_TO_MS
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.vEgoRaw < 0.01
+    ret.standstill = ret.vEgoRaw < 0.1
 
-    ret.steeringAngleDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL"]['PRNDL'], None))
     ret.brake = pt_cp.vl["EBCMBrakePedalPosition"]['BrakePedalPosition'] / 0xd0
     # Brake pedal's potentiometer returns near-zero reading even when pedal is not pressed.
@@ -60,7 +40,7 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
     ret.steeringRateDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelRate']
     ret.steeringTorque = pt_cp.vl["PSCMStatus"]['LKADriverAppldTrq']
-    ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATotalTorqueDelivered']
+    ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATorqueDelivered']
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
     # 0 inactive, 1 active, 2 temporarily limited, 3 failed
@@ -80,45 +60,23 @@ class CarState(CarStateBase):
 
     self.park_brake = pt_cp.vl["EPBStatus"]['EPBClosed']
     self.main_on = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
-    ret.cruiseState.available = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.espDisabled = pt_cp.vl["ESPStatus"]['TractionControlOn'] != 1
     self.pcm_acc_status = pt_cp.vl["ASCMActiveCruiseControlStatus"]['ACCCmdActive']
-
-    ret.brakePressed = ret.brake > 1e-5
-    # Regen braking is braking
-    self.regen_pressed = False
-    if self.car_fingerprint == CAR.VOLT or self.car_fingerprint == CAR.BOLT:
-      self.regen_pressed = bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
-
-    brake_light_enable = False
-    if self.car_fingerprint == CAR.BOLT:
-      if ret.aEgo < -1.3:
-        brake_light_enable = True
-
-    ret.brakeLights = ret.brakePressed or self.regen_pressed or brake_light_enable
-
     ret.cruiseState.available = self.main_on
     ret.cruiseState.enabled = self.pcm_acc_status != 0
     ret.cruiseState.standstill = False
 
-    # 0 - inactive, 1 - active, 2 - temporary limited, 3 - failed
-    self.lkas_status = pt_cp.vl["PSCMStatus"]['LKATorqueDeliveredStatus']
-    ret.steerWarning = self.lkas_status not in [0, 1]
-
-    ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATorqueDelivered']
-    #self.engineRPM = pt_cp.vl["ECMEngineStatus"]['EngineRPM']
-
+    ret.brakePressed = ret.brake > 1e-5
+    self.regen_pressed = False
+    if self.car_fingerprint == CAR.VOLT or self.car_fingerprint == CAR.BOLT:
+      self.regen_pressed or bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+    brake_light_enable = False
     if self.car_fingerprint == CAR.BOLT:
-      self.HVBvoltage = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryVoltage']
-      self.HVBcurrent = pt_cp.vl["BECMBatteryVoltageCurrent"]['HVBatteryCurrent']
-      # ret.hvBpower = self.HVBvoltage * self.HVBcurrent / 1000   #kW
+      if ret.aEgo < -1.3:
+        brake_light_enable = True
+    ret.brakeLights = ret.brakePressed or self.regen_pressed or brake_light_enable
 
     return ret
-
-
-  def get_follow_level(self):
-    return self.follow_level
-
 
   @staticmethod
   def get_can_parser(CP):
@@ -149,9 +107,6 @@ class CarState(CarStateBase):
       ("TractionControlOn", "ESPStatus", 0),
       ("EPBClosed", "EPBStatus", 0),
       ("CruiseMainOn", "ECMEngineStatus", 0),
-      ("LKAButton", "ASCMSteeringButton", 0),
-      ("DistanceButton", "ASCMSteeringButton", 0),
-      ("LKATorqueDelivered", "PSCMStatus", 0),
       ("ACCCmdActive", "ASCMActiveCruiseControlStatus", 0),
       ("LKATotalTorqueDelivered", "PSCMStatus", 0),
     ]

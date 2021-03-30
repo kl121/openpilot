@@ -98,14 +98,9 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     deviceFalling @90;
     fanMalfunction @91;
     cameraMalfunction @92;
-    manualSteeringRequired @94;
-    manualSteeringRequiredBlinkersOn @95;
-    autoHoldActivated @96;
-    gpsMalfunction @97;
-
-    processNotRunning @98;
-    dashcamMode @99;
-
+    gpsMalfunction @94;
+    processNotRunning @95;
+    dashcamMode @96;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -121,7 +116,6 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     invalidGiraffeToyotaDEPRECATED @60;
     internetConnectivityNeededDEPRECATED @61;
     whitePandaUnsupportedDEPRECATED @81;
-	startupGreyPanda @100;
     commIssueWarningDEPRECATED @83;
     focusRecoverActiveDEPRECATED @86;
     neosUpdateRequiredDEPRECATED @88;
@@ -177,21 +171,14 @@ struct CarState {
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
-  distanceToggle @37 :Float32;
-  laneDepartureToggle @38 :Bool;
 
   # lock info
   doorOpen @24 :Bool;
   seatbeltUnlatched @25 :Bool;
   canValid @26 :Bool;
 
-
   # clutch (manual transmission only)
   clutchPressed @28 :Bool;
-
-  readdistancelines @39 :Float32;
-  lkMode @40 :Bool;
-  engineRPM @41 :Float32;
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
@@ -199,10 +186,6 @@ struct CarState {
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
-
-  # autoHold Active Information
-  autoHoldActivated @42 :Bool;
-  # hvBpower @43 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -343,7 +326,6 @@ struct CarControl {
       seatbeltUnbuckled @5;
       speedTooHigh @6;
       ldw @7;
-      autoHoldActivated @8;
     }
 
     enum AudibleAlert {

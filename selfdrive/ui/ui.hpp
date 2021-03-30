@@ -28,6 +28,7 @@
 #include "sound.hpp"
 #include "visionipc.h"
 #include "visionipc_client.h"
+#include "common/touch.h"
 
 #define COLOR_BLACK nvgRGBA(0, 0, 0, 255)
 #define COLOR_BLACK_ALPHA(x) nvgRGBA(0, 0, 0, x)
@@ -131,6 +132,11 @@ typedef struct UIScene {
   float light_sensor, accel_sensor, gyro_sensor;
   bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
+
+  //Add-on
+  bool brakeLights;
+  int lead_status;
+  float lead_d_rel, lead_v_rel;
 } UIScene;
 
 typedef struct UIState {
@@ -167,6 +173,8 @@ typedef struct UIState {
   bool sidebar_collapsed;
   Rect video_rect, viz_rect;
   float car_space_transform[6];
+
+  TouchState touch;
 } UIState;
 
 void ui_init(UIState *s);

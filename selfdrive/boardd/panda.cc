@@ -58,7 +58,7 @@ Panda::Panda(){
     (hw_type == cereal::PandaState::PandaType::UNO) ||
     (hw_type == cereal::PandaState::PandaType::DOS);
   has_rtc = (hw_type == cereal::PandaState::PandaType::UNO) ||
-    (hw_type == cereal::PandaState::PandaType::DOS);
+            (hw_type == cereal::PandaState::PandaType::DOS);
 
   return;
 

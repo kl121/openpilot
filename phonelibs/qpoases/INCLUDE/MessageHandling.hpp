@@ -30,7 +30,7 @@
  *	Declaration of the MessageHandling class including global return values.
  */
 
- 
+
 #ifndef QPOASES_MESSAGEHANDLING_HPP
 #define QPOASES_MESSAGEHANDLING_HPP
 
