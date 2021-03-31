@@ -134,7 +134,7 @@ class CarInterfaceBase():
     if self.initial_pcmEnable and cs_out.cruiseState.enabled and cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 2 :
       events.add(EventName.pcmEnable)
       self.initial_pcmEnable = False
-    if not self.initial_pcmEnable  and   cs_out.gearShifter == GearShifter.park:
+    if not self.initial_pcmEnable  and  ( cs_out.gearShifter == GearShifter.park or cs_out.gearShifter == GearShifter.reverse ) :
       self.initial_pcmEnable = True
 
 

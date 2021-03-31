@@ -20,7 +20,7 @@ procs = [
   NativeProcess("ui", "selfdrive/ui", ["./ui"], persistent=True, watchdog_max_dt=(10 if TICI else None)),
   PythonProcess("calibrationd", "selfdrive.locationd.calibrationd"),
   PythonProcess("controlsd", "selfdrive.controls.controlsd"),
-  # PythonProcess("deleter", "selfdrive.loggerd.deleter", persistent=True),
+  PythonProcess("deleter", "selfdrive.loggerd.deleter", persistent=True),
   PythonProcess("dmonitoringd", "selfdrive.monitoring.dmonitoringd", enabled=(not PC or WEBCAM), driverview=True),
   PythonProcess("locationd", "selfdrive.locationd.locationd"),
   # PythonProcess("logmessaged", "selfdrive.logmessaged", persistent=True),
@@ -31,9 +31,9 @@ procs = [
   PythonProcess("rtshield", "selfdrive.rtshield", enabled=EON),
   PythonProcess("thermald", "selfdrive.thermald.thermald", persistent=True),
   PythonProcess("timezoned", "selfdrive.timezoned", enabled=TICI, persistent=True),
-  # PythonProcess("tombstoned", "selfdrive.tombstoned", enabled=not PC, persistent=True),
+  PythonProcess("tombstoned", "selfdrive.tombstoned", enabled=not PC, persistent=True),
   PythonProcess("updated", "selfdrive.updated", enabled=not PC, persistent=True),
-  # PythonProcess("uploader", "selfdrive.loggerd.uploader", persistent=True),
+  PythonProcess("uploader", "selfdrive.loggerd.uploader", persistent=True),
 ]
 
 managed_processes = {p.name: p for p in procs}
