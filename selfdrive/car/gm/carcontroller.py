@@ -1,8 +1,8 @@
 from cereal import car
 from common.realtime import DT_CTRL
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip
 from selfdrive.config import Conversions as CV
-from selfdrive.car import apply_std_steer_torque_limits
+from selfdrive.car import apply_std_steer_torque_limits, create_gas_command
 from selfdrive.car.gm import gmcan
 from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -46,8 +46,15 @@ class CarController():
 
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
-    # GAS/BRAKE - Delete
+    # Pedal
+    if enabled and CS.CP.enableGasInterceptor:
+      #pedal_threshold = 0.15625
+      #final_pedal = (1 - pedal_threshold) * actuators.gas
+      final_pedal = clip(actuators.gas, 0., 1.)
 
+      if (frame % 4) == 0:
+        idx = (frame // 4) % 4
+        can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
     if (frame % 4) == 0:
