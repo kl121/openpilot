@@ -100,6 +100,32 @@ static void draw_metric(UIState *s, const char *label_str, const char *value_str
   }
 }
 
+static void draw_metric2(UIState *s, const int severity, const int y_offset, const char *message_str) {
+  NVGcolor status_color;
+
+  if (severity == 0) {
+    status_color = COLOR_WHITE;
+  } else if (severity == 1) {
+    status_color = COLOR_YELLOW;
+  } else if (severity > 1) {
+    status_color = COLOR_RED;
+  }
+
+  const Rect rect = {30, 338 + y_offset, 240, message_str ? strchr(message_str, '\n') ? 124 : 100 : 148};
+  ui_draw_rect(s->vg, rect, severity > 0 ? COLOR_WHITE : COLOR_WHITE_ALPHA(85), 2, 20.);
+
+  nvgBeginPath(s->vg);
+  nvgRoundedRectVarying(s->vg, rect.x + 6, rect.y + 6, 18, rect.h - 12, 25, 0, 0, 25);
+  nvgFillColor(s->vg, status_color);
+  nvgFill(s->vg);
+
+  nvgFillColor(s->vg, COLOR_WHITE);
+    nvgFontSize(s->vg, 78);
+    nvgFontFace(s->vg, "sans-bold");
+    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+    nvgTextBox(s->vg, rect.x + 35, rect.y + (strchr(message_str, '\n') ? 40 : 50), rect.w - 50, message_str, NULL);
+}
+
 static void draw_temp_metric(UIState *s) {
   static std::map<cereal::DeviceState::ThermalStatus, const int> temp_severity_map = {
       {cereal::DeviceState::ThermalStatus::GREEN, 0},
@@ -107,7 +133,7 @@ static void draw_temp_metric(UIState *s) {
       {cereal::DeviceState::ThermalStatus::RED, 2},
       {cereal::DeviceState::ThermalStatus::DANGER, 3}};
   std::string temp_val = std::to_string((int)s->scene.deviceState.getAmbientTempC()) + "°C";
-  draw_metric(s, "TEMP", temp_val.c_str(), temp_severity_map[s->scene.deviceState.getThermalStatus()], 0, NULL);
+  draw_metric2(s, temp_severity_map[s->scene.deviceState.getThermalStatus()], 45, temp_val.c_str());
 }
 
 static void draw_panda_metric(UIState *s) {
