@@ -13,7 +13,7 @@
 Spinner::Spinner(QWidget *parent) {
   QGridLayout *main_layout = new QGridLayout();
   main_layout->setSpacing(0);
-  main_layout->setContentsMargins(200, 200, 200, 200);
+  main_layout->setContentsMargins(0, 0, 0, 200);
 
   comma = new QLabel();
   comma->setPixmap(QPixmap("../assets/img_spinner_comma.png").scaled(spinner_size, Qt::KeepAspectRatio, Qt::SmoothTransformation));

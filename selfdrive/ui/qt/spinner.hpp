@@ -9,6 +9,7 @@
 
 constexpr int spinner_fps = 30;
 constexpr QSize spinner_size = QSize(360, 360);
+constexpr QSize spinner_size = QSize(1920, 1080);
 
 class Spinner : public QWidget {
   Q_OBJECT
