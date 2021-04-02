@@ -24,7 +24,8 @@ const int GM_DRIVER_TORQUE_FACTOR = 4;
 const int GM_MAX_GAS = 3072;
 const int GM_MAX_REGEN = 1404;
 const int GM_MAX_BRAKE = 350;
-const CanMsg GM_TX_MSGS[] = {{384, 0, 4}, {1033, 0, 7}, {1034, 0, 7}, {715, 0, 8}, {880, 0, 6},  // pt bus
+const int GM_GAS_INTERCEPTOR_THRESHOLD = 458;  // (610 + 306.25) / 2ratio between offset and gain from dbc file
+const CanMsg GM_TX_MSGS[] = {{384, 0, 4}, {1033, 0, 7}, {1034, 0, 7}, {715, 0, 8}, {880, 0, 6}, {512, 0}, // pt bus
                              {161, 1, 7}, {774, 1, 8}, {776, 1, 7}, {784, 1, 2},   // obs bus
                              {789, 2, 5},  // ch bus
                              {0x104c006c, 3, 3}, {0x10400060, 3, 5}};  // gmlan
@@ -110,9 +111,6 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
         case 5:  // main on
           controls_allowed = 1;
           break;
-        case 6:  // cancel
-          controls_allowed = 1;
-          break;
         default:
           break;  // any other button is irrelevant
       }
@@ -181,6 +179,15 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     }
     if (brake > GM_MAX_BRAKE) {
       tx = 0;
+    }
+  }
+
+  // GAS: Interceptor safety check
+  if (addr == 0x200) {
+    if (!current_controls_allowed) {
+      if (GET_BYTE(to_send, 0) || GET_BYTE(to_send, 1)) {
+        tx = 0;
+      }
     }
   }
 
