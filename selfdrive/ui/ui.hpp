@@ -1,4 +1,5 @@
 #pragma once
+#define UI_FEATURE_DASHCAM 1
 #include "messaging.hpp"
 
 #ifdef __APPLE__
