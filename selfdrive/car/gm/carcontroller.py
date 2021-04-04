@@ -47,7 +47,7 @@ class CarController():
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
     # Pedal
-    if enabled and CS.CP.enableGasInterceptor:
+    if enabled and CS.CP.enableGasInterceptor and CS.out.adaptiveCruise:
       #pedal_threshold = 0.15625
       #final_pedal = (1 - pedal_threshold) * actuators.gas
       final_pedal = clip(actuators.gas, 0., 1.)

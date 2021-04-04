@@ -142,7 +142,7 @@ class CarInterface(CarInterfaceBase):
 
     ret = self.CS.update(self.cp)
 
-    ret.cruiseState.enabled = self.CS.main_on
+    ret.cruiseState.enabled = self.CS.main_on or ret.adaptiveCruise
     ret.canValid = self.cp.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
@@ -179,12 +179,20 @@ class CarInterface(CarInterfaceBase):
       events.add(car.CarEvent.EventName.belowSteerSpeed)
 
     # handle button presses
-    for b in ret.buttonEvents:
-      # do enable on both accel and decel buttons
-      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-        events.add(EventName.buttonEnable)
+    if not self.CS.main_on:
+      for b in ret.buttonEvents:
+        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptiveCruise_prev:
+          ret.adaptiveCruise = True
+          #events.add(EventName.buttonEnable)
+        elif (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptiveCruise_prev:
+          ret.adaptiveCruise = False
+          #events.add(EventName.buttonCancel)
+    elif self.CS.main_on or ret.brakePressed:
+      ret.adaptiveCruise = False
 
     ret.events = events.to_msg()
+
+    self.CS.adaptiveCruise_prev = ret.adaptiveCruise
 
     # copy back carState packet to CS
     self.CS.out = ret.as_reader()

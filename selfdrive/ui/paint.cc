@@ -184,6 +184,25 @@ static void ui_draw_world(UIState *s) {
   nvgResetScissor(s->vg);
 }
 
+static void ui_draw_vision_maxspeed(UIState *s) {
+  const int SET_SPEED_NA = 255;
+  float maxspeed = s->scene.controls_state.getVCruise();
+  const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA;
+  if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
+
+  const Rect rect = {s->viz_rect.x + (bdr_s * 2), int(s->viz_rect.y + (bdr_s * 1.5)), 184, 202};
+  ui_fill_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 30.);
+  ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
+
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+  ui_draw_text(s, rect.centerX(), 148, "MAX", 26 * 2.5, COLOR_WHITE_ALPHA(is_cruise_set ? 200 : 100), "sans-regular");
+  if (is_cruise_set) {
+    const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
+    ui_draw_text(s, rect.centerX(), 242, maxspeed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
+  } else {
+    ui_draw_text(s, rect.centerX(), 242, "--", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
+  }
+}
 
 static void ui_draw_vision_speed(UIState *s) {
   const float speed = std::max(0.0, s->scene.car_state.getVEgo() * (s->scene.is_metric ? 3.6 : 2.2369363));
@@ -274,6 +293,7 @@ static void ui_draw_vision_header(UIState *s) {
 
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
+  ui_draw_vision_maxspeed(s);
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }
