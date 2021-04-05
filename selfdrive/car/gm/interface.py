@@ -181,7 +181,7 @@ class CarInterface(CarInterfaceBase):
     # handle button presses
     if not self.CS.main_on:
       for b in ret.buttonEvents:
-        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptiveCruise_prev:
+        if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptiveCruise_prev:
           ret.adaptiveCruise = True
           #events.add(EventName.buttonEnable)
         elif (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptiveCruise_prev:
