@@ -80,7 +80,7 @@ class CarState(CarStateBase):
         ret.adaptiveCruise = True
       if self.cruise_buttons == 6 and self.adaptiveCruise_prev:
         ret.adaptiveCruise = False
-    elif self.main_on or ret.brakePressed:
+    else:
       ret.adaptiveCruise = False
 
     ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
