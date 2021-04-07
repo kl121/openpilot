@@ -83,6 +83,9 @@ keys = {
   b"Offroad_UpdateFailed": [TxType.CLEAR_ON_MANAGER_START],
   b"Offroad_HardwareUnsupported": [TxType.CLEAR_ON_MANAGER_START],
   b"ForcePowerDown": [TxType.CLEAR_ON_MANAGER_START],
+
+  b"AutoLaneChangeEnabled": [TxType.PERSISTENT],
+
 }
 
 def ensure_bytes(v):

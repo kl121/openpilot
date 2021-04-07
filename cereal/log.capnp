@@ -789,6 +789,8 @@ struct LateralPlan @0xe1e9318e2ae8b51e {
   curvatureRate @23 :Float32;
   rawCurvature @24 :Float32;
   rawCurvatureRate @25 :Float32;
+  autoLaneChangeEnabled @26 :Bool;
+  autoLaneChangeTimer @27 :Int8;
 
   enum Desire {
     none @0;
