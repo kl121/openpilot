@@ -75,12 +75,12 @@ class CarState(CarStateBase):
         brake_light_enable = True
     ret.brakeLights = ret.brakePressed or ret.regenPressed or brake_light_enable
 
-    if not self.main_on:
-      if self.cruise_buttons == 3 and not self.adaptiveCruise_prev:
+    if self.cruise_buttons != self.prev_cruise_buttons and not self.main_on:
+      if self.cruise_buttons == CruiseButtons.DECEL_SET and not self.adaptiveCruise_prev:
         ret.adaptiveCruise = True
-      if self.cruise_buttons == 6 and self.adaptiveCruise_prev:
+      elif self.cruise_buttons == CruiseButtons.CANCEL and self.adaptiveCruise_prev:
         ret.adaptiveCruise = False
-    else:
+    elif self.main_on:
       ret.adaptiveCruise = False
 
     ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
