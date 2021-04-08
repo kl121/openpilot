@@ -80,8 +80,8 @@ class CarState(CarStateBase):
         ret.adaptiveCruise = True
       elif self.cruise_buttons == CruiseButtons.CANCEL and self.adaptiveCruise_prev:
         ret.adaptiveCruise = False
-    elif self.main_on:
-      ret.adaptiveCruise = False
+    #elif self.main_on:
+      #ret.adaptiveCruise = False
 
     ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
     self.adaptiveCruise_prev = ret.adaptiveCruise
