@@ -13,11 +13,11 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
     self.shifter_values = can_define.dv["ECMPRDNL"]["PRNDL"]
-    self.adaptiveCruise_prev = False
+    self.adaptive_Cruise = False
 
   def update(self, pt_cp):
     ret = car.CarState.new_message()
-
+    ret.adaptiveCruise = self.adaptive_Cruise
     self.prev_cruise_buttons = self.cruise_buttons
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]['ACCButtons']
     ret.wheelSpeeds.fl = pt_cp.vl["EBCMWheelSpdFront"]['FLWheelSpd'] * CV.KPH_TO_MS
@@ -75,16 +75,17 @@ class CarState(CarStateBase):
         brake_light_enable = True
     ret.brakeLights = ret.brakePressed or ret.regenPressed or brake_light_enable
 
-    if self.cruise_buttons != self.prev_cruise_buttons and not self.main_on:
-      if self.cruise_buttons == CruiseButtons.DECEL_SET and not self.adaptiveCruise_prev:
-        ret.adaptiveCruise = True
-      elif self.cruise_buttons == CruiseButtons.CANCEL and self.adaptiveCruise_prev:
-        ret.adaptiveCruise = False
+    #if self.cruise_buttons != self.prev_cruise_buttons and not self.main_on:
+    #  if self.cruise_buttons == CruiseButtons.DECEL_SET and not self.adaptiveCruise_prev:
+    #    ret.adaptiveCruise = True
+    #  elif self.cruise_buttons == CruiseButtons.CANCEL and self.adaptiveCruise_prev:
+    #    ret.adaptiveCruise = False
     #elif self.main_on:
-      #ret.adaptiveCruise = False
+    #  ret.adaptiveCruise = False
 
     ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
-    self.adaptiveCruise_prev = ret.adaptiveCruise
+    #self.adaptiveCruise_prev = ret.adaptiveCruise
+    print(ret.adaptiveCruise, self.adaptive_Cruise)
 
     return ret
 
