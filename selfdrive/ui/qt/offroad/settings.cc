@@ -247,12 +247,12 @@ QWidget * community_panel() {
                                             "warnings: it is beta, be careful!!",
                                             "../assets/offroad/icon_road.png"
                                               ));
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("SccSmootherEnabled",
-//                                            "Enable SCC Smoother",
-//                                            "WARNING: Use at your own risk !!, It automatically adjusts the maximum set speed to help with slight smooth acceleration/deceleration. When this mode is activated, you can switch to stock mode using the CANCEL or GAP button on the vehicle steering wheel.",
-//                                            "../assets/offroad/icon_road.png"
-//                                            ));
+  toggles_list->addWidget(horizontal_line());
+  toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
+                                            "Enable Prebuilt File",
+                                            "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
+                                            "../assets/offroad/icon_checkmark.png"
+                                            ));
 //  toggles_list->addWidget(horizontal_line());
 //  toggles_list->addWidget(new ParamControl("SccSmootherSlowOnCurves",
 //                                            "Enable Slow On Curves",
