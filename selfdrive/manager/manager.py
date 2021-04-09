@@ -41,6 +41,7 @@ def manager_init():
     ("IsDriverViewEnabled", "0"),
 
     ("AutoLaneChangeEnabled", "0"),
+    ("PrebuiltEnabled", "0"),
   ]
 
   if params.get("RecordFrontLock", encoding='utf-8') == "1":

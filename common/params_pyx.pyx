@@ -85,6 +85,7 @@ keys = {
   b"ForcePowerDown": [TxType.CLEAR_ON_MANAGER_START],
 
   b"AutoLaneChangeEnabled": [TxType.PERSISTENT],
+  b"PrebuiltEnabled": [TxType.PERSISTENT],
 
 }
 
