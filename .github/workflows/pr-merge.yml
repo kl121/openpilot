@@ -6,7 +6,6 @@ name: automatic merge
 # events but only for the 075-kegman-lqr branch
 on:
   pull_request:
-    branches: [ 075-kegman-lqr, 075-kegman-lqr-develop, 081-kegman, 081-kegman-develop ]
     types: [edited, opened, synchronize, reopened,labeled]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
