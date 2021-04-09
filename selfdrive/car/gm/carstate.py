@@ -14,6 +14,7 @@ class CarState(CarStateBase):
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
     self.shifter_values = can_define.dv["ECMPRDNL"]["PRNDL"]
     self.adaptive_Cruise = False
+    self.enable_lkas = True
 
   def update(self, pt_cp):
     ret = car.CarState.new_message()

@@ -61,8 +61,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4 # wild guess
       #PID tunning not to prevent oversteer
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 41.0], [10., 41.0]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.13, 0.24], [0.01, 0.02]]
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 25.0], [10., 25.0]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.3], [0.015, 0.025]]
       ret.lateralTuning.pid.kdBP = [0.]
       ret.lateralTuning.pid.kdV = [0.3]  #corolla from shane fork : 0.725
       ret.lateralTuning.pid.kf = 0.000045
@@ -183,12 +183,19 @@ class CarInterface(CarInterfaceBase):
       for b in ret.buttonEvents:
         if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = True
+          events.add(EventName.buttonEnable)
+        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = False
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = False
+          self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
     elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
+      self.CS.enable_lkas = True
 
     ret.events = events.to_msg()
 
