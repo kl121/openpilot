@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <fstream>
+#include <filesystem>
 
 #include "common/params.h"
 #include "toggle.hpp"
@@ -134,14 +136,14 @@ class PrebuiltParamControl : public ParamControl {
 
     } else {
     //remove prebuilt
-        std::remove("/data/openpilot/prebuilt");
+        std::filesystem::remove("/data/openpilot/prebuilt");
     }
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](int state) {
 //      char value = state ? '1' : '0';
         if (state == 1 ) {
             std::ofstream output("/data/openpilot/prebuilt");
         } else {
-            std::remove("/data/openpilot/prebuilt");
+            std::filesystem::remove("/data/openpilot/prebuilt");
         }
 //      Params().write_db_value(param.toStdString().c_str(), &value, 1);
     });
