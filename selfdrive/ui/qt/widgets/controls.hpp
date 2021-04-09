@@ -145,4 +145,4 @@ class PrebuiltParamControl : public ParamControl {
 //      Params().write_db_value(param.toStdString().c_str(), &value, 1);
     });
  }
-}
+};
