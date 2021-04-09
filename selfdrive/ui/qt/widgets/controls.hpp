@@ -124,7 +124,8 @@ class PrebuiltParamControl : public ParamControl {
 
 
 
- public PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
+ public:
+  PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
                 ParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr)
  {
     if (Params().read_db_bool(param.toStdString().c_str())) {
