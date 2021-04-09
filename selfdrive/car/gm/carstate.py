@@ -69,7 +69,7 @@ class CarState(CarStateBase):
     ret.brakePressed = ret.brake > 1e-5
     self.regen_pressed = False
     if self.car_fingerprint == CAR.VOLT or self.car_fingerprint == CAR.BOLT:
-      self.regen_pressed or bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
+      self.regen_pressed = bool(pt_cp.vl["EBCMRegenPaddle"]['RegenPaddle'])
     brake_light_enable = False
     if self.car_fingerprint == CAR.BOLT:
       if ret.aEgo < -1.3:
