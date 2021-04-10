@@ -23,9 +23,9 @@ class LanePlanner:
     self.ll_x = np.zeros((TRAJECTORY_SIZE,))
     self.lll_y = np.zeros((TRAJECTORY_SIZE,))
     self.rll_y = np.zeros((TRAJECTORY_SIZE,))
-    self.lane_width_estimate = 3.7
+    self.lane_width_estimate = 3.5
     self.lane_width_certainty = 1.0
-    self.lane_width = 3.7
+    self.lane_width = 3.5
 
     self.lll_prob = 0.
     self.rll_prob = 0.
