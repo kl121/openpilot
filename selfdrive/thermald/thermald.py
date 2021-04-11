@@ -66,7 +66,6 @@ def setup_eon_fan():
   os.system("echo 2 > /sys/module/dwc3_msm/parameters/otg_switch")
 
 
-
 def set_eon_fan(val):
   global last_eon_fan_val
 
@@ -331,7 +330,7 @@ def thermald_thread():
       set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", False)
 
     #startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get("DisableUpdates") == b"1"
-    startup_conditions["not_uninstalling"] = not params.get("DoUninstall") == b"1"
+    startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 
     panda_signature = params.get("PandaFirmware")
@@ -342,8 +341,8 @@ def thermald_thread():
     startup_conditions["free_space"] = msg.deviceState.freeSpacePercent > 2
     startup_conditions["completed_training"] = params.get("CompletedTrainingVersion") == training_version or \
                                                (current_branch in ['dashcam', 'dashcam-staging'])
-    startup_conditions["not_driver_view"] = not params.get("IsDriverViewEnabled") == b"1"
-    startup_conditions["not_taking_snapshot"] = not params.get("IsTakingSnapshot") == b"1"
+    startup_conditions["not_driver_view"] = not params.get_bool("IsDriverViewEnabled")
+    startup_conditions["not_taking_snapshot"] = not params.get_bool("IsTakingSnapshot")
     # if any CPU gets above 107 or the battery gets above 63, kill all processes
     # controls will warn with CPU above 95 or battery above 60
     startup_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
@@ -366,7 +365,7 @@ def thermald_thread():
         cloudlog.event("Startup blocked", startup_conditions=startup_conditions)
 
       if should_start_prev or (count == 0):
-        params.put("IsOffroad", "1")
+        params.put_bool("IsOffroad", True)
         if TICI and DISABLE_LTE_ONROAD:
           os.system("sudo systemctl start --no-block lte")
 
@@ -410,8 +409,8 @@ def thermald_thread():
     should_start_prev = should_start
     startup_conditions_prev = startup_conditions.copy()
 
-    # report to server once per minute
-    if (count % int(60. / DT_TRML)) == 0:
+    # report to server once every 10 minutes
+    if (count % int(600. / DT_TRML)) == 0:
       location = messaging.recv_sock(location_sock)
       cloudlog.event("STATUS_PACKET",
                      count=count,
