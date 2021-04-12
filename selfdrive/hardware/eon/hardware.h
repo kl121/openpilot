@@ -12,8 +12,8 @@
 
 class HardwareEon : public HardwareNone {
 public:
-  static constexpr float MAX_VOLUME = 1.0;
-  static constexpr float MIN_VOLUME = 0.5;
+  static constexpr float MAX_VOLUME = 0.85;
+  static constexpr float MIN_VOLUME = 0.45;
 
   static std::string get_os_version() {
     return "NEOS " + util::read_file("/VERSION");
@@ -24,6 +24,9 @@ public:
   static void set_brightness(int percent) {
     std::ofstream brightness_control("/sys/class/leds/lcd-backlight/brightness");
     if (brightness_control.is_open()) {
+      if (percent > 30 ) {
+        percent -= 15;
+      }
       brightness_control << (int)(percent * (255/100.)) << "\n";
       brightness_control.close();
     }
