@@ -29,8 +29,8 @@ class CarInterface(CarInterfaceBase):
     # Have to go to read_only if ASCM is online (ACC-enabled cars),
     # or camera is on powertrain bus (LKA cars without ACC).
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
-    ret.openpilotLongitudinalControl = ret.enableCamera
     ret.enableGasInterceptor = 0x201 in fingerprint[0]
+    ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
     tire_stiffness_factor = 0.444  # not optimized yet
 
     # Start with a baseline lateral tuning for all GM vehicles. Override tuning as needed in each model section below.
