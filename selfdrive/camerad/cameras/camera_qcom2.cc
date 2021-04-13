@@ -515,7 +515,7 @@ void enqueue_req_multi(struct CameraState *s, int start, int n, bool dp) {
 static void camera_init(MultiCameraState *multi_cam_state, VisionIpcServer * v, CameraState *s, int camera_id, int camera_num, unsigned int fps, cl_device_id device_id, cl_context ctx, VisionStreamType rgb_type, VisionStreamType yuv_type) {
   LOGD("camera init %d", camera_num);
   s->multi_cam_state = multi_cam_state;
-  assert(camera_id < std::size(cameras_supported));
+  assert(camera_id < ARRAYSIZE(cameras_supported));
   s->ci = cameras_supported[camera_id];
   assert(s->ci.frame_width != 0);
 

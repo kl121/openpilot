@@ -94,7 +94,7 @@ private:
   CameraState *camera_state;
   cl_kernel krnl_debayer;
 
-  std::unique_ptr<Rgb2Yuv> rgb2yuv;
+  RGBToYUVState rgb_to_yuv_state;
 
   VisionStreamType rgb_type, yuv_type;
 

@@ -573,7 +573,7 @@ int main() {
   LOG("set priority returns %d", err);
 
 #ifdef QCOM2
-  err = set_core_affinity(4);
+  err = set_core_affinity(7);
 #else
   err = set_core_affinity(3);
 #endif
