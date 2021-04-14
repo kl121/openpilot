@@ -19,6 +19,7 @@ class CarState(CarStateBase):
   def update(self, pt_cp):
     ret = car.CarState.new_message()
     ret.adaptiveCruise = self.adaptive_Cruise
+    ret.lkasEnable = self.enable_lkas
     self.prev_cruise_buttons = self.cruise_buttons
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]['ACCButtons']
     ret.wheelSpeeds.fl = pt_cp.vl["EBCMWheelSpdFront"]['FLWheelSpd'] * CV.KPH_TO_MS
