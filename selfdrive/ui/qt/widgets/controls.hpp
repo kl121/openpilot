@@ -138,7 +138,7 @@ class PrebuiltParamControl : public ParamControl {
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
                 ParamControl(param, title,desc, icon, parent)
  {
-    if (Params().read_db_bool(param.toStdString().c_str())) {
+    if (Params().getBool(param.toStdString().c_str())) {
     //touch prebuilt
         std::ofstream output("/data/openpilot/prebuilt");
 
