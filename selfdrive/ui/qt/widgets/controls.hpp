@@ -5,6 +5,8 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <fstream>
+#include <cstdio>
 
 #include "common/params.h"
 #include "toggle.hpp"
@@ -125,4 +127,34 @@ public:
       Params().putBool(param.toStdString().c_str(), (bool)state);
     });
   }
+};
+
+//prebuilt param control class, this only uses for prebuilt toggle button.
+class PrebuiltParamControl : public ParamControl {
+  Q_OBJECT
+
+
+
+ public:
+  PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
+                ParamControl(param, title,desc, icon, parent)
+ {
+    if (Params().read_db_bool(param.toStdString().c_str())) {
+    //touch prebuilt
+        std::ofstream output("/data/openpilot/prebuilt");
+
+    } else {
+    //remove prebuilt
+        std::remove("/data/openpilot/prebuilt");
+    }
+    QObject::connect(this, &ToggleControl::toggleFlipped, [=](int state) {
+//      char value = state ? '1' : '0';
+        if (state == 1 ) {
+            std::ofstream output("/data/openpilot/prebuilt");
+        } else {
+            std::remove("/data/openpilot/prebuilt");
+        }
+//      Params().write_db_value(param.toStdString().c_str(), &value, 1);
+    });
+ }
 };

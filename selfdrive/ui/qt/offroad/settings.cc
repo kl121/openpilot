@@ -254,6 +254,21 @@ QWidget * network_panel(QWidget * parent) {
   return w;
 }
 
+QWidget * community_panel() {
+  QVBoxLayout *toggles_list = new QVBoxLayout();
+
+  toggles_list->addWidget(horizontal_line());
+  toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
+                                            "Enable Prebuilt File",
+                                            "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
+                                            "../assets/offroad/icon_checkmark.png"
+                                            ));
+
+  QWidget *widget = new QWidget;
+  widget->setLayout(toggles_list);
+  return widget;
+}
+
 SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   // setup two main layouts
   QVBoxLayout *sidebar_layout = new QVBoxLayout();
@@ -287,6 +302,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {"Network", network_panel(this)},
     {"Toggles", new TogglesPanel(this)},
     {"Developer", new DeveloperPanel()},
+    {"Community", community_panel()},
   };
 
   sidebar_layout->addSpacing(45);
