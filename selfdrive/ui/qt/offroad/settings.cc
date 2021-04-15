@@ -108,7 +108,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   reset_layout->addWidget(reset_calib_btn);
   QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?")) {
-          Params().delete_db_value("CalibrationParams");
+          Params().remove("CalibrationParams");
       }
   });
 
