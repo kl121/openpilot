@@ -146,12 +146,6 @@ int main(int argc, char **argv) {
   wide_camera = Params().getBool("EnableWideCamera");
 #endif
 
-  bool wide_camera = false;
-
-#ifdef QCOM2
-  wide_camera = Params().getBool("EnableWideCamera");
-#endif
-
   // start calibration thread
   std::thread thread = std::thread(calibration_thread, wide_camera);
 
