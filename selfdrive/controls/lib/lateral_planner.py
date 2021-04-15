@@ -1,6 +1,7 @@
 import os
 import math
 import numpy as np
+from common.params import Params
 from common.realtime import sec_since_boot, DT_MDL
 from common.numpy_fast import interp, clip
 from selfdrive.swaglog import cloudlog

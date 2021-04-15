@@ -26,7 +26,7 @@ jobs:
       - name: Python Linter
         uses: ricardochaves/python-lint@v1.3.0
         with:
-          python-root-list: selfdrive/car/gm/** selfdrive/car/*.py
+          python-root-list: selfdrive/car/gm/** selfdrive/car/*.py selfdrive/controls/lib/lateral_planner.py
           use-pylint: true
           use-pycodestyle: false
           use-flake8: true
