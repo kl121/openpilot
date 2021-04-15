@@ -271,7 +271,7 @@ QWidget * network_panel(QWidget * parent) {
 }
 QWidget * community_panel() {
   QVBoxLayout *toggles_list = new QVBoxLayout();
-  //toggles_list->setMargin(50);
+  toggles_list->setMargin(50);
 
 //  toggles_list->addWidget(new ParamControl("LongControlEnabled",
 //                                            "Enable HKG Long Control",
