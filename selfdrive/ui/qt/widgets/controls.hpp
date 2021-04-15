@@ -139,22 +139,25 @@ class PrebuiltParamControl : public ParamControl {
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
                 ParamControl(param, title,desc, icon, parent)
  {
-    if (Params().read_db_bool(param.toStdString().c_str())) {
-    //touch prebuilt
+    //when instantiate object
+    if (Params().getBool(param.toStdString().c_str())) {
+        //touch prebuilt
         std::ofstream output("/data/openpilot/prebuilt");
 
     } else {
-    //remove prebuilt
+        //rm prebuilt
         std::remove("/data/openpilot/prebuilt");
     }
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](int state) {
-//      char value = state ? '1' : '0';
+        ////when user toggled
         if (state == 1 ) {
+            //touch prebuilt
             std::ofstream output("/data/openpilot/prebuilt");
         } else {
+        //rm prebuilt
             std::remove("/data/openpilot/prebuilt");
         }
-//      Params().write_db_value(param.toStdString().c_str(), &value, 1);
+
     });
  }
 };
