@@ -2,7 +2,7 @@ name: Comma master-ci puller
 on:
   schedule:
     - cron: '10 23 * * *'
-on: workflow_dispatch
+  workflow_dispatch:
 
 
 
