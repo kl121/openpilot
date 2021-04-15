@@ -175,6 +175,7 @@ typedef struct UIState {
   float car_space_transform[6];
   bool wide_camera;
   float zoom;
+  TouchState touch;
 } UIState;
 
 void ui_init(UIState *s);
