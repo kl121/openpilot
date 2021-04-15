@@ -2,7 +2,12 @@ name: Comma master-ci puller
 on:
   schedule:
     - cron: '* * * * *'
-
+  workflow_dispatch:
+    inputs:
+        name:
+          description: 'Person to greet'
+          required: true
+          default: 'Mona the Octocat'
 
 jobs:
   merge-upstream:
