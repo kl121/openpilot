@@ -15,6 +15,10 @@ AddOption('--test',
           action='store_true',
           help='build test files')
 
+AddOption('--kaitai',
+          action='store_true',
+          help='Regenerate kaitai struct parsers')
+
 AddOption('--asan',
           action='store_true',
           help='turn on ASAN')
@@ -182,6 +186,7 @@ env = Environment(
     "#phonelibs/snpe/include",
     "#phonelibs/nanovg",
     "#phonelibs/qrcode",
+    "#phonelibs",
     "#selfdrive/boardd",
     "#selfdrive/common",
     "#selfdrive/camerad",
@@ -331,12 +336,8 @@ if GetOption("clazy"):
   qt_env['CXX'] = 'clazy'
   qt_env['ENV']['CLAZY_IGNORE_DIRS'] = qt_dirs[0]
   qt_env['ENV']['CLAZY_CHECKS'] = ','.join(checks)
-Export('qt_env')
 
-
-# still needed for apks
-zmq = 'zmq'
-Export('env', 'arch', 'real_arch', 'zmq', 'SHARED', 'USE_WEBCAM', 'QCOM_REPLAY')
+Export('env', 'qt_env', 'arch', 'real_arch', 'SHARED', 'USE_WEBCAM', 'QCOM_REPLAY')
 
 # cereal and messaging are shared with the system
 SConscript(['cereal/SConscript'])

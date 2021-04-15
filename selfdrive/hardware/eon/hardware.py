@@ -352,6 +352,7 @@ class Android(HardwareBase):
   def set_screen_brightness(self, percentage):
     with open("/sys/class/leds/lcd-backlight/brightness", "w") as f:
       f.write(str(int(percentage * 2.55)))
+
 	  
   def get_ip_address(self):
     try:
@@ -360,3 +361,8 @@ class Android(HardwareBase):
       return pattern.search(wlan).group(1)
     except Exception:
       return "--"
+
+
+  def set_power_save(self, enabled):
+    pass
+
