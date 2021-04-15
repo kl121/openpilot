@@ -1,4 +1,4 @@
-name: Scheduled Merge Remote Action
+name: Comma master-ci puller
 on:
   schedule:
     - cron: '* * * * *'
