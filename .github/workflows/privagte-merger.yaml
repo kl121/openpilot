@@ -1,0 +1,53 @@
+# This action mirrors a github repo into a similar bitbucket one
+# requires the bb workspace/repo and the github org/repo to match
+# e.g.  groatnz/demo
+
+# Assumptions
+# - you have a bitbucket workspace matching your github org name 
+# so we can map   github.com/org/repo -> bitbucket.org/workspace/repo
+
+# Setup for an existing repo
+# 1 create an empty repo in bit bucket with the same name, no readme or anything
+
+name: Synch BitBucket via SSH
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - '*-develop'
+# uncomment to enable trigger only on push to specific branches e.g. master
+
+# set the BB_REPO variable to the destination bitbucket workspace name
+
+
+jobs:
+  syncbb:
+    name: Synch from Github to Bitbucket using SSH
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull the github repo
+        uses: actions/checkout@v2
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.BITBUCKET_PRIVATE }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.BITBUCKET_KNOWN_HOSTS }}
+          config:
+            Host bitbucket.org
+            User git
+            IdentityFile ~/.ssh/id_rsa
+            IdentitiesOnly yes
+
+      - uses: franzdiebold/github-env-vars-action@v1.0.0
+      - name: sync with bitbucket
+        run: |
+          cd $GITHUB_WORKSPACE
+          git remote add private ${{ secrets.BITBUCKET_REPO_URL }}
+          git fetch --all --prune
+          git checkout -t private/develop
+          git merge ${GITHUB_REF##*/}
+          git push
+     
