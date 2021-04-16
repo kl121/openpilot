@@ -422,8 +422,8 @@ class Controls:
 
       if len(lat_plan.dPathPoints):
         # Check if we deviated from the path
-        left_deviation = actuators.steer > 0 and lat_plan.dPathPoints[0] < -0.125
-        right_deviation = actuators.steer < 0 and lat_plan.dPathPoints[0] > 0.125
+        left_deviation = actuators.steer > 0 and lat_plan.dPathPoints[0] < -0.140
+        right_deviation = actuators.steer < 0 and lat_plan.dPathPoints[0] > 0.140
 
         if left_deviation or right_deviation:
           self.events.add(EventName.steerSaturated)
