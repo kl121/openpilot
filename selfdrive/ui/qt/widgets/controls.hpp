@@ -123,8 +123,8 @@ public:
     if (Params().getBool(param.toStdString().c_str())) {
       toggle.togglePosition();
     }
-    QObject::connect(this, &ToggleControl::toggleFlipped, [=](int state) {
-      Params().putBool(param.toStdString().c_str(), (bool)state);
+    QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
+      Params().putBool(param.toStdString().c_str(), state);
     });
   }
 };
@@ -146,9 +146,9 @@ class PrebuiltParamControl : public ParamControl {
     //remove prebuilt
         std::remove("/data/openpilot/prebuilt");
     }
-    QObject::connect(this, &ToggleControl::toggleFlipped, [=](int state) {
+    QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
 //      char value = state ? '1' : '0';
-        if (state == 1 ) {
+        if (state ) {
             std::ofstream output("/data/openpilot/prebuilt");
         } else {
             std::remove("/data/openpilot/prebuilt");
