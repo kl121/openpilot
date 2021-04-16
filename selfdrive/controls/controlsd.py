@@ -45,7 +45,7 @@ EventName = car.CarEvent.EventName
 
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None):
-    config_realtime_process(3, Priority.CTRL_HIGH)
+    config_realtime_process(4 if TICI else 3, Priority.CTRL_HIGH)
 
     # Setup sockets
     self.pm = pm
@@ -73,11 +73,12 @@ class Controls:
 
     # read params
     params = Params()
-    self.is_metric = params.get("IsMetric", encoding='utf8') == "1"
-    self.is_ldw_enabled = params.get("IsLdwEnabled", encoding='utf8') == "1"
-    community_feature_toggle = params.get("CommunityFeaturesToggle", encoding='utf8') == "1"
-    openpilot_enabled_toggle = params.get("OpenpilotEnabledToggle", encoding='utf8') == "1"
-    passive = params.get("Passive", encoding='utf8') == "1" or not openpilot_enabled_toggle
+    self.is_metric = params.get_bool("IsMetric")
+    self.is_ldw_enabled = params.get_bool("IsLdwEnabled")
+    self.enable_lte_onroad = params.get_bool("EnableLteOnroad")
+    community_feature_toggle = params.get_bool("CommunityFeaturesToggle")
+    openpilot_enabled_toggle = params.get_bool("OpenpilotEnabledToggle")
+    passive = params.get_bool("Passive") or not openpilot_enabled_toggle
 
     # detect sound card presence and ensure successful init
     sounds_available = HARDWARE.get_sound_card_online()
@@ -244,7 +245,8 @@ class Controls:
     # TODO: fix simulator
     if not SIMULATION:
       if not NOSENSOR:
-        if not self.sm['liveLocationKalman'].gpsOK and (self.distance_traveled > 1000) and not TICI:
+        if not self.sm['liveLocationKalman'].gpsOK and (self.distance_traveled > 1000) and \
+          (not TICI or self.enable_lte_onroad):
           # Not show in first 1 km to allow for driving out of garage. This event shows after 5 minutes
           self.events.add(EventName.noGps)
       if not self.sm.all_alive(['roadCameraState', 'driverCameraState']) and (self.sm.frame > 5 / DT_CTRL):

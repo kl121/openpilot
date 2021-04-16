@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import gc
 import numpy as np
 import sympy as sp
 import cereal.messaging as messaging
@@ -289,12 +290,14 @@ class Localizer():
 
 
 def locationd_thread(sm, pm, disabled_logs=None):
+  gc.disable()
+
   if disabled_logs is None:
     disabled_logs = []
 
   if sm is None:
     socks = ['gpsLocationExternal', 'sensorEvents', 'cameraOdometry', 'liveCalibration', 'carState']
-    sm = messaging.SubMaster(socks, ignore_alive=['gpsLocationExternal'])
+    sm = messaging.SubMaster(socks, ignore_alive=['gpsLocationExternal'], ignore_avg_freq=['sensorEvents'])
   if pm is None:
     pm = messaging.PubMaster(['liveLocationKalman'])
 
