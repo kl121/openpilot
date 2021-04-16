@@ -193,7 +193,7 @@ class CarInterface(CarInterfaceBase):
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
-    elif self.CS.main_on:
+    elif self.CS.main_on or ret.brakePressed:
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 
