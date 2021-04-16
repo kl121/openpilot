@@ -48,6 +48,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git remote add private ${{ secrets.BITBUCKET_REPO_URL }}
           git fetch --all --prune
+          git fetch  --unshallow origin
+          git fetch  --unshallow private
           git checkout -t private/develop
           git merge -s recursive -Xtheirs --allow-unrelated-histories ${GITHUB_REF##*/}
           git push
