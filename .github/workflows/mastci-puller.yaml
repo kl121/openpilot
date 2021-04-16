@@ -25,8 +25,9 @@ jobs:
           upstream_repository: commaai/openpilot
           upstream_branch: master-ci
           target_branch: master-ci
-          git_pull_args: -s recursive -Xtheirs                 # optional arg use, defaults to simple 'pull'
+          git_pull_args: '-s recursive -Xtheirs --allow-unrelated-histories'                # optional arg use, defaults to simple 'pull'
           github_token: ${{ secrets.GITHUB_TOKEN }}   # optional, for accessing repos that require authentication
+
 
 
       # Step 3: Display a message if 'sync' step had new commits (simple test)
