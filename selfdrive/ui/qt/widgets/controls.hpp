@@ -118,15 +118,17 @@ class ParamControl : public ToggleControl {
   Q_OBJECT
 
 public:
-  ParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) : ToggleControl(title, desc, icon,false, parent) {
-    // set initial state from param
-    if (Params().getBool(param.toStdString().c_str())) {
+  ParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) : ToggleControl(title, desc, icon, false, parent) {
+    if (params.getBool(param.toStdString().c_str())) {
       toggle.togglePosition();
     }
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
-      Params().putBool(param.toStdString().c_str(), state);
+      params.putBool(param.toStdString().c_str(), state);
     });
   }
+
+private:
+  Params params;
 };
 
 class PrebuiltParamControl : public ParamControl {
@@ -138,22 +140,17 @@ class PrebuiltParamControl : public ParamControl {
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
                 ParamControl(param, title,desc, icon, parent)
  {
-    if (Params().getBool(param.toStdString().c_str())) {
-    //touch prebuilt
-        std::ofstream output("/data/openpilot/prebuilt");
-
+    if (params.getBool(param.toStdString().c_str())) {
+        std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
     } else {
-    //remove prebuilt
-        std::remove("/data/openpilot/prebuilt");
+        std::remove("/data/openpilot/prebuilt"); //rm prebuilt
     }
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
-//      char value = state ? '1' : '0';
         if (state ) {
             std::ofstream output("/data/openpilot/prebuilt");
         } else {
             std::remove("/data/openpilot/prebuilt");
         }
-//      Params().write_db_value(param.toStdString().c_str(), &value, 1);
     });
  }
 };
