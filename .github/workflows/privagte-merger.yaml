@@ -47,6 +47,6 @@ jobs:
           git remote add private ${{ secrets.BITBUCKET_REPO_URL }}
           git fetch --all --prune
           git checkout -t private/develop
-          git merge ${GITHUB_REF##*/}
+          git merge -s recursive -Xtheirs --allow-unrelated-histories ${GITHUB_REF##*/}
           git push
      
