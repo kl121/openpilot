@@ -208,6 +208,7 @@ static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
     bus_fwd = bus_vehicle;       //Forward all messages except LAK message
     }
   }
+  return bus_fwd;
 }
 
 const safety_hooks gm_hooks = {
