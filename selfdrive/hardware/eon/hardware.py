@@ -353,7 +353,6 @@ class Android(HardwareBase):
     with open("/sys/class/leds/lcd-backlight/brightness", "w") as f:
       f.write(str(int(percentage * 2.55)))
 
-	  
   def get_ip_address(self):
     try:
       wlan = subprocess.check_output(["ifconfig", "wlan0"], encoding='utf8').strip()
@@ -362,7 +361,5 @@ class Android(HardwareBase):
     except Exception:
       return "--"
 
-
   def set_power_save(self, enabled):
     pass
-

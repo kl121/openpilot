@@ -8,8 +8,6 @@ import os
 import threading
 from common.basedir import BASEDIR
 
-#add comments for force rebuild - 2021-04-15
-
 cdef enum TxType:
   PERSISTENT = 1
   CLEAR_ON_MANAGER_START = 2

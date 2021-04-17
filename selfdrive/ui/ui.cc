@@ -9,7 +9,6 @@
 #include "common/visionimg.h"
 #include "ui.hpp"
 #include "paint.hpp"
-#include "dashcam.h"
 
 // Projects a point in car to space to the corresponding point in full frame
 // image space.
@@ -355,16 +354,6 @@ static void update_status(UIState *s) {
   started_prev = s->scene.started;
 }
 
-static void update_extras(UIState *s) {
-#if UI_FEATURE_DASHCAM
-   if(s->awake && s->status != STATUS_OFFROAD) {
-        int touch_x = -1, touch_y = -1;
-        int touched = touch_poll(&(s->touch), &touch_x, &touch_y, 0);
-        dashcam(s, touch_x, touch_y);
-   }
-#endif
-}
-
 void ui_update(UIState *s) {
   update_params(s);
   update_sockets(s);
@@ -372,5 +361,4 @@ void ui_update(UIState *s) {
   update_status(s);
   update_alert(s);
   update_vision(s);
-  update_extras(s);
 }
