@@ -200,7 +200,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
     const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
     ui_draw_text(s, rect.centerX(), 242, maxspeed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
   } else {
-    ui_draw_text(s, rect.centerX(), 242, "N/A", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
+    ui_draw_text(s, rect.centerX(), 242, "-", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
   }
 }
 
@@ -230,10 +230,10 @@ static void ui_draw_vision_face(UIState *s) {
 }
 
 static void ui_draw_vision_brake(UIState *s) {
-  const int radius = 96;
-  const int center_x = s->viz_rect.x + radius + (bdr_s * 2) + 255;
-  const int center_y = s->viz_rect.bottom() - footer_h / 2;
-  ui_draw_circle_image(s, center_x, center_y, radius, "brake_img", s->scene.brakeLights);
+  const int brake_size = 96;
+  const int brake_x = s->viz_rect.x + brake_size + (bdr_s * 2) + 255;
+  const int brake_y = s->viz_rect.bottom() - footer_h / 2;
+  ui_draw_circle_image(s, brake_x, brake_y, brake_size, "brake_img", s->scene.brakeLights);
 }
 
 static void ui_draw_driver_view(UIState *s) {
@@ -279,10 +279,10 @@ static void ui_draw_driver_view(UIState *s) {
   ui_draw_circle_image(s, center_x, center_y, face_radius, "driver_face", face_detected);
 
   //draw brake icon
-  const int brake_radius = 85;
-  const int x2 = rect.x + brake_radius + bdr_s * 2 + 200;
-  const int y2 = rect.bottom() - brake_radius - (bdr_s * 2.5);
-  ui_draw_circle_image(s, x2, y2, brake_radius, "brake_img", s->scene.brakeLights);
+  const int brake_size = 85;
+  const int x2 = rect.x + brake_size + bdr_s * 2 + 200;
+  const int y2 = rect.bottom() - brake_size - (bdr_s * 2.5);
+  ui_draw_circle_image(s, x2, y2, brake_size, "brake_img", s->scene.brakeLights);
 }
 
 static void ui_draw_vision_header(UIState *s) {
@@ -293,7 +293,9 @@ static void ui_draw_vision_header(UIState *s) {
 
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
-  ui_draw_vision_maxspeed(s);
+  if (s->scene.longitudinal_control) {
+    ui_draw_vision_maxspeed(s);
+  }
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }

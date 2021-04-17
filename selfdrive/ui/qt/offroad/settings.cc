@@ -49,11 +49,14 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "Use features from the open source community that are not maintained or supported by comma.ai and have not been confirmed to meet the standard safety model. These features include community supported cars and community supported hardware. Be extra cautious when using these features",
                                   "../assets/offroad/icon_shell.png",
                                   this));
+
+#ifndef QCOM2
   toggles.append(new ParamControl("IsUploadRawEnabled",
                                  "Upload Raw Logs",
                                  "Upload full logs and full resolution video by default while on WiFi. If not enabled, individual logs can be marked for upload at my.comma.ai/useradmin.",
                                  "../assets/offroad/icon_network.png",
                                  this));
+#endif
   ParamControl *record_toggle = new ParamControl("RecordFront",
                                                  "Record and Upload Driver Camera",
                                                 "Upload data from the driver facing camera and help improve the driver monitoring algorithm.",
@@ -275,22 +278,9 @@ QWidget * network_panel(QWidget * parent) {
 #endif
   return w;
 }
+
 QWidget * community_panel() {
   QVBoxLayout *toggles_list = new QVBoxLayout();
-  //toggles_list->setMargin(50);
-
-//  toggles_list->addWidget(new ParamControl("LongControlEnabled",
-//                                            "Enable HKG Long Control",
-//                                            "warnings: it is beta, be careful!! Openpilot will control the speed of your car",
-//                                            "../assets/offroad/icon_road.png"
-//                                              ));
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("MadModeEnabled",
-//                                            "Enable HKG MAD mode",
-//                                            "Only for Car without long control, Openpilot will engage when turn cruise control on",
-//                                            "../assets/offroad/icon_openpilot.png"
-//                                              ));
-//  toggles_list->addWidget(horizontal_line());
   toggles_list->addWidget(new ParamControl("AutoLaneChangeEnabled",
                                             "Enable Auto Lane Change Assist",
                                             "warnings: it is beta, be careful!!",
@@ -302,36 +292,11 @@ QWidget * community_panel() {
                                             "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
                                             "../assets/offroad/icon_checkmark.png"
                                             ));
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("SccSmootherSlowOnCurves",
-//                                            "Enable Slow On Curves",
-//                                            "",
-//                                            "../assets/offroad/icon_road.png"
-//                                            ));
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("SccSmootherSyncGasPressed",
-//                                            "Sync set speed on gas pressed",
-//                                            "",
-//                                            "../assets/offroad/icon_road.png"
-//                                            ));
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("SccSmootherSwitchGapOnly",
-//                                            "Switch only with cruise gap button",
-//                                            "",
-//                                            "../assets/offroad/icon_road.png"
-//                                            ));
-//                                            toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new ParamControl("ShowDebugUI",
-//                                            "Show Debug UI",
-//                                            "",
-//                                            "../assets/offroad/icon_shell.png"
-//                                            ));
 
   QWidget *widget = new QWidget;
   widget->setLayout(toggles_list);
   return widget;
 }
-
 
 SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   // setup two main layouts
