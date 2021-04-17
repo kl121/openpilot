@@ -197,15 +197,15 @@ static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   //int bus_chassis = 3; //vehicle Chassis can bus, Bolt EV doesn't need this can bus
   int addr = GET_ADDR(to_fwd);
 
-  if (bus_num == 0) {
-    bus_fwd = 1;       //Forward all messages from vehicle
+  if (bus_num == bus_vehicle) {
+    bus_fwd = bus_camera;       //Forward all messages from vehicle
   }
 
-  if (bus_num == 1) {
+  if (bus_num == bus_camera) {
     if (addr == MSG_TX_LKA) {
       bus_fwd = -1;    //Block LKA message from camera
     } else {
-    bus_fwd = 0;       //Forward all messages except LAK message
+    bus_fwd = bus_vehicle;       //Forward all messages except LAK message
     }
   }
 }
