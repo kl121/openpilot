@@ -91,9 +91,9 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     }
 
     // Gas Interceptor Check
-    if ((addr == MSG_TX_PEDAL_02) && (len == 6)) {
+    if (addr == MSG_TX_PEDAL_02) {
       gas_interceptor_detected = 1;
-      int gas_interceptor = GM_GET_INTERCEPTOR(to_push);
+      //int gas_interceptor = GM_GET_INTERCEPTOR(to_push);
       //gas_pressed = gas_interceptor > HONDA_GAS_INTERCEPTOR_THRESHOLD;
       //gas_interceptor_prev = gas_interceptor;
     }
