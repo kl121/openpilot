@@ -59,7 +59,7 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.60096
       ret.steerRatio = 15.2
       ret.steerRatioRear = 0.
-      ret.centerToFront = ret.wheelbase * 0.44
+      ret.centerToFront = ret.wheelbase * 0.49
       #PID tunning not to prevent oversteer
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
