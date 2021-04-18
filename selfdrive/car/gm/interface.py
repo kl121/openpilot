@@ -37,8 +37,8 @@ class CarInterface(CarInterfaceBase):
     #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
     #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
     #ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
-    ret.steerRateCost = 0.35 # def : 2.0
-    ret.steerActuatorDelay = 0.18  # def: 0.2 Default delay, not measured yet
+    ret.steerRateCost = 0.3 # def : 2.0
+    ret.steerActuatorDelay = 0.1  # def: 0.2 Default delay, not measured yet
 
       # initial engage unkown - copied from Volt. Stop and go unknown.
     ret.minEnableSpeed = -1
