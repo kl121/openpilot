@@ -4,11 +4,15 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.gm.values import CAR, Ecu, ECU_FINGERPRINT, CruiseButtons, AccState, FINGERPRINTS
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
+from common.params import Params
 
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
 class CarInterface(CarInterfaceBase):
+  def __init__(self, CP, CarController, CarState):
+    super().__init__(CP, CarController, CarState)
+    self.LQR_Enabled = Params().get('LQR_Selected') == b'1' #LQR Selection
 
   @staticmethod
   def compute_gb(accel, speed):
@@ -60,12 +64,23 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.2
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.49
-      #PID tunning not to prevent oversteer
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
-      ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [0.7]  #corolla from shane fork : 0.725
-      ret.lateralTuning.pid.kf = 0.000045
+      if self.LQR_Enabled:             #LQR setting values by 양민님
+        ret.lateralTuning.init('lqr')
+        ret.lateralTuning.lqr.scale = 1965.0
+        ret.lateralTuning.lqr.ki = 0.024
+        ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+        ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+        ret.lateralTuning.lqr.c = [1., 0.]
+        ret.lateralTuning.lqr.k = [-110., 451.]
+        ret.lateralTuning.lqr.l = [0.33, 0.318]
+        ret.lateralTuning.lqr.dcGain = 0.00225
+      else:
+        ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
+        ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
+        ret.lateralTuning.pid.kdBP = [0.]
+        ret.lateralTuning.pid.kdV = [0.7]  #corolla from shane fork : 0.725
+        ret.lateralTuning.pid.kf = 0.000045
+
       tire_stiffness_factor = 1.0
 
     elif candidate == CAR.MALIBU:
