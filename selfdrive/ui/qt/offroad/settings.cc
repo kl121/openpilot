@@ -57,6 +57,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                  "../assets/offroad/icon_network.png",
                                  this));
 #endif
+
   ParamControl *record_toggle = new ParamControl("RecordFront",
                                                  "Record and Upload Driver Camera",
                                                 "Upload data from the driver facing camera and help improve the driver monitoring algorithm.",
