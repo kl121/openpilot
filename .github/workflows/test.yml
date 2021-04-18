@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - '081-kegman-ci'
-      - '083-comma-untested'
+      - '083-release'
 
 
 env:
