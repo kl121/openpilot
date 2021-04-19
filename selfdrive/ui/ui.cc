@@ -72,7 +72,6 @@ void ui_init(UIState *s) {
   s->vipc_client_front = new VisionIpcClient("camerad", VISION_STREAM_RGB_FRONT, true);
   s->vipc_client = s->vipc_client_rear;
 
-  touch_init(&(s->touch));
 }
 
 static int get_path_length_idx(const cereal::ModelDataV2::XYZTData::Reader &line, const float path_height) {
