@@ -75,6 +75,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.lqr.l = [0.33, 0.318]
         ret.lateralTuning.lqr.dcGain = 0.00225
       else:
+        ret.lateralTuning.init('pid')
         ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
         ret.lateralTuning.pid.kdBP = [0.]
