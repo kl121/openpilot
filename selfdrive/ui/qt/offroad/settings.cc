@@ -189,7 +189,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton *reboot_btn = new QPushButton("Reboot");
+  QPushButton *reboot_btn = new QPushButton("재부팅");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
@@ -197,7 +197,16 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   });
 
-  QPushButton *poweroff_btn = new QPushButton("Power Off");
+  QPushButton *reboot_rmprebuilt_btn = new QPushButton("prebuilt 임시삭제 & 재부팅");
+  power_layout->addWidget(reboot_rmprebuilt_btn);
+  QObject::connect(reboot_btn, &QPushButton::released, [=]() {
+      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
+        Hardware::update_reboot();
+      }
+  });
+
+
+  QPushButton *poweroff_btn = new QPushButton("끄기");
   poweroff_btn->setStyleSheet("background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
