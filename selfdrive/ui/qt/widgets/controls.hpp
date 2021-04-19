@@ -9,6 +9,7 @@
 #include <cstdio>
 
 #include "common/params.h"
+#include "selfdrive/hardware/hw.h"
 #include "toggle.hpp"
 
 QFrame *horizontal_line(QWidget *parent = nullptr);
@@ -140,17 +141,19 @@ class PrebuiltParamControl : public ParamControl {
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
                 ParamControl(param, title,desc, icon, parent)
  {
+#ifdef QCOM
     if (params.getBool(param.toStdString().c_str())) {
-        std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
+      HardwareEon::touch_prebuilt();
     } else {
-        std::remove("/data/openpilot/prebuilt"); //rm prebuilt
+      HardwareEon::rm_prebuilt();
     }
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
         if (state ) {
-            std::ofstream output("/data/openpilot/prebuilt");
+          HardwareEon::touch_prebuilt();
         } else {
-            std::remove("/data/openpilot/prebuilt");
+          HardwareEon::rm_prebuilt();
         }
     });
+#endif
  }
 };
