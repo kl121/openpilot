@@ -61,7 +61,7 @@ OffroadAlert::OffroadAlert(QWidget* parent) : QFrame(parent) {
   rebootBtn.setFixedSize(600, 125);
   rebootBtn.setVisible(false);
   footer_layout->addWidget(&rebootBtn, 0, Qt::AlignBottom | Qt::AlignRight);
-  QObject::connect(&rebootBtn, &QPushButton::released, [=]() { Hardware::reboot(); });
+  QObject::connect(&rebootBtn, &QPushButton::released, [=]() { Hardware::update_reboot(); });
 
   setLayout(layout);
   setStyleSheet(R"(

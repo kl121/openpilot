@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <cstdio>
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
@@ -71,5 +72,17 @@ public:
   }
   static void launch_tethering() {
     launch_activity("com.android.settings/.TetherSettings");
+  }
+
+  // added jc01rho
+  static void touch_prebuilt() {
+    std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
+  }
+  static void rm_prebuilt() {
+    std::remove("/data/openpilot/prebuilt"); //rm prebuilt
+  }
+  static void update_reboot() {
+    rm_prebuilt();
+    reboot();
   }
 };
