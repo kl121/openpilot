@@ -38,7 +38,7 @@ class CarInterface(CarInterfaceBase):
     #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
     #ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
     ret.steerRateCost = 0.35 # def : 2.0
-    ret.steerActuatorDelay = 0.18  # def: 0.2 Default delay, not measured yet
+    ret.steerActuatorDelay = 0.15  # def: 0.2 Default delay, not measured yet
 
       # initial engage unkown - copied from Volt. Stop and go unknown.
     ret.minEnableSpeed = -1
@@ -82,7 +82,7 @@ class CarInterface(CarInterfaceBase):
     ret.stoppingControl = False
     ret.startAccel = 0.8
 
-    ret.steerLimitTimer = 1.25
+    ret.steerLimitTimer = 2.5
     ret.radarTimeStep = 0.0667  # GM radar runs at 15Hz instead of standard 20Hz
 
     return ret
