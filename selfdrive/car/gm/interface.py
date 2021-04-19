@@ -35,13 +35,8 @@ class CarInterface(CarInterfaceBase):
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
     ret.enableGasInterceptor = 0x201 in fingerprint[0]
     ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
-    tire_stiffness_factor = 0.444  # not optimized yet
 
     # Start with a baseline lateral tuning for all GM vehicles. Override tuning as needed in each model section below.
-    ret.minSteerSpeed = 7 * CV.MPH_TO_MS
-    ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
-    ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
     ret.steerRateCost = 1.0
     ret.steerActuatorDelay = 0.1  # Default delay, not measured yet
 
@@ -53,6 +48,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.7
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4  # wild guess
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet
 
     elif candidate == CAR.BOLT:
       # initial engage unkown - copied from Volt. Stop and go unknown.
@@ -92,6 +92,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.8
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4  # wild guess
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet
 
     elif candidate == CAR.HOLDEN_ASTRA:
       ret.mass = 1363. + STD_CARGO_KG
@@ -101,6 +106,11 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = 18 * CV.MPH_TO_MS
       ret.steerRatio = 15.7
       ret.steerRatioRear = 0.
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet
 
     elif candidate == CAR.ACADIA:
       ret.minEnableSpeed = -1.  # engage speed is decided by pcm
@@ -109,6 +119,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.4  # end to end is 13.46
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet
 
     elif candidate == CAR.BUICK_REGAL:
       ret.minEnableSpeed = 18 * CV.MPH_TO_MS
@@ -117,6 +132,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 14.4  # guess for tourx
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.4  # guess for tourx
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet
 
     elif candidate == CAR.CADILLAC_ATS:
       ret.minEnableSpeed = 18 * CV.MPH_TO_MS
@@ -125,6 +145,11 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 15.3
       ret.steerRatioRear = 0.
       ret.centerToFront = ret.wheelbase * 0.49
+      ret.minSteerSpeed = 7 * CV.MPH_TO_MS
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+      ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+      tire_stiffness_factor = 0.444  # not optimized yet 
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
