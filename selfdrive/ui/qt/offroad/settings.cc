@@ -274,11 +274,12 @@ QWidget * community_panel() {
                                             "../assets/offroad/icon_checkmark.png"
                                             ));
 
-  toggles_list->addWidget(new PrebuiltParamControl("LQR_Selected",
-                                            "Select LQR for Lateral Control",
-                                            "LQR 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using LQR)",
-                                            "../assets/offroad/icon_checkmark.png"
-                                            ));
+  toggles_list->addWidget(horizontal_line());
+  toggles_list->addWidget(new ParamControl("LQR_Selected",
+                                           "Select LQR for Lateral Control",
+                                           "LQR 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using LQR)",
+                                           "../assets/offroad/icon_checkmark.png"
+                                           ));
 
   QWidget *widget = new QWidget;
   widget->setLayout(toggles_list);
