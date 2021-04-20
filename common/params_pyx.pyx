@@ -88,6 +88,9 @@ keys = {
   #prebuilt params on setting EON ui
   b"PrebuiltEnabled": [TxType.PERSISTENT],
 
+  #Lateral control selection
+  b"LQR_Selected": [TxType.PERSISTENT],
+
 }
 
 def ensure_bytes(v):

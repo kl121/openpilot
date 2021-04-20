@@ -140,8 +140,8 @@ class PrebuiltParamControl : public ParamControl {
 public:
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
           ParamControl(param, title,desc, icon, parent) {
- 
-    //when instantiate object        
+
+    //when instantiate object
     if (params.getBool(param.toStdString().c_str())) {
         std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
     } else {
@@ -155,4 +155,17 @@ public:
         }
     });
  }
+};
+
+//Lateral Control Selection class, this only uses for LQR_Selectd toggle button.
+class LateralSelection : public ToggleControl {
+  Q_OBJECT
+
+public:
+  LateralSelection() : ToggleControl("Select LQR for Lateral Control", "LQR 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using LQR)", "../assets/offroad/icon_checkmark.png", Params().getBool("LQR_Selected")) {
+    QObject::connect(this, &LateralSelection::toggleFlipped, [=](int state) {
+      char value = state ? '1' : '0';
+      Params().put("LQR_Selected", &value, 1);
+    });
+  }
 };

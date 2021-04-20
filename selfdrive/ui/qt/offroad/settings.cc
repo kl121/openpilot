@@ -267,12 +267,15 @@ QWidget * network_panel(QWidget * parent) {
 QWidget * community_panel() {
   QVBoxLayout *toggles_list = new QVBoxLayout();
 
-  toggles_list->addWidget(horizontal_line());
   toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
                                             "Enable Prebuilt File",
                                             "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
                                             "../assets/offroad/icon_checkmark.png"
                                             ));
+
+  toggles_list->addWidget(horizontal_line());
+
+  toggles_list->addWidget(new LateralSelection());
 
   QWidget *widget = new QWidget;
   widget->setLayout(toggles_list);
@@ -380,4 +383,3 @@ void SettingsWindow::showEvent(QShowEvent *event){
   panel_widget->setCurrentIndex(0);
   nav_btns->buttons()[0]->setChecked(true);
 }
-
