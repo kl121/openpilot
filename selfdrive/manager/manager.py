@@ -11,7 +11,8 @@ import selfdrive.crash as crash
 from common.basedir import BASEDIR
 from common.params import Params
 from common.text_window import TextWindow
-from selfdrive.hardware import HARDWARE
+from selfdrive.boardd.set_time import set_time
+from selfdrive.hardware import HARDWARE, TICI
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes
@@ -21,28 +22,25 @@ from selfdrive.version import dirty, version
 
 
 def manager_init():
+
+  # update system time from panda
+  set_time(cloudlog)
+
   params = Params()
   params.manager_start()
 
   default_params = [
-    ("CommunityFeaturesToggle", "0"),
-    ("EndToEndToggle", "0"),
     ("CompletedTrainingVersion", "0"),
-    ("IsRHD", "0"),
-    ("IsMetric", "0"),
-    ("RecordFront", "0"),
     ("HasAcceptedTerms", "0"),
-    ("HasCompletedSetup", "0"),
-    ("IsUploadRawEnabled", "1"),
-    ("IsLdwEnabled", "0"),
     ("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')),
     ("OpenpilotEnabledToggle", "1"),
-    ("VisionRadarToggle", "0"),
-    ("IsDriverViewEnabled", "0"),
   ]
 
-  if params.get("RecordFrontLock", encoding='utf-8') == "1":
-    params.put("RecordFront", "1")
+  if TICI:
+    default_params.append(("IsUploadRawEnabled", "1"))
+
+  if params.get_bool("RecordFrontLock"):
+    params.put_bool("RecordFront", True)
 
   # set unset params
   for k, v in default_params:
@@ -51,7 +49,7 @@ def manager_init():
 
   # is this dashcam?
   if os.getenv("PASSIVE") is not None:
-    params.put("Passive", str(int(os.getenv("PASSIVE"))))
+    params.put_bool("Passive", bool(int(os.getenv("PASSIVE"))))
 
   if params.get("Passive") is None:
     raise Exception("Passive must be set to continue")
@@ -123,7 +121,7 @@ def manager_thread():
       not_run.append("loggerd")
 
     started = sm['deviceState'].started
-    driverview = params.get("IsDriverViewEnabled") == b"1"
+    driverview = params.get_bool("IsDriverViewEnabled")
     ensure_running(managed_processes.values(), started, driverview, not_run)
 
     # trigger an update after going offroad
@@ -142,8 +140,9 @@ def manager_thread():
     msg.managerState.processes = [p.get_process_state_msg() for p in managed_processes.values()]
     pm.send('managerState', msg)
 
+    # TODO: let UI handle this
     # Exit main loop when uninstall is needed
-    if params.get("DoUninstall", encoding='utf8') == "1":
+    if params.get_bool("DoUninstall"):
       break
 
 
@@ -152,7 +151,7 @@ def main():
 
   manager_init()
 
-  # Start ui early so prepare can happen in the background
+  # Start UI early so prepare can happen in the background
   if not prepare_only:
     managed_processes['ui'].start()
 
@@ -172,7 +171,7 @@ def main():
   finally:
     manager_cleanup()
 
-  if Params().get("DoUninstall", encoding='utf8') == "1":
+  if Params().get_bool("DoUninstall"):
     cloudlog.warning("uninstalling")
     HARDWARE.uninstall()
 
