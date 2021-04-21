@@ -144,7 +144,3 @@ DBC = {
   CAR.BUICK_REGAL: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'),
   CAR.BOLT: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'),
 }
-
-ECU_FINGERPRINT = {
-  Ecu.fwdCamera: [384, 715]  # 384 = "ASCMLKASteeringCmd", 715 = "ASCMGasRegenCmd"
-}
