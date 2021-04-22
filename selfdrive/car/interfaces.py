@@ -118,7 +118,10 @@ class CarInterfaceBase():
     if cs_out.steerError:
       events.add(EventName.steerUnavailable)
     elif cs_out.steerWarning:
-      events.add(EventName.steerTempUnavailable)
+      if cs_out.steeringPressed:
+        events.add(EventName.steerTempUnavailableUserOverride)
+      else:
+        events.add(EventName.steerTempUnavailable)
 
     # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
     if cs_out.brakePressed and (not self.CS.out.brakePressed or not cs_out.standstill):
