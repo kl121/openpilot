@@ -172,11 +172,8 @@ def fingerprint(logcan, sendcan, has_relay):
   return car_fingerprint, finger, vin, car_fw, source, exact_match
 
 
-  
-
-
 def get_car(logcan, sendcan, has_relay=False):
-  candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(logcan, sendcan, has_relay)
+  candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(logcan, sendcan)
 
   if candidate is None:
     cloudlog.warning("car doesn't match any fingerprints: %r", fingerprints)

@@ -6,7 +6,7 @@ from common.realtime import DT_CTRL
 from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.events import ET
-from selfdrive.car.honda.values import CruiseButtons, CAR, HONDA_BOSCH, Ecu, ECU_FINGERPRINT, FINGERPRINTS
+from selfdrive.car.honda.values import CruiseButtons, CAR, HONDA_BOSCH
 from selfdrive.car import STD_CARGO_KG, CivicParams, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.controls.lib.longitudinal_planner import _A_CRUISE_MAX_V_FOLLOWING
 from selfdrive.car.interfaces import CarInterfaceBase
