@@ -409,4 +409,3 @@ void SettingsWindow::showEvent(QShowEvent *event){
   panel_widget->setCurrentIndex(0);
   nav_btns->buttons()[0]->setChecked(true);
 }
-

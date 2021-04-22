@@ -44,6 +44,10 @@ AddrCheckStruct gm_rx_checks[] = {
 };
 const int GM_RX_CHECK_LEN = sizeof(gm_rx_checks) / sizeof(gm_rx_checks[0]);
 
+int cam_can_bus = -1;
+int bus_camera = -1;
+int bus_vehicle = -1;
+
 static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   bool valid = addr_safety_check(to_push, gm_rx_checks, GM_RX_CHECK_LEN,
@@ -51,6 +55,14 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   if (valid && (GET_BUS(to_push) == 0)) {
     int addr = GET_ADDR(to_push);
+    int bus = GET_BUS(to_push);
+
+    if (bus == 1 && (addr == MSG_TX_LKA)) {
+      cam_can_bus = 1;
+    }
+    if (bus == 2 && (addr == MSG_TX_LKA)) {
+      cam_can_bus = 2;
+    }
 
     if (addr == MSG_RX_STEER) {
       int torque_driver_new = ((GET_BYTE(to_push, 6) & 0x7) << 8) | GET_BYTE(to_push, 7);
@@ -186,21 +198,28 @@ static void gm_init(int16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
   gas_interceptor_detected = 0;
+  cam_can_bus = -1;
+  bus_camera = -1;
+  //bus_radar = 1;  // Radar can bus, Bolt EV doesn't need this can bus
+  bus_vehicle = 0; //vehicle PT can bus for comma ai harness
+  //bus_chassis = 3; //vehicle Chassis can bus, Bolt EV doesn't need this can bus
 }
 
 static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   int bus_fwd = -1;
-  int bus_camera = 1; //camera PT can bus for grey panda and custom made harness
-  //int bus_radar = 1; // Radar can bus, Bolt EV doesn't need this can bus
-  //int bus_camera = 2; //vehicle PT can bus for comma ai harness
-  int bus_vehicle = 0; //vehicle PT can bus for comma ai harness
-  //int bus_chassis = 3; //vehicle Chassis can bus, Bolt EV doesn't need this can bus
   int addr = GET_ADDR(to_fwd);
+
+  if (cam_can_bus == 1) {
+    bus_camera = 1;   //camera PT can bus for grey panda and custom made harness
+  } else {
+    if (cam_can_bus != -1){
+      bus_camera = 2;  //camera PT can bus for comma ai harness
+    }
+  }
 
   if (bus_num == bus_vehicle) {
     bus_fwd = bus_camera;       //Forward all messages from vehicle
   }
-
   if (bus_num == bus_camera) {
     if (addr == MSG_TX_LKA) {
       bus_fwd = -1;    //Block LKA message from camera
