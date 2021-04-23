@@ -82,6 +82,3 @@ class Pc(HardwareBase):
 
   def set_power_save(self, enabled):
     pass
-
-  def update_reboot(self, reason=None):
-    self.reboot()

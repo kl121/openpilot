@@ -29,5 +29,4 @@ public:
 
   static bool get_ssh_enabled() { return Params().getBool("SshEnabled"); };
   static void set_ssh_enabled(bool enabled) { Params().putBool("SshEnabled", enabled); };
-  static void update_reboot() { reboot(); }
 };
