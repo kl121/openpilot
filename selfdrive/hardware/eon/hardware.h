@@ -14,7 +14,7 @@
 class HardwareEon : public HardwareNone {
 public:
   static constexpr float MAX_VOLUME = 0.85;
-  static constexpr float MIN_VOLUME = 0.45;
+  static constexpr float MIN_VOLUME = 0.85;
 
   static std::string get_os_version() {
     return "NEOS " + util::read_file("/VERSION");
