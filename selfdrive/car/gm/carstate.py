@@ -42,7 +42,7 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
     ret.steeringRateDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelRate']
     ret.steeringTorque = pt_cp.vl["PSCMStatus"]['LKADriverAppldTrq']
-    ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATotalTorqueDelivered']
+    ret.steeringTorqueEps = pt_cp.vl["PSCMStatus"]['LKATorqueDelivered']
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
     # 0 inactive, 1 active, 2 temporarily limited, 3 failed
