@@ -89,7 +89,7 @@ keys = {
   b"PrebuiltEnabled": [TxType.PERSISTENT],
 
   #Lateral control selection
-  b"LQR_Selected": [TxType.PERSISTENT],
+  b"INDI_Selected": [TxType.PERSISTENT],
 
 }
 

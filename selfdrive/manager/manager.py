@@ -40,7 +40,7 @@ def manager_init():
     ("PrebuiltEnabled", "0"),
 
     #Lateral Control Selection
-    ("LQR_Selected", "0"),
+    ("INDI_Selected", "0"),
   ]
 
   if TICI:
