@@ -66,8 +66,8 @@ def apply_std_steer_torque_limits(apply_torque, apply_torque_last, driver_torque
 
 def apply_gm_steer_torque_limits(apply_torque, apply_torque_last, total_torque, LIMITS):
   # limits due to comparison of commanded torque VS motor reported torque
-  max_lim = min(max(total_torque + LIMITS.STEER_ERROR_MAX, LIMITS.STEER_ERROR_MAX), LIMITS.STEER_MAX)
-  min_lim = max(min(total_torque - LIMITS.STEER_ERROR_MAX, -LIMITS.STEER_ERROR_MAX), -LIMITS.STEER_MAX)
+  max_lim = min(max(total_torque + LIMITS.STEER_MAX_ERROR, LIMITS.STEER_MAX_ERROR), LIMITS.STEER_MAX)
+  min_lim = max(min(total_torque - LIMITS.STEER_MAX_ERROR, -LIMITS.STEER_MAX_ERROR), -LIMITS.STEER_MAX)
 
   apply_torque = clip(apply_torque, min_lim, max_lim)
 
