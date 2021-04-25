@@ -8,13 +8,12 @@ class CarControllerParams():
   def __init__(self):
     self.STEER_MAX = 300
     self.STEER_STEP = 4              # how often we update the steer cmd
-    self.STEER_DELTA_UP = 8          # ~0.75s time to peak torque (255/50hz/0.75s)
-    self.STEER_DELTA_DOWN = 8       # ~0.3s from peak torque to zero
+    self.STEER_DELTA_UP = 6          # ~0.75s time to peak torque (255/50hz/0.75s)
+    self.STEER_DELTA_DOWN = 6       # ~0.3s from peak torque to zero
     self.MIN_STEER_SPEED = 3.
     self.STEER_DRIVER_ALLOWANCE = 50   # allowed driver torque before start limiting
     self.STEER_DRIVER_MULTIPLIER = 4   # weight driver torque heavily
     self.STEER_DRIVER_FACTOR = 100     # from dbc
-    self.STEER_MAX_ERROR = 200         # Bolt EV PSMC has max torelence between command and actual
     self.NEAR_STOP_BRAKE_PHASE = 0.5  # m/s, more aggressive braking near full stop
 
     # Takes case of "Service Adaptive Cruise" and "Service Front Camera"
