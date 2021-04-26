@@ -155,4 +155,4 @@ class PrebuiltParamControl : public ParamControl {
         }
     });
 #endif
- }
+ };
