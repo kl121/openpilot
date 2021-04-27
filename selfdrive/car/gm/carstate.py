@@ -131,11 +131,10 @@ class CarState(CarStateBase):
     if CP.carFingerprint == CAR.VOLT or CP.carFingerprint == CAR.BOLT:
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
-        ("HVBatteryVoltage", "BECMBatteryVoltageCurrent", 0),
-        ("HVBatteryCurrent", "BECMBatteryVoltageCurrent", 0),
       ]
       checks += [
         ("EBCMRegenPaddle", 50),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, CanBus.POWERTRAIN)
+
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
