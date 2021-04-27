@@ -146,4 +146,4 @@ class CarState(CarStateBase):
         ("INTERCEPTOR_GAS2", "GAS_SENSOR", 0)
       ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, CanBus.POWERTRAIN)
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
