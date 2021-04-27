@@ -12,13 +12,13 @@ from common.basedir import BASEDIR
 from common.params import Params
 from common.text_window import TextWindow
 from selfdrive.boardd.set_time import set_time
-from selfdrive.hardware import HARDWARE, TICI
+from selfdrive.hardware import HARDWARE, PC, TICI
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes
 from selfdrive.registration import register
 from selfdrive.swaglog import cloudlog, add_file_handler
-from selfdrive.version import dirty, version, origin, branch, commit, \
+from selfdrive.version import dirty, get_git_commit, version, origin, branch, commit, \
                               terms_version, training_version, \
                               get_git_branch, get_git_remote
 
@@ -72,7 +72,7 @@ def manager_init():
   params.put("Version", version)
   params.put("TermsVersion", terms_version)
   params.put("TrainingVersion", training_version)
-  params.put("GitCommit", commit)
+  params.put("GitCommit", get_git_commit(default=""))
   params.put("GitBranch", get_git_branch(default=""))
   params.put("GitRemote", get_git_remote(default=""))
 
@@ -86,6 +86,9 @@ def manager_init():
 
   cloudlog.bind_global(dongle_id=dongle_id, version=version, dirty=dirty,
                        device=HARDWARE.get_device_type())
+
+  if not (dongle_id is None or os.getenv("NOLOG") or os.getenv("NOCRASH") or PC):
+    crash.init()
   crash.bind_user(id=dongle_id)
   crash.bind_extra(dirty=dirty, origin=origin, branch=branch, commit=commit,
                    device=HARDWARE.get_device_type())
