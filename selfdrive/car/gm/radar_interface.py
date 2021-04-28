@@ -34,7 +34,7 @@ def create_radar_can_parser(car_fingerprint):
                 [0.0] * NUM_SLOTS + [0.0] * NUM_SLOTS +
                 [0.0] * NUM_SLOTS + [0] * NUM_SLOTS))
 
-  checks = list({(s[1], 14) for s in signals})
+  checks = []
 
   return CANParser(DBC[car_fingerprint]['radar'], signals, checks, CanBus.OBSTACLE)
 

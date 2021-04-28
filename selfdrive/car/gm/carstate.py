@@ -114,14 +114,12 @@ class CarState(CarStateBase):
       ("LKATotalTorqueDelivered", "PSCMStatus", 0),
     ]
 
-    checks = []
 
     if CP.carFingerprint == CAR.VOLT or CP.carFingerprint == CAR.BOLT:
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
       ]
 
-      checks += []
 
     if CP.enableGasInterceptor:
       signals += [
@@ -129,6 +127,5 @@ class CarState(CarStateBase):
         ("INTERCEPTOR_GAS2", "GAS_SENSOR", 0)
       ]
 
-      checks += []
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, 0, CanBus.POWERTRAIN, enforce_checks=False)
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
