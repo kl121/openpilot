@@ -120,13 +120,15 @@ class CarState(CarStateBase):
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
       ]
-	  
-      checks += []	  
+
+      checks += []
 
     if CP.enableGasInterceptor:
       signals += [
         ("INTERCEPTOR_GAS", "GAS_SENSOR", 0),
         ("INTERCEPTOR_GAS2", "GAS_SENSOR", 0)
       ]
+
+      checks += []
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, 0, CanBus.POWERTRAIN, enforce_checks=False)
