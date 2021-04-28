@@ -121,7 +121,7 @@ class CarState(CarStateBase):
         ("RegenPaddle", "EBCMRegenPaddle", 0),
       ]
 	  
-      checks = []	  
+      checks += []	  
 
     if CP.enableGasInterceptor:
       signals += [
