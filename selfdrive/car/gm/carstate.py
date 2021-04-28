@@ -111,31 +111,15 @@ class CarState(CarStateBase):
       ("LKATotalTorqueDelivered", "PSCMStatus", 0),
     ]
 
-    checks = [
-      ("BCMTurnSignals", 1),
-      ("ECMPRDNL", 10),
-      ("PSCMStatus", 10),
-      ("ESPStatus", 10),
-      ("BCMDoorBeltStatus", 10),
-      ("EPBStatus", 20),
-      ("EBCMWheelSpdFront", 20),
-      ("EBCMWheelSpdRear", 20),
-      ("AcceleratorPedal", 33),
-      ("AcceleratorPedal2", 33),
-      ("ASCMSteeringButton", 33),
-      ("ECMEngineStatus", 100),
-      ("PSCMSteeringAngle", 100),
-      ("EBCMBrakePedalPosition", 100),
-    ]
+    checks = []
 
     if CP.carFingerprint == CAR.VOLT or CP.carFingerprint == CAR.BOLT:
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
       ]
-      checks += [
-        ("EBCMRegenPaddle", 50),
-      ]
+	  
+      checks = []	  
 
 
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, CanBus.POWERTRAIN, enforce_checks=False)
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, 0, CanBus.POWERTRAIN, enforce_checks=False)
