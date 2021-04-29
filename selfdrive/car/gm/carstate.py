@@ -111,14 +111,13 @@ class CarState(CarStateBase):
       ("LKATotalTorqueDelivered", "PSCMStatus", 0),
     ]
 
-    checks = []
 
     if CP.carFingerprint == CAR.VOLT or CP.carFingerprint == CAR.BOLT:
       signals += [
         ("RegenPaddle", "EBCMRegenPaddle", 0),
       ]
-	  
-      checks = []	  
+
+
 
 
 
