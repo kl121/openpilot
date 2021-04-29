@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 
 #include "QrCode.hpp"
-#include "api.hpp"
+#include "request_repeater.hpp"
 #include "common/params.h"
 #include "setup.hpp"
 
@@ -37,9 +37,7 @@ void PairingQRWidget::refresh(){
     qrCode->setStyleSheet(R"(font-size: 60px;)");
     return;
   }
-  QVector<QPair<QString, QJsonValue>> payloads;
-  payloads.push_back(qMakePair(QString("pair"), true));
-  QString pairToken = CommaApi::create_jwt(payloads);
+  QString pairToken = CommaApi::create_jwt({{"pair", true}});
 
   QString qrString = IMEI + "--" + serial + "--" + pairToken;
   this->updateQrCode(qrString);
@@ -105,9 +103,8 @@ PrimeUserWidget::PrimeUserWidget(QWidget* parent) : QWidget(parent) {
     return;
   }
 
-  // TODO: only send the request when widget is shown
   QString url = "https://api.commadotai.com/v1/devices/" + dongleId + "/owner";
-  RequestRepeater* repeater = new RequestRepeater(this, url, 6, "ApiCache_Owner");
+  RequestRepeater *repeater = new RequestRepeater(this, url, "ApiCache_Owner", 6);
   QObject::connect(repeater, SIGNAL(receivedResponse(QString)), this, SLOT(replyFinished(QString)));
 }
 
@@ -192,7 +189,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QVBoxLayout* qrLayout = new QVBoxLayout;
 
-  qrLayout->addSpacing(40);
+  qrLayout->addSpacing(30);
   QLabel* qrLabel = new QLabel("Scan with comma connect!");
   qrLabel->setWordWrap(true);
   qrLabel->setAlignment(Qt::AlignHCenter);
@@ -239,7 +236,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   // set up API requests
   QString dongleId = QString::fromStdString(Params().get("DongleId"));
   QString url = "https://api.commadotai.com/v1.1/devices/" + dongleId + "/";
-  RequestRepeater* repeater = new RequestRepeater(this, url, 5, "ApiCache_Device");
+  RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 5);
 
   QObject::connect(repeater, SIGNAL(receivedResponse(QString)), this, SLOT(replyFinished(QString)));
   QObject::connect(repeater, SIGNAL(failedResponse(QString)), this, SLOT(parseError(QString)));
