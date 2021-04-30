@@ -136,6 +136,11 @@ class LateralPlanner():
       # State transitions
       # off
       if self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker and not below_lane_change_speed:
+        if sm['carState'].leftBlinker:
+          self.lane_change_direction = LaneChangeDirection.left
+        elif sm['carState'].rightBlinker:
+          self.lane_change_direction = LaneChangeDirection.right
+
         self.lane_change_state = LaneChangeState.preLaneChange
         self.lane_change_ll_prob = 1.0
 
