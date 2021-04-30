@@ -11,7 +11,6 @@
 #include <QRandomGenerator>
 
 #include "api.hpp"
-#include "home.hpp"
 #include "common/params.h"
 #include "common/util.h"
 
@@ -72,24 +71,17 @@ QString CommaApi::create_jwt(QVector<QPair<QString, QJsonValue>> payloads, int e
   return jwt;
 }
 
-QString CommaApi::create_jwt() {
-  return create_jwt(*(new QVector<QPair<QString, QJsonValue>>()));
-}
 
-RequestRepeater::RequestRepeater(QWidget* parent, QString requestURL, int period_seconds, const QString &cache_key, QVector<QPair<QString, QJsonValue>> payloads, bool disableWithScreen)
-  : disableWithScreen(disableWithScreen), cache_key(cache_key), QObject(parent)  {
+HttpRequest::HttpRequest(QObject *parent, QString requestURL, const QString &cache_key, bool create_jwt_) : cache_key(cache_key), create_jwt(create_jwt_), QObject(parent) {
   networkAccessManager = new QNetworkAccessManager(this);
-
   reply = NULL;
-
-  QTimer* timer = new QTimer(this);
-  QObject::connect(timer, &QTimer::timeout, [=](){sendRequest(requestURL, payloads);});
-  timer->start(period_seconds * 1000);
 
   networkTimer = new QTimer(this);
   networkTimer->setSingleShot(true);
   networkTimer->setInterval(20000);
   connect(networkTimer, SIGNAL(timeout()), this, SLOT(requestTimeout()));
+
+  sendRequest(requestURL);
 
   if (!cache_key.isEmpty()) {
     if (std::string cached_resp = Params().get(cache_key.toStdString()); !cached_resp.empty()) {
@@ -98,13 +90,16 @@ RequestRepeater::RequestRepeater(QWidget* parent, QString requestURL, int period
   }
 }
 
-void RequestRepeater::sendRequest(QString requestURL, QVector<QPair<QString, QJsonValue>> payloads){
-  if (GLWindow::ui_state.scene.started || !active || reply != NULL ||
-      (!GLWindow::ui_state.awake && disableWithScreen)) {
-    return;
+void HttpRequest::sendRequest(QString requestURL){
+  QString token;
+  if(create_jwt) {
+    token = CommaApi::create_jwt();
+  } else {
+    QString token_json = QString::fromStdString(util::read_file(util::getenv_default("HOME", "/.comma/auth.json", "/.comma/auth.json")));
+    QJsonDocument json_d = QJsonDocument::fromJson(token_json.toUtf8());
+    token = json_d["access_token"].toString();
   }
 
-  QString token = CommaApi::create_jwt(payloads);
   QNetworkRequest request;
   request.setUrl(QUrl(requestURL));
   request.setRawHeader(QByteArray("Authorization"), ("JWT " + token).toUtf8());
@@ -122,25 +117,27 @@ void RequestRepeater::sendRequest(QString requestURL, QVector<QPair<QString, QJs
   connect(reply, SIGNAL(finished()), this, SLOT(requestFinished()));
 }
 
-void RequestRepeater::requestTimeout(){
+void HttpRequest::requestTimeout(){
   reply->abort();
 }
 
 // This function should always emit something
-void RequestRepeater::requestFinished(){
+void HttpRequest::requestFinished(){
   if (reply->error() != QNetworkReply::OperationCanceledError) {
     networkTimer->stop();
     QString response = reply->readAll();
+
     if (reply->error() == QNetworkReply::NoError) {
       // save to cache
       if (!cache_key.isEmpty()) {
-        Params().write_db_value(cache_key.toStdString(), response.toStdString());
+        Params().put(cache_key.toStdString(), response.toStdString());
       }
       emit receivedResponse(response);
     } else {
       if (!cache_key.isEmpty()) {
-        Params().delete_db_value(cache_key.toStdString());
+        Params().remove(cache_key.toStdString());
       }
+      qDebug() << reply->errorString();
       emit failedResponse(reply->errorString());
     }
   } else {

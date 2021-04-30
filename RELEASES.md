@@ -1,3 +1,10 @@
+Version 0.8.4 (2021-05-07)
+========================
+ * Fuzzy car identification, enabled with Community Features toggle
+ * Localizer optimized for increased precision and less CPU usage
+ * Toyota Mirai 2021 support
+ * Lexus NX 300 2020 support thanks to goesreallyfast!
+
 Version 0.8.3 (2021-04-01)
 ========================
  * New model

@@ -48,10 +48,19 @@ AbstractControl::AbstractControl(const QString &title, const QString &desc, cons
     vlayout->addWidget(description);
 
     connect(title_label, &QPushButton::clicked, [=]() {
+      if (!description->isVisible()) {
+        emit showDescription();
+      }
       description->setVisible(!description->isVisible());
     });
   }
 
   setLayout(vlayout);
   setStyleSheet("background-color: transparent;");
+}
+
+void AbstractControl::hideEvent(QHideEvent *e){
+  if(description != nullptr){
+    description->hide();
+  }
 }
