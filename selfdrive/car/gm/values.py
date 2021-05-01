@@ -144,5 +144,5 @@ DBC = {
   CAR.ACADIA: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'),
   CAR.CADILLAC_ATS: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'),
   CAR.BUICK_REGAL: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'),
-  CAR.BOLT: dbc_dict('gm_global_a_powertrain', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis', body_dbc= 'gm_global_a_lowspeed_1818125'),
+  CAR.BOLT: dbc_dict('gm_global_a_powertrain', None, body_dbc='gm_global_a_lowspeed_1818125'),
 }

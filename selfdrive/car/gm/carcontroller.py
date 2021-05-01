@@ -74,15 +74,15 @@ class CarController():
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
-    if (frame % 4) == 0:
-      send_fcw = hud_alert == VisualAlert.fcw
-      can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
+    #if (frame % 4) == 0:
+    #  send_fcw = hud_alert == VisualAlert.fcw
+    #  can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
 
     # Radar needs to know current speed and yaw rate (50hz) - Delete
     # and that ADAS is alive (10hz)
 
-    if frame % P.ADAS_KEEPALIVE_STEP == 0:
-      can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
+    #if frame % P.ADAS_KEEPALIVE_STEP == 0:
+    #  can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
 
     # Show green icon when LKA torque is applied, and
     # alarming orange icon when approaching torque limit.
