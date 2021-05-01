@@ -10,7 +10,6 @@
 #include "sidebar.hpp"
 #include "onroad.hpp"
 #include "ui/ui.hpp"
-#include "common/util.h"
 #include "widgets/offroad_alerts.hpp"
 
 class OffroadHome : public QFrame {
