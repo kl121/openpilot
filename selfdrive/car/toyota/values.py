@@ -1145,6 +1145,7 @@ FW_VERSIONS = {
       b'\x01F152642551\x00\x00\x00\x00\x00\x00',
       b'\x01F152642561\x00\x00\x00\x00\x00\x00',
       b'\x01F152642700\x00\x00\x00\x00\x00\x00',
+      b'\x01F152642701\x00\x00\x00\x00\x00\x00',
       b'\x01F152642710\x00\x00\x00\x00\x00\x00',
       b'\x01F152642711\x00\x00\x00\x00\x00\x00',
       b'\x01F152642750\x00\x00\x00\x00\x00\x00',
@@ -1623,6 +1624,7 @@ DBC = {
   CAR.RAV4H_TSS2: dbc_dict('toyota_nodsu_hybrid_pt_generated', 'toyota_tss2_adas'),
   CAR.LEXUS_NXH: dbc_dict('lexus_nx300h_2018_pt_generated', 'toyota_adas'),
   CAR.LEXUS_NX: dbc_dict('lexus_nx300_2018_pt_generated', 'toyota_adas'),
+  CAR.LEXUS_NX_TSS2: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'),
   CAR.PRIUS_TSS2: dbc_dict('toyota_nodsu_hybrid_pt_generated', 'toyota_tss2_adas'),
   CAR.MIRAI: dbc_dict('toyota_nodsu_hybrid_pt_generated', 'toyota_tss2_adas'),
 }
@@ -1631,7 +1633,7 @@ DBC = {
 # Toyota/Lexus Safety Sense 2.0 and 2.5
 TSS2_CAR = set([CAR.RAV4_TSS2, CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2, CAR.LEXUS_ES_TSS2, CAR.LEXUS_ESH_TSS2, CAR.RAV4H_TSS2,
                 CAR.LEXUS_RX_TSS2, CAR.LEXUS_RXH_TSS2, CAR.HIGHLANDER_TSS2, CAR.HIGHLANDERH_TSS2, CAR.PRIUS_TSS2, CAR.CAMRY_TSS2, CAR.CAMRYH_TSS2,
-                CAR.MIRAI])
+                CAR.MIRAI, CAR.LEXUS_NX_TSS2])
 
 NO_DSU_CAR = TSS2_CAR | set([CAR.CHR, CAR.CHRH, CAR.CAMRY, CAR.CAMRYH])
 
