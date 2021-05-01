@@ -9,6 +9,18 @@ from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+def accel_hysteresis(accel, accel_steady):
+
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if accel == 0:
+    accel_steady = 0.
+  elif accel > accel_steady + CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel - CarControllerParams.ACCEL_HYST_GAP
+  elif accel < accel_steady - CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel + CarControllerParams.ACCEL_HYST_GAP
+  accel = accel_steady
+
+  return accel, accel_steady
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -16,6 +28,7 @@ class CarController():
     self.apply_steer_last = 0
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
+    self.accel_steady = 0.
 
     self.params = CarControllerParams()
 
@@ -50,8 +63,12 @@ class CarController():
     if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
       #pedal_threshold = 0.15625
       #final_pedal = (1 - pedal_threshold) * actuators.gas
-      final_pedal = clip(actuators.gas, 0., 1.)
-
+      zero = 40/256
+      gas = (1-zero) * actuators.gas + zero
+      regen_brake = clip(actuators.brake, 0., zero)
+      final_accel = gas - regen_brake
+      final_accel, self.accel_steady = accel_hystereses(final_accel, self.accel_steady)
+      final_pedal = clip(final_accel, 0., 1.)
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
