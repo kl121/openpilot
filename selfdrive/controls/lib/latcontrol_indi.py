@@ -91,7 +91,7 @@ class LatControlINDI():
     indi_log.steeringRateDeg = math.degrees(self.x[1])
     indi_log.steeringAccelDeg = math.degrees(self.x[2])
 
-    if CS.vEgo < 0.3 or not active:
+    if CS.vEgo < 0.3 or not active or not CS.lkasEnable:
       indi_log.active = False
       self.output_steer = 0.0
       self.delayed_output = 0.0

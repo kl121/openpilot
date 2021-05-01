@@ -246,9 +246,6 @@ def thermald_thread():
     msg.deviceState.batteryVoltage = HARDWARE.get_battery_voltage()
     msg.deviceState.usbOnline = HARDWARE.get_usb_present()
 
-    if EON and started_ts is None and msg.deviceState.memoryUsagePercent > 40:
-      cloudlog.event("High offroad memory usage", mem=msg.deviceState.memoryUsagePercent)
-
     # Fake battery levels on uno for frame
     if (not EON) or is_uno:
       msg.deviceState.batteryPercent = 100
