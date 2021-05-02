@@ -12,7 +12,6 @@
 #include "ui.hpp"
 #include "paint.hpp"
 #include "qt_window.hpp"
-#include "dashcam.h"
 
 #define BACKLIGHT_DT 0.25
 #define BACKLIGHT_TS 2.00
@@ -331,19 +330,6 @@ static void update_status(UIState *s) {
   started_prev = s->scene.started;
 }
 
-static void update_extras(UIState *s) {
-#if UI_FEATURE_DASHCAM
-   if(s->awake && s->status != STATUS_OFFROAD)
-   {
-        int touch_x = -1, touch_y = -1;
-        int touched = touch_poll(&(s->touch), &touch_x, &touch_y, 0);
-        if (touched == 1) {
-          dashcam(s, touch_x, touch_y);
-        }
-   }
-#endif
-}
-
 
 QUIState::QUIState(QObject *parent) : QObject(parent) {
   ui_state.sound = std::make_unique<Sound>();
@@ -374,8 +360,6 @@ QUIState::QUIState(QObject *parent) : QObject(parent) {
   timer = new QTimer(this);
   QObject::connect(timer, &QTimer::timeout, this, &QUIState::update);
   timer->start(0);
-
-  touch_init(&(ui_state.touch));
 }
 
 void QUIState::update() {
@@ -383,7 +367,6 @@ void QUIState::update() {
   update_sockets(&ui_state);
   update_state(&ui_state);
   update_status(&ui_state);
-  update_extras(&ui_state);
   update_alert(&ui_state);
   update_vision(&ui_state);
 

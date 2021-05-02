@@ -1,6 +1,5 @@
 #pragma once
 
-#define UI_FEATURE_DASHCAM 1
 #define UI_FEATURE_BATTERY_LEVEL 1
 #include <atomic>
 #include <map>
@@ -26,8 +25,6 @@
 
 #include <QObject>
 #include <QTimer>
-
-#include "common/touch.h"
 
 #define COLOR_BLACK nvgRGBA(0, 0, 0, 255)
 #define COLOR_BLACK_ALPHA(x) nvgRGBA(0, 0, 0, x)
@@ -167,9 +164,6 @@ typedef struct UIState {
   float car_space_transform[6];
   bool wide_camera;
   float zoom;
-
-  TouchState touch;
-
 } UIState;
 
 
