@@ -53,17 +53,17 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   bool valid = addr_safety_check(to_push, gm_rx_checks, GM_RX_CHECK_LEN,
                                  NULL, NULL, NULL);
 
-  if (valid && (GET_BUS(to_push) == 0)) {
-    int addr = GET_ADDR(to_push);
-    int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
+  int bus = GET_BUS(to_push);
 
-    if (bus == 1 && (addr == MSG_TX_LKA)) {
-      cam_can_bus = 1;
-    }
-    if (bus == 2 && (addr == MSG_TX_LKA)) {
-      cam_can_bus = 2;
-    }
-
+  if (bus == 1 && (addr == MSG_TX_LKA)) {
+    cam_can_bus = 1;
+  }
+  if (bus == 2 && (addr == MSG_TX_LKA)) {
+    cam_can_bus = 2;
+  }
+  
+  if (valid && bus == 0) {
     if (addr == MSG_RX_STEER) {
       int torque_driver_new = ((GET_BYTE(to_push, 6) & 0x7) << 8) | GET_BYTE(to_push, 7);
       torque_driver_new = to_signed(torque_driver_new, 11);
