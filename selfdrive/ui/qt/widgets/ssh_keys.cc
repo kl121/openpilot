@@ -34,8 +34,8 @@ SshControl::SshControl() : AbstractControl("SSH Keys", "Warning: This grants SSH
         getUserKeys(username);
       }
     } else {
-      Params().delete_db_value("GithubUsername");
-      Params().delete_db_value("GithubSshKeys");
+      Params().remove("GithubUsername");
+      Params().remove("GithubSshKeys");
       refresh();
     }
   });
@@ -45,7 +45,7 @@ SshControl::SshControl() : AbstractControl("SSH Keys", "Warning: This grants SSH
   networkTimer = new QTimer(this);
   networkTimer->setSingleShot(true);
   networkTimer->setInterval(5000);
-  connect(networkTimer, SIGNAL(timeout()), this, SLOT(timeout()));
+  connect(networkTimer, &QTimer::timeout, this, &SshControl::timeout);
 
   refresh();
 }
@@ -75,7 +75,7 @@ void SshControl::getUserKeys(QString username){
 #endif
 
   reply = manager->get(request);
-  connect(reply, SIGNAL(finished()), this, SLOT(parseResponse()));
+  connect(reply, &QNetworkReply::finished, this, &SshControl::parseResponse);
   networkTimer->start();
 }
 
@@ -89,8 +89,8 @@ void SshControl::parseResponse(){
     networkTimer->stop();
     QString response = reply->readAll();
     if (reply->error() == QNetworkReply::NoError && response.length()) {
-      Params().write_db_value("GithubUsername", username.toStdString());
-      Params().write_db_value("GithubSshKeys", response.toStdString());
+      Params().put("GithubUsername", username.toStdString());
+      Params().put("GithubSshKeys", response.toStdString());
     } else if(reply->error() == QNetworkReply::NoError){
       err = "Username '" + username + "' has no keys on GitHub";
     } else {
