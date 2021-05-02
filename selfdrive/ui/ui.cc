@@ -331,7 +331,7 @@ static void update_status(UIState *s) {
   started_prev = s->scene.started;
 }
 
-static void update_extras(UIState *s)
+static void update_extras(UIState *s) {
 #if UI_FEATURE_DASHCAM
    if(s->awake && s->status != STATUS_OFFROAD)
    {
