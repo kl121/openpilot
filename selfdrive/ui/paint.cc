@@ -345,7 +345,7 @@ static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_
 }
 
 static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  //const UIScene *scene = &s->scene;
+  const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
   int bb_ry = bb_y;
   int bb_h = 5;
@@ -419,6 +419,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   }
 
   // add battery level
+  float batteryTemp = scene->deviceState.getBatteryTempC();
   bool batteryless =  batteryTemp < -20;
   if(UI_FEATURE_BATTERY_LEVEL && !batteryless) {
     char val_str[16];
@@ -435,7 +436,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
         val_color, lab_color, uom_color,
         value_fontSize, label_fontSize, uom_fontSize );
     bb_ry = bb_y + bb_h;
-  }  
+  }
 
   //finally draw the frame
   bb_h += 20;
