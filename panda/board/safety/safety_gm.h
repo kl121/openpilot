@@ -63,7 +63,7 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     cam_can_bus = 2;
   }
 
-  if (valid && bus == 0)) {
+  if (valid && bus == 0) {
     if (addr == MSG_RX_STEER) {
       int torque_driver_new = ((GET_BYTE(to_push, 6) & 0x7) << 8) | GET_BYTE(to_push, 7);
       torque_driver_new = to_signed(torque_driver_new, 11);
