@@ -113,7 +113,7 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     // Check if LKA camera are online
     // on powertrain bus.
     // 384 = ASCMLKASteeringCmd
-    generic_rx_checks((addr == MSG_TX_LKA);
+    generic_rx_checks(addr == MSG_TX_LKA);
   }
   return valid;
 }
