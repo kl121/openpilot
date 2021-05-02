@@ -16,7 +16,7 @@ class CarState(CarStateBase):
     self.adaptive_Cruise = False
     self.enable_lkas = True
 
-  def update(self, pt_cp, cp_body):
+  def update(self, pt_cp):
     ret = car.CarState.new_message()
     ret.adaptiveCruise = self.adaptive_Cruise
     ret.lkasEnable = self.enable_lkas
@@ -79,10 +79,6 @@ class CarState(CarStateBase):
 
     ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
 
-    if self.CP.enableBsm:
-      ret.leftBlindspot = cp_body.vl["Side_Blind_Zone_Alert_Status"]['LftLnChgThrt'] != 0
-      ret.rightBlindspot = cp_body.vl["Lane_Change_Threat_LS"]['RgtLnChgThrt'] != 0
-
     return ret
 
   @staticmethod
@@ -133,13 +129,3 @@ class CarState(CarStateBase):
 
 
     return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
-
-  @staticmethod
-  def get_body_can_parser(CP):
-
-    signals = [
-      ("LftLnChgThrt", "Side_Blind_Zone_Alert_Status", 0),
-      ("RgtLnChgThrt", "Lane_Change_Threat_LS", 0)
-    ]
-
-    return CANParser(DBC[CP.carFingerprint]['body'], signals, [], CanBus.SW_GMLAN)
