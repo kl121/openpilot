@@ -1,6 +1,7 @@
 #pragma once
 
 #define UI_FEATURE_DASHCAM 1
+#define UI_FEATURE_BATTERY_LEVEL 1
 #include <atomic>
 #include <map>
 #include <memory>
