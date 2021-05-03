@@ -5,10 +5,10 @@
 //      brake rising edge
 //      brake > 0mph
 const int GM_MAX_STEER = 300;
-const int GM_MAX_RT_DELTA = 256;          // max delta torque allowed for real time checks
+const int GM_MAX_RT_DELTA = 128;          // max delta torque allowed for real time checks
 const uint32_t GM_RT_INTERVAL = 250000;    // 250ms between real time checks
 const int GM_MAX_RATE_UP = 10;
-const int GM_MAX_RATE_DOWN = 20;
+const int GM_MAX_RATE_DOWN = 10;
 const int GM_DRIVER_TORQUE_ALLOWANCE = 50;
 const int GM_DRIVER_TORQUE_FACTOR = 4;
 const int GM_MAX_GAS = 3072;
@@ -62,7 +62,7 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   if (bus == 2 && (addr == MSG_TX_LKA)) {
     cam_can_bus = 2;
   }
-  
+
   if (valid && bus == 0) {
     if (addr == MSG_RX_STEER) {
       int torque_driver_new = ((GET_BYTE(to_push, 6) & 0x7) << 8) | GET_BYTE(to_push, 7);
@@ -113,7 +113,7 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     // Check if LKA camera are online
     // on powertrain bus.
     // 384 = ASCMLKASteeringCmd
-    generic_rx_checks((addr == MSG_TX_LKA));
+    generic_rx_checks(addr == MSG_TX_LKA);
   }
   return valid;
 }
