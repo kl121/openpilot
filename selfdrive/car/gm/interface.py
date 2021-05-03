@@ -122,8 +122,8 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    if ret.vEgo < self.CP.minEnableSpeed:
-      events.add(EventName.belowEngageSpeed)
+    # if ret.vEgo < self.CP.minEnableSpeed:
+    #   events.add(EventName.belowEngageSpeed)
     if self.CS.park_brake:
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
