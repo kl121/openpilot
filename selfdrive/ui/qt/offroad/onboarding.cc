@@ -6,8 +6,8 @@
 #include <QDesktopWidget>
 
 #include "common/params.h"
-#include "onboarding.hpp"
-#include "home.hpp"
+#include "onboarding.h"
+#include "home.h"
 #include "util.h"
 
 
@@ -80,9 +80,7 @@ TermsPage::TermsPage(QWidget *parent) : QFrame(parent){
   accept_btn = new QPushButton("Scroll to accept");
   accept_btn->setEnabled(false);
   buttons->addWidget(accept_btn);
-  QObject::connect(accept_btn, &QPushButton::released, [=]() {
-    emit acceptedTerms();
-  });
+  QObject::connect(accept_btn, &QPushButton::released, this, &TermsPage::acceptedTerms);
 
   QObject *obj = (QObject*)text->rootObject();
   QObject::connect(obj, SIGNAL(qmlSignal()), SLOT(enableAccept()));
@@ -127,13 +125,13 @@ OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
   addWidget(terms);
 
   connect(terms, &TermsPage::acceptedTerms, [=](){
-    Params().write_db_value("HasAcceptedTerms", current_terms_version);
+    Params().put("HasAcceptedTerms", current_terms_version);
     updateActiveScreen();
   });
 
   TrainingGuide* tr = new TrainingGuide(this);
   connect(tr, &TrainingGuide::completedTraining, [=](){
-    Params().write_db_value("CompletedTrainingVersion", current_training_version);
+    Params().put("CompletedTrainingVersion", current_training_version);
     updateActiveScreen();
   });
   addWidget(tr);
