@@ -1,6 +1,6 @@
 #include "common/util.h"
-#include "sidebar.hpp"
-#include "qt_window.hpp"
+#include "sidebar.h"
+#include "qt_window.h"
 
 StatusWidget::StatusWidget(QString label, QString msg, QColor c, QWidget* parent) : QFrame(parent) {
   layout.setSpacing(0);
@@ -68,7 +68,6 @@ SignalWidget::SignalWidget(QString text, int strength, QWidget* parent) : QFrame
 }
 
 void SignalWidget::paintEvent(QPaintEvent *e){
-  int startX = (width() - (5 * _dotspace)) / 2;
   QPainter p(this);
   p.setRenderHint(QPainter::Antialiasing, true);
   p.setPen(Qt::NoPen);
@@ -78,7 +77,7 @@ void SignalWidget::paintEvent(QPaintEvent *e){
       p.setPen(Qt::NoPen);
       p.setBrush(Qt::darkGray);
     }
-    p.drawEllipse(QRectF(startX + _dotspace * i, _top, _dia, _dia));
+    p.drawEllipse(QRectF(_dotspace * i, _top, _dia, _dia));
   }
 }
 

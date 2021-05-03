@@ -1,6 +1,5 @@
 #pragma once
 
-#define UI_FEATURE_BATTERY_LEVEL 1
 #include <atomic>
 #include <map>
 #include <memory>
@@ -21,7 +20,7 @@
 #include "visionipc.h"
 #include "visionipc_client.h"
 
-#include "qt/sound.hpp"
+#include "qt/sound.h"
 
 #include <QObject>
 #include <QTimer>
@@ -123,11 +122,6 @@ typedef struct UIScene {
   float light_sensor, accel_sensor, gyro_sensor;
   bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
-
-  //Add-on
-  bool brakeLights;
-  int lead_status;
-  float lead_d_rel, lead_v_rel;
 } UIScene;
 
 typedef struct UIState {
