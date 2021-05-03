@@ -10,7 +10,7 @@
 
 #include "common/params.h"
 #include "selfdrive/hardware/hw.h"
-#include "toggle.hpp"
+#include "toggle.h"
 
 QFrame *horizontal_line(QWidget *parent = nullptr);
 
