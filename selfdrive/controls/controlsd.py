@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import math
+import numpy as np
 from cereal import car, log
 from common.numpy_fast import clip
 from common.realtime import sec_since_boot, config_realtime_process, Priority, Ratekeeper, DT_CTRL
@@ -11,7 +12,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.swaglog import cloudlog
 from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car.car_helpers import get_car, get_startup_event, get_one_can
-from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET
+from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET, TRAJECTORY_SIZE
 from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise
 from selfdrive.controls.lib.longcontrol import LongControl, STARTING_TARGET_SPEED
 from selfdrive.controls.lib.latcontrol_pid import LatControlPID
@@ -127,6 +128,8 @@ class Controls:
     self.soft_disable_timer = 0
     self.v_cruise_kph = 255
     self.v_cruise_kph_last = 0
+    self.curve_speed_ms = 255.
+    self.v_cruise_kph_limit = 0
     self.mismatch_counter = 0
     self.can_error_counter = 0
     self.last_blinker_frame = 0
@@ -306,6 +309,33 @@ class Controls:
 
     return CS
 
+  def cal_curve_speed(self, sm, v_ego, frame):
+
+    if frame % 10 == 0:
+      md = sm['modelV2']
+      if md is not None and len(md.position.x) == TRAJECTORY_SIZE and len(md.position.y) == TRAJECTORY_SIZE:
+        x = md.position.x
+        y = md.position.y
+        dy = np.gradient(y, x)
+        d2y = np.gradient(dy, x)
+        curv = d2y / (1 + dy ** 2) ** 1.5
+        curv = curv[5:TRAJECTORY_SIZE - 10]
+        a_y_max = 2.975 - v_ego * 0.0375  # ~1.85 @ 75mph, ~2.6 @ 25mph
+        v_curvature = np.sqrt(a_y_max / np.clip(np.abs(curv), 1e-4, None))
+        model_speed = np.mean(v_curvature) * 0.9
+
+        if model_speed < v_ego:
+          self.curve_speed_ms = float(max(model_speed, 32. * CV.KPH_TO_MS))
+        else:
+          self.curve_speed_ms = 255.
+
+        if np.isnan(self.curve_speed_ms):
+          self.curve_speed_ms = 255.
+      else:
+        self.curve_speed_ms = 255.
+
+    return self.curve_speed_ms
+
   def state_transition(self, CS):
     """Compute conditional state transitions and execute actions on state transitions"""
 
@@ -313,7 +343,9 @@ class Controls:
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if CS.adaptiveCruise:
-      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      v_cruise_raw = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      curv_speed_ms = self.cal_curve_speed(self.sm, CS.vEgo, self.sm.frame)
+      self.v_cruise_kph = min(v_cruise_raw, curv_speed_ms * CV.MS_TO_KPH)
     elif not CS.adaptiveCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = 40
 
