@@ -60,14 +60,15 @@ SignalWidget::SignalWidget(QString text, int strength, QWidget* parent) : QFrame
   layout.insertSpacing(0, 45);
 
   label.setText(text);
-  layout.addWidget(&label, 0, Qt::AlignLeft);
+  layout.addWidget(&label, 0, Qt::AlignHCenter);
   label.setStyleSheet(R"(font-size: 35px; font-weight: 400;)");
 
-  setFixedWidth(177);
+  setMinimumWidth(190);
   setLayout(&layout);
 }
 
 void SignalWidget::paintEvent(QPaintEvent *e){
+  int startX = (width() - (5 * _dotspace)) / 2;
   QPainter p(this);
   p.setRenderHint(QPainter::Antialiasing, true);
   p.setPen(Qt::NoPen);
@@ -77,7 +78,7 @@ void SignalWidget::paintEvent(QPaintEvent *e){
       p.setPen(Qt::NoPen);
       p.setBrush(Qt::darkGray);
     }
-    p.drawEllipse(QRectF(_dotspace * i, _top, _dia, _dia));
+    p.drawEllipse(QRectF(startX + _dotspace * i, _top, _dia, _dia));
   }
 }
 
@@ -163,6 +164,12 @@ void Sidebar::update(const UIState &s){
       {cereal::DeviceState::NetworkStrength::GOOD, 4},
       {cereal::DeviceState::NetworkStrength::GREAT, 5}};
   const int img_idx = s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::NONE ? 0 : network_strength_map[s.scene.deviceState.getNetworkStrength()];
+
+  if(s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::WIFI) {
+    std::string ip = s.scene.deviceState.getWifiIpAddress();
+    network_type = ip.c_str();
+  }
+
   signal->update(network_type, img_idx);
 
   QColor panda_color = COLOR_GOOD;
