@@ -17,11 +17,11 @@
 #include "common/glutil.h"
 #include "common/util.h"
 #include "common/transformations/orientation.hpp"
-#include "messaging.hpp"
+#include "messaging.h"
 #include "visionipc.h"
 #include "visionipc_client.h"
 
-#include "qt/sound.hpp"
+#include "qt/sound.h"
 
 #include <QObject>
 #include <QTimer>

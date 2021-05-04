@@ -9,7 +9,7 @@
 #include <cstdio>
 
 #include "common/params.h"
-#include "toggle.hpp"
+#include "toggle.h"
 
 QFrame *horizontal_line(QWidget *parent = nullptr);
 
