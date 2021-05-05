@@ -34,7 +34,20 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
 
     params = Params()
-    if params.get_bool("INDI_Selected"):
+    LQR_enabled = params.get_bool("LQR_Selected")
+    INDI_enabled = params.get_bool("INDI_Selected")
+    
+    if LQR_enabled:
+      ret.lateralTuning.init('lqr')
+      ret.lateralTuning.lqr.scale = 1800.0
+      ret.lateralTuning.lqr.ki = 0.04
+      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+      ret.lateralTuning.lqr.c = [1., 0.]
+      ret.lateralTuning.lqr.k = [-110., 451.]
+      ret.lateralTuning.lqr.l = [0.33, 0.318]
+      ret.lateralTuning.lqr.dcGain = 0.00225
+    elif not LQR_enabled and INDI_enabled:
       ret.lateralTuning.init('indi')
       ret.lateralTuning.indi.innerLoopGainBP = [10., 30.]
       ret.lateralTuning.indi.innerLoopGain = [5.5, 6.0]
@@ -44,7 +57,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.indi.timeConstant = [1.8, 2.2]
       ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
       ret.lateralTuning.indi.actuatorEffectiveness = [2.0]
-    else:
+    elif not LQR_enabled and not INDI_enabled:
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
       ret.lateralTuning.pid.kdBP = [0.]

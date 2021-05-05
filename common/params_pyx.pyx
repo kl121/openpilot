@@ -91,6 +91,7 @@ keys = {
 
   #Lateral control selection
   b"INDI_Selected": [TxType.PERSISTENT],
+  b"LQR_Selected": [TxType.PERSISTENT],
 
 }
 
