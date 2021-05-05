@@ -37,9 +37,9 @@ class CarInterface(CarInterfaceBase):
     if params.get_bool("INDI_Selected"):
       ret.lateralTuning.init('indi')
       ret.lateralTuning.indi.innerLoopGainBP = [10., 30.]
-      ret.lateralTuning.indi.innerLoopGain = [5.0, 5.6]
+      ret.lateralTuning.indi.innerLoopGain = [5.5, 6.0]
       ret.lateralTuning.indi.outerLoopGainBP = [10., 30.]
-      ret.lateralTuning.indi.outerLoopGain = [4.2, 4.8]
+      ret.lateralTuning.indi.outerLoopGain = [4.5, 5.0]
       ret.lateralTuning.indi.timeConstantBP = [10., 30.]
       ret.lateralTuning.indi.timeConstant = [1.8, 2.2]
       ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
