@@ -162,10 +162,10 @@ class LateralSelection : public ToggleControl {
   Q_OBJECT
 
 public:
-  LateralSelection() : ToggleControl("Select INDI for Lateral Control", "INDI 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using INDI)", "../assets/offroad/icon_checkmark.png", Params().getBool("LQR_Selected")) {
+  LateralSelection() : ToggleControl("Select INDI for Lateral Control", "INDI 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using INDI)", "../assets/offroad/icon_checkmark.png", Params().getBool("INDI_Selected")) {
     QObject::connect(this, &LateralSelection::toggleFlipped, [=](int state) {
       char value = state ? '1' : '0';
-      Params().put("LQR_Selected", &value, 1);
+      Params().put("INDI_Selected", &value, 1);
     });
   }
 };
