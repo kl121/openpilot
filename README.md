@@ -1,12 +1,12 @@
 <b/>**Release Notes**</b>
 
-This branch is only for GM Chevolet Bole EV based on latest released version from comma ai
+This branch is only for GM Chevolet Bolt EV based on latest released version from comma ai
 
 # Updates
 
   - New panda code supports white/grey panda giraffe and comma/custom made harness for black panda
   - Toggle Switch for enabling prebuilt (thanks to 양민님)
-  - Toggle Switch for selection lateral control function between PID and INDI
+  - Toggle Switch for selection lateral control function with LQR or INDI
   - <b>Support Comma pedal for longitudinal control (Not tested yet) </b>
     1) Only Lateral control by OP
        - Engage : main switch on

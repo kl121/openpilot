@@ -273,8 +273,9 @@ QWidget * community_panel() {
                                             ));
 
   toggles_list->addWidget(horizontal_line());
-
-  toggles_list->addWidget(new LateralSelection());
+  toggles_list->addWidget(new LQRSelection());
+  toggles_list->addWidget(horizontal_line());
+  toggles_list->addWidget(new INDISelection());
 
   QWidget *widget = new QWidget;
   widget->setLayout(toggles_list);
@@ -390,4 +391,3 @@ void SettingsWindow::showEvent(QShowEvent *event){
   panel_widget->setCurrentIndex(0);
   nav_btns->buttons()[0]->setChecked(true);
 }
-
