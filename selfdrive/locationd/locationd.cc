@@ -1,3 +1,6 @@
+#include <sys/time.h>
+#include <sys/resource.h>
+
 #include "locationd.h"
 
 using namespace EKFS;
@@ -337,8 +340,8 @@ kj::ArrayPtr<capnp::byte> Localizer::get_message_bytes(MessageBuilder& msg_build
 int Localizer::locationd_thread() {
   const std::initializer_list<const char *> service_list =
       { "gpsLocationExternal", "sensorEvents", "cameraOdometry", "liveCalibration", "carState" };
-  SubMaster sm(service_list, nullptr, { "gpsLocationExternal" });
   PubMaster pm({ "liveLocationKalman" });
+  SubMaster sm(service_list, nullptr, { "gpsLocationExternal" });
 
   Params params;
 
@@ -376,6 +379,8 @@ int Localizer::locationd_thread() {
 }
 
 int main() {
+  setpriority(PRIO_PROCESS, 0, -20);
+
   Localizer localizer;
   return localizer.locationd_thread();
 }
