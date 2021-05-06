@@ -282,7 +282,13 @@ QWidget * community_panel() {
   return widget;
 }
 
-SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
+void SettingsWindow::showEvent(QShowEvent *event) {
+  if (layout()) {
+    panel_widget->setCurrentIndex(0);
+    nav_btns->buttons()[0]->setChecked(true);
+    return;
+  }
+
   // setup two main layouts
   QVBoxLayout *sidebar_layout = new QVBoxLayout();
   sidebar_layout->setMargin(0);
@@ -385,9 +391,4 @@ void SettingsWindow::hideEvent(QHideEvent *event){
       w->close();
     }
   }
-}
-
-void SettingsWindow::showEvent(QShowEvent *event){
-  panel_widget->setCurrentIndex(0);
-  nav_btns->buttons()[0]->setChecked(true);
 }
