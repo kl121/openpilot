@@ -1,8 +1,8 @@
 from cereal import car
 from common.realtime import DT_CTRL
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip
 from selfdrive.config import Conversions as CV
-from selfdrive.car import apply_std_steer_torque_limits
+from selfdrive.car import apply_std_steer_torque_limits, create_gas_command
 from selfdrive.car.gm import gmcan
 from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
@@ -20,8 +20,8 @@ class CarController():
     self.params = CarControllerParams()
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
-    #self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
-    #self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
+    self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
+    self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
 
   def update(self, enabled, CS, frame, actuators,
              hud_v_cruise, hud_show_lanes, hud_show_car, hud_alert):
@@ -32,7 +32,7 @@ class CarController():
     can_sends = []
 
     # STEER
-    lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED
+    lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED and CS.enable_lkas
     if (frame % P.STEER_STEP) == 0:
       if lkas_enabled:
         new_steer = int(round(actuators.steer * P.STEER_MAX))
@@ -46,8 +46,15 @@ class CarController():
 
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
-    # GAS/BRAKE - Delete
+    # Pedal
+    if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
+      #pedal_threshold = 0.15625
+      #final_pedal = (1 - pedal_threshold) * actuators.gas
+      final_pedal = clip(actuators.gas, 0., 1.)
 
+      if (frame % 4) == 0:
+        idx = (frame // 4) % 4
+        can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
     if (frame % 4) == 0:
