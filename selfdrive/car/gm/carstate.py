@@ -13,13 +13,15 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
     self.shifter_values = can_define.dv["ECMPRDNL"]["PRNDL"]
+    self.adaptive_Cruise = False
+    self.enable_lkas = True
 
   def update(self, pt_cp):
     ret = car.CarState.new_message()
-
+    ret.adaptiveCruise = self.adaptive_Cruise
+    ret.lkasEnable = self.enable_lkas
     self.prev_cruise_buttons = self.cruise_buttons
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]['ACCButtons']
-
     ret.wheelSpeeds.fl = pt_cp.vl["EBCMWheelSpdFront"]['FLWheelSpd'] * CV.KPH_TO_MS
     ret.wheelSpeeds.fr = pt_cp.vl["EBCMWheelSpdFront"]['FRWheelSpd'] * CV.KPH_TO_MS
     ret.wheelSpeeds.rl = pt_cp.vl["EBCMWheelSpdRear"]['RLWheelSpd'] * CV.KPH_TO_MS
@@ -61,9 +63,8 @@ class CarState(CarStateBase):
     self.park_brake = pt_cp.vl["EPBStatus"]['EPBClosed']
     self.main_on = bool(pt_cp.vl["ECMEngineStatus"]['CruiseMainOn'])
     ret.espDisabled = pt_cp.vl["ESPStatus"]['TractionControlOn'] != 1
-    self.pcm_acc_status = pt_cp.vl["ASCMActiveCruiseControlStatus"]['ACCCmdActive']
-    ret.cruiseState.available = self.main_on
-    ret.cruiseState.enabled = self.pcm_acc_status != 0
+    self.pcm_acc_status = pt_cp.vl["AcceleratorPedal2"]['CruiseState']
+    ret.cruiseState.available = self.pcm_acc_status != 0
     ret.cruiseState.standstill = False
 
     ret.brakePressed = ret.brake > 1e-5
@@ -75,6 +76,8 @@ class CarState(CarStateBase):
       if ret.aEgo < -1.3:
         brake_light_enable = True
     ret.brakeLights = ret.brakePressed or ret.regenPressed or brake_light_enable
+
+    ret.cruiseState.enabled = self.main_on or ret.adaptiveCruise
 
     return ret
 
@@ -118,7 +121,11 @@ class CarState(CarStateBase):
       ]
 
 
+    if CP.enableGasInterceptor:
+      signals += [
+        ("INTERCEPTOR_GAS", "GAS_SENSOR", 0),
+        ("INTERCEPTOR_GAS2", "GAS_SENSOR", 0)
+      ]
 
 
-
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN, enforce_checks=False)
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)

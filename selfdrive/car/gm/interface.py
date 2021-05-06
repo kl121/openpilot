@@ -28,38 +28,56 @@ class CarInterface(CarInterfaceBase):
     # Presence of a camera on the object bus is ok.
     # Have to go to read_only if ASCM is online (ACC-enabled cars),
     # or camera is on powertrain bus (LKA cars without ACC).
-    ret.enableCamera = True # has_relay or is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or
-    ret.openpilotLongitudinalControl = ret.enableCamera
-    tire_stiffness_factor = 0.444  # not optimized yet
+    ret.enableCamera = True
+    ret.enableGasInterceptor = 0x201 in fingerprint[0]
+    ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
 
-    # Start with a baseline lateral tuning for all GM vehicles. Override tuning as needed in each model section below.
-    ret.minSteerSpeed = 10 * CV.KPH_TO_MS
-    #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
-    #ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+    params = Params()
+    LQR_enabled = params.get_bool("LQR_Selected")
+    INDI_enabled = params.get_bool("INDI_Selected")
+
+    if LQR_enabled:
+      ret.lateralTuning.init('lqr')
+      ret.lateralTuning.lqr.scale = 1965.0
+      ret.lateralTuning.lqr.ki = 0.024
+      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+      ret.lateralTuning.lqr.c = [1., 0.]
+      ret.lateralTuning.lqr.k = [-110., 451.]
+      ret.lateralTuning.lqr.l = [0.33, 0.318]
+      ret.lateralTuning.lqr.dcGain = 0.00225
+    elif not LQR_enabled and INDI_enabled:
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGainBP = [10., 30.]
+      ret.lateralTuning.indi.innerLoopGainV = [5.5, 6.0]
+      ret.lateralTuning.indi.outerLoopGainBP = [10., 30.]
+      ret.lateralTuning.indi.outerLoopGainV = [4.5, 5.0]
+      ret.lateralTuning.indi.timeConstantBP = [10., 30.]
+      ret.lateralTuning.indi.timeConstantV = [1.8, 2.3]
+      ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
+      ret.lateralTuning.indi.actuatorEffectivenessV = [2.0]
+    elif not LQR_enabled and not INDI_enabled:
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
+      ret.lateralTuning.pid.kdBP = [0.]
+      ret.lateralTuning.pid.kdV = [0.7]  #corolla from shane fork : 0.725
+      ret.lateralTuning.pid.kf = 0.000045
+
     ret.steerRateCost = 0.35 # def : 2.0
     ret.steerActuatorDelay = 0.15  # def: 0.2 Default delay, not measured yet
 
+
+
       # initial engage unkown - copied from Volt. Stop and go unknown.
     ret.minEnableSpeed = -1
-    ret.mass = 1616. + STD_CARGO_KG
+    ret.minSteerSpeed = 10 * CV.KPH_TO_MS
+    ret.mass = 1625. + STD_CARGO_KG
     ret.safetyModel = car.CarParams.SafetyModel.gm
     ret.wheelbase = 2.60096
     ret.steerRatio = 16.8
     ret.steerRatioRear = 0.
-    ret.centerToFront = ret.wheelbase * 0.4 # wild guess
-    ret.lateralTuning.init('lqr')
-
-    ret.lateralTuning.lqr.scale = 1965.0
-    ret.lateralTuning.lqr.ki = 0.024
-    ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
-    ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
-    ret.lateralTuning.lqr.c = [1., 0.]
-    ret.lateralTuning.lqr.k = [-110., 451.]
-    ret.lateralTuning.lqr.l = [0.33, 0.318]
-    ret.lateralTuning.lqr.dcGain = 0.00225
+    ret.centerToFront = ret.wheelbase * 0.49
     tire_stiffness_factor = 0.5
-
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
@@ -93,7 +111,7 @@ class CarInterface(CarInterfaceBase):
 
     ret = self.CS.update(self.cp)
 
-    ret.cruiseState.enabled = self.CS.main_on
+    ret.cruiseState.enabled = self.CS.main_on or self.CS.adaptive_Cruise
     ret.canValid = self.cp.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
@@ -130,10 +148,23 @@ class CarInterface(CarInterfaceBase):
       events.add(car.CarEvent.EventName.belowSteerSpeed)
 
     # handle button presses
-    for b in ret.buttonEvents:
-      # do enable on both accel and decel buttons
-      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-        events.add(EventName.buttonEnable)
+    if not self.CS.main_on and self.CP.enableGasInterceptor:
+      for b in ret.buttonEvents:
+        if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = True
+          events.add(EventName.buttonEnable)
+        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = False
+          events.add(EventName.buttonEnable)
+        if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = False
+          self.CS.enable_lkas = True
+          events.add(EventName.buttonCancel)
+    elif self.CS.main_on or ret.brakePressed:
+      self.CS.adaptive_Cruise = False
+      self.CS.enable_lkas = True
 
     ret.events = events.to_msg()
 
