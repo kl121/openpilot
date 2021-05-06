@@ -81,7 +81,7 @@ void SignalWidget::paintEvent(QPaintEvent *e) {
       p.setPen(Qt::NoPen);
       p.setBrush(Qt::darkGray);
     }
-    p.drawEllipse(QRectF(startX + _dotspace * i, _top, _dia, _dia));
+    p.drawEllipse(QRectF(_dotspace * i, _top, _dia, _dia));
   }
 }
 
@@ -140,35 +140,35 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent) {
 
 void Sidebar::update(const UIState &s) {
   static std::map<NetStatus, std::pair<QString, QColor>> connectivity_map = {
-      {NET_ERROR, {"CONNECT\nERROR", COLOR_DANGER}},
-      {NET_CONNECTED, {"CONNECT\nONLINE", COLOR_GOOD}},
-      {NET_DISCONNECTED, {"CONNECT\nOFFLINE", COLOR_WARNING}},
+          {NET_ERROR, {"CONNECT\nERROR", COLOR_DANGER}},
+          {NET_CONNECTED, {"CONNECT\nONLINE", COLOR_GOOD}},
+          {NET_DISCONNECTED, {"CONNECT\nOFFLINE", COLOR_WARNING}},
   };
   auto net_params = connectivity_map[s.scene.athenaStatus];
   connect->update(net_params.first, net_params.second);
 
   static std::map<cereal::DeviceState::ThermalStatus, QColor> temp_severity_map = {
-      {cereal::DeviceState::ThermalStatus::GREEN, COLOR_GOOD},
-      {cereal::DeviceState::ThermalStatus::YELLOW, COLOR_WARNING},
-      {cereal::DeviceState::ThermalStatus::RED, COLOR_DANGER},
-      {cereal::DeviceState::ThermalStatus::DANGER, COLOR_DANGER}};
+          {cereal::DeviceState::ThermalStatus::GREEN, COLOR_GOOD},
+          {cereal::DeviceState::ThermalStatus::YELLOW, COLOR_WARNING},
+          {cereal::DeviceState::ThermalStatus::RED, COLOR_DANGER},
+          {cereal::DeviceState::ThermalStatus::DANGER, COLOR_DANGER}};
   QString temp_val = QString("%1 °C").arg((int)s.scene.deviceState.getAmbientTempC());
   temp->update(temp_val, temp_severity_map[s.scene.deviceState.getThermalStatus()], "TEMP");
 
   static std::map<cereal::DeviceState::NetworkType, const char *> network_type_map = {
-      {cereal::DeviceState::NetworkType::NONE, "--"},
-      {cereal::DeviceState::NetworkType::WIFI, "WiFi"},
-      {cereal::DeviceState::NetworkType::CELL2_G, "2G"},
-      {cereal::DeviceState::NetworkType::CELL3_G, "3G"},
-      {cereal::DeviceState::NetworkType::CELL4_G, "4G"},
-      {cereal::DeviceState::NetworkType::CELL5_G, "5G"}};
+          {cereal::DeviceState::NetworkType::NONE, "--"},
+          {cereal::DeviceState::NetworkType::WIFI, "WiFi"},
+          {cereal::DeviceState::NetworkType::CELL2_G, "2G"},
+          {cereal::DeviceState::NetworkType::CELL3_G, "3G"},
+          {cereal::DeviceState::NetworkType::CELL4_G, "4G"},
+          {cereal::DeviceState::NetworkType::CELL5_G, "5G"}};
   const char *network_type = network_type_map[s.scene.deviceState.getNetworkType()];
   static std::map<cereal::DeviceState::NetworkStrength, int> network_strength_map = {
-      {cereal::DeviceState::NetworkStrength::UNKNOWN, 1},
-      {cereal::DeviceState::NetworkStrength::POOR, 2},
-      {cereal::DeviceState::NetworkStrength::MODERATE, 3},
-      {cereal::DeviceState::NetworkStrength::GOOD, 4},
-      {cereal::DeviceState::NetworkStrength::GREAT, 5}};
+          {cereal::DeviceState::NetworkStrength::UNKNOWN, 1},
+          {cereal::DeviceState::NetworkStrength::POOR, 2},
+          {cereal::DeviceState::NetworkStrength::MODERATE, 3},
+          {cereal::DeviceState::NetworkStrength::GOOD, 4},
+          {cereal::DeviceState::NetworkStrength::GREAT, 5}};
   const int img_idx = s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::NONE ? 0 : network_strength_map[s.scene.deviceState.getNetworkStrength()];
 
   if(s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::WIFI) {
