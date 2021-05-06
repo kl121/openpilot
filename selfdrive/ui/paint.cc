@@ -163,10 +163,10 @@ static void ui_draw_vision_lane_lines(UIState *s) {
       ui_draw_line(s, scene.road_edge_vertices[i], &color, nullptr);
     }
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
-                                          COLOR_WHITE, COLOR_WHITE_ALPHA(0));
+                                 COLOR_WHITE, COLOR_WHITE_ALPHA(0));
   } else {
     track_bg = nvgLinearGradient(s->vg, s->fb_w, s->fb_h, s->fb_w, s->fb_h * .4,
-                                          COLOR_RED, COLOR_RED_ALPHA(0));
+                                 COLOR_RED, COLOR_RED_ALPHA(0));
   }
   // paint path
   ui_draw_line(s, scene.track_vertices, nullptr, &track_bg);
@@ -209,7 +209,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
     const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
     ui_draw_text(s, rect.centerX(), 242, maxspeed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
   } else {
-    ui_draw_text(s, rect.centerX(), 242, "-", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
+    ui_draw_text(s, rect.centerX(), 242, "N/A", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
   }
 }
 
@@ -295,9 +295,9 @@ static void ui_draw_driver_view(UIState *s) {
 
 static void ui_draw_vision_header(UIState *s) {
   NVGpaint gradient = nvgLinearGradient(s->vg, s->viz_rect.x,
-                        s->viz_rect.y+(header_h-(header_h/2.5)),
-                        s->viz_rect.x, s->viz_rect.y+header_h,
-                        nvgRGBAf(0,0,0,0.45), nvgRGBAf(0,0,0,0));
+                                        s->viz_rect.y+(header_h-(header_h/2.5)),
+                                        s->viz_rect.x, s->viz_rect.y+header_h,
+                                        nvgRGBAf(0,0,0,0.45), nvgRGBAf(0,0,0,0));
 
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
@@ -306,205 +306,6 @@ static void ui_draw_vision_header(UIState *s) {
   }
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
-}
-
-//BB START: functions added for the display of various items
-static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
-    int bb_x, int bb_y, int bb_uom_dx,
-    NVGcolor bb_valueColor, NVGcolor bb_labelColor, NVGcolor bb_uomColor,
-    int bb_valueFontSize, int bb_labelFontSize, int bb_uomFontSize )  {
-  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  int dx = 0;
-  if (strlen(bb_uom) > 0) {
-    dx = (int)(bb_uomFontSize*2.5/2);
-   }
-  //print value
-  nvgFontFace(s->vg, "sans-semibold");
-  nvgFontSize(s->vg, bb_valueFontSize*2.5);
-  nvgFillColor(s->vg, bb_valueColor);
-  nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
-  //print label
-  nvgFontFace(s->vg, "sans-regular");
-  nvgFontSize(s->vg, bb_labelFontSize*2.5);
-  nvgFillColor(s->vg, bb_labelColor);
-  nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
-  //print uom
-  if (strlen(bb_uom) > 0) {
-      nvgSave(s->vg);
-    int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-    int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
-    nvgTranslate(s->vg,rx,ry);
-    nvgRotate(s->vg, -1.5708); //-90deg in radians
-    nvgFontFace(s->vg, "sans-regular");
-    nvgFontSize(s->vg, (int)(bb_uomFontSize*2.5));
-    nvgFillColor(s->vg, bb_uomColor);
-    nvgText(s->vg, 0, 0, bb_uom, NULL);
-    nvgRestore(s->vg);
-  }
-  return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
-}
-
-static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  const UIScene *scene = &s->scene;
-  int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y;
-  int bb_h = 5;
-  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
-  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
-  int value_fontSize=30;
-  int label_fontSize=15;
-  int uom_fontSize = 15;
-  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
-
-  //add visual radar relative distance
-  if (true) {
-    char val_str[16];
-    char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    if (s->scene.lead_status) {
-      //show RED if less than 10 meters
-      //show orange if less than 30 meters
-      if((int)(s->scene.lead_d_rel) < 30) {
-        val_color = nvgRGBA(255, 188, 3, 200);
-      }
-      if((int)(s->scene.lead_d_rel) < 10) {
-        val_color = nvgRGBA(255, 0, 0, 200);
-      }
-      // lead car relative distance is always in meters
-      snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_d_rel);
-    } else {
-       snprintf(val_str, sizeof(val_str), "-");
-    }
-    snprintf(uom_str, sizeof(uom_str), "m");
-    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL DIST",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-
-  //add visual radar relative speed
-  if (true) {
-    char val_str[16];
-    char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    if (s->scene.lead_status) {
-      //show Orange if negative speed (approaching)
-      //show Orange if negative speed faster than 5mph (approaching fast)
-      if((int)(s->scene.lead_v_rel) < 0) {
-        val_color = nvgRGBA(255, 188, 3, 200);
-      }
-      if((int)(s->scene.lead_v_rel) < -5) {
-        val_color = nvgRGBA(255, 0, 0, 200);
-      }
-      // lead car relative speed is always in meters
-      if (s->scene.is_metric) {
-         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
-      } else {
-         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
-      }
-    } else {
-       snprintf(val_str, sizeof(val_str), "-");
-    }
-    if (s->scene.is_metric) {
-      snprintf(uom_str, sizeof(uom_str), "km/h");;
-    } else {
-      snprintf(uom_str, sizeof(uom_str), "mph");
-    }
-    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL SPEED",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-
-  // add battery level
-  float batteryTemp = scene->deviceState.getBatteryTempC();
-  bool batteryless =  batteryTemp < -20;
-  if(UI_FEATURE_BATTERY_LEVEL && !batteryless) {
-    char val_str[16];
-    char uom_str[6];
-    //char bat_lvl[4] = "";
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-
-    int batteryPercent = scene->deviceState.getBatteryPercent();
-
-    snprintf(val_str, sizeof(val_str), "%d%%", batteryPercent);
-    snprintf(uom_str, sizeof(uom_str), "");
-    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "BAT LVL",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
-  }
-
-  //finally draw the frame
-  bb_h += 20;
-  nvgBeginPath(s->vg);
-    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
-    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
-    nvgStrokeWidth(s->vg, 6);
-    nvgStroke(s->vg);
-}
-
-static void bb_ui_draw_UI(UIState *s)
-{
-  //const UIScene *scene = &s->scene;
-  const int bb_dml_w = 180;
-  const int bb_dml_x = (s->viz_rect.x + (bdr_s * 2));
-  const int bb_dml_y = (s->viz_rect.y + (bdr_s * 1.5)) + 220;
-
-  bb_ui_draw_measures_left(s, bb_dml_x, bb_dml_y, bb_dml_w);
-}
-
-static void ui_draw_vision_footer(UIState *s) {
-  ui_draw_vision_face(s);
-  ui_draw_vision_brake(s);
-  bb_ui_draw_UI(s);
-}
-
-static float get_alert_alpha(float blink_rate) {
-  return 0.375 * cos((millis_since_boot() / 1000) * 2 * M_PI * blink_rate) + 0.625;
-}
-
-static void ui_draw_vision_alert(UIState *s) {
-  static std::map<cereal::ControlsState::AlertSize, const int> alert_size_map = {
-      {cereal::ControlsState::AlertSize::SMALL, 241},
-      {cereal::ControlsState::AlertSize::MID, 390},
-      {cereal::ControlsState::AlertSize::FULL, s->fb_h}};
-  const UIScene *scene = &s->scene;
-  bool longAlert1 = scene->alert_text1.length() > 15;
-
-  NVGcolor color = bg_colors[s->status];
-  color.a *= get_alert_alpha(scene->alert_blinking_rate);
-  const int alr_h = alert_size_map[scene->alert_size] + bdr_s;
-  const Rect rect = {.x = s->viz_rect.x - bdr_s,
-                     .y = s->fb_h - alr_h,
-                     .w = s->viz_rect.w + (bdr_s * 2),
-                     .h = alr_h};
-
-  ui_fill_rect(s->vg, rect, color);
-  ui_fill_rect(s->vg, rect, nvgLinearGradient(s->vg, rect.x, rect.y, rect.x, rect.bottom(),
-                                            nvgRGBAf(0.0, 0.0, 0.0, 0.05), nvgRGBAf(0.0, 0.0, 0.0, 0.35)));
-
-  nvgFillColor(s->vg, COLOR_WHITE);
-  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-
-  if (scene->alert_size == cereal::ControlsState::AlertSize::SMALL) {
-    ui_draw_text(s, rect.centerX(), rect.centerY() + 15, scene->alert_text1.c_str(), 40*2.5, COLOR_WHITE, "sans-semibold");
-  } else if (scene->alert_size == cereal::ControlsState::AlertSize::MID) {
-    ui_draw_text(s, rect.centerX(), rect.centerY() - 45, scene->alert_text1.c_str(), 48*2.5, COLOR_WHITE, "sans-bold");
-    ui_draw_text(s, rect.centerX(), rect.centerY() + 75, scene->alert_text2.c_str(), 36*2.5, COLOR_WHITE, "sans-regular");
-  } else if (scene->alert_size == cereal::ControlsState::AlertSize::FULL) {
-    nvgFontSize(s->vg, (longAlert1?72:96)*2.5);
-    nvgFontFace(s->vg, "sans-bold");
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-    nvgTextBox(s->vg, rect.x, rect.y+(longAlert1?360:420), rect.w-60, scene->alert_text1.c_str(), NULL);
-    nvgFontSize(s->vg, 48*2.5);
-    nvgFontFace(s->vg,  "sans-regular");
-    nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
-    nvgTextBox(s->vg, rect.x, rect.h-(longAlert1?300:360), rect.w-60, scene->alert_text2.c_str(), NULL);
-  }
 }
 
 static void ui_draw_vision_frame(UIState *s) {
@@ -562,10 +363,6 @@ void ui_draw(UIState *s, int w, int h) {
     ui_draw_vision(s);
   }
 
-  if (draw_alerts && s->scene.alert_size != cereal::ControlsState::AlertSize::NONE) {
-    ui_draw_vision_alert(s);
-  }
-
   if (s->scene.driver_view && !s->vipc_client->connected) {
     nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
     ui_draw_text(s, s->viz_rect.centerX(), s->viz_rect.centerY(), "Please wait for camera to start", 40 * 2.5, COLOR_WHITE, "sans-bold");
@@ -606,53 +403,53 @@ void ui_fill_rect(NVGcontext *vg, const Rect &r, const NVGpaint &paint, float ra
 
 static const char frame_vertex_shader[] =
 #ifdef NANOVG_GL3_IMPLEMENTATION
-  "#version 150 core\n"
+        "#version 150 core\n"
 #else
-  "#version 300 es\n"
-#endif
-  "in vec4 aPosition;\n"
-  "in vec4 aTexCoord;\n"
-  "uniform mat4 uTransform;\n"
-  "out vec4 vTexCoord;\n"
-  "void main() {\n"
-  "  gl_Position = uTransform * aPosition;\n"
-  "  vTexCoord = aTexCoord;\n"
-  "}\n";
+        "#version 300 es\n"
+        #endif
+        "in vec4 aPosition;\n"
+        "in vec4 aTexCoord;\n"
+        "uniform mat4 uTransform;\n"
+        "out vec4 vTexCoord;\n"
+        "void main() {\n"
+        "  gl_Position = uTransform * aPosition;\n"
+        "  vTexCoord = aTexCoord;\n"
+        "}\n";
 
 static const char frame_fragment_shader[] =
 #ifdef NANOVG_GL3_IMPLEMENTATION
-  "#version 150 core\n"
+        "#version 150 core\n"
 #else
-  "#version 300 es\n"
-#endif
-  "precision mediump float;\n"
-  "uniform sampler2D uTexture;\n"
-  "in vec4 vTexCoord;\n"
-  "out vec4 colorOut;\n"
-  "void main() {\n"
-  "  colorOut = texture(uTexture, vTexCoord.xy);\n"
-#ifdef QCOM
-  "  vec3 dz = vec3(0.0627f, 0.0627f, 0.0627f);\n"
+        "#version 300 es\n"
+        #endif
+        "precision mediump float;\n"
+        "uniform sampler2D uTexture;\n"
+        "in vec4 vTexCoord;\n"
+        "out vec4 colorOut;\n"
+        "void main() {\n"
+        "  colorOut = texture(uTexture, vTexCoord.xy);\n"
+        #ifdef QCOM
+        "  vec3 dz = vec3(0.0627f, 0.0627f, 0.0627f);\n"
   "  colorOut.rgb = ((vec3(1.0f, 1.0f, 1.0f) - dz) * colorOut.rgb / vec3(1.0f, 1.0f, 1.0f)) + dz;\n"
-#endif
-  "}\n";
+        #endif
+        "}\n";
 
 static const mat4 device_transform = {{
-  1.0,  0.0, 0.0, 0.0,
-  0.0,  1.0, 0.0, 0.0,
-  0.0,  0.0, 1.0, 0.0,
-  0.0,  0.0, 0.0, 1.0,
-}};
+                                              1.0,  0.0, 0.0, 0.0,
+                                              0.0,  1.0, 0.0, 0.0,
+                                              0.0,  0.0, 1.0, 0.0,
+                                              0.0,  0.0, 0.0, 1.0,
+                                      }};
 
 static const float driver_view_ratio = 1.333;
 #ifndef QCOM2
 // frame from 4/3 to 16/9 display
 static const mat4 driver_view_transform = {{
-  driver_view_ratio*(1080-2*bdr_s)/(1920-2*bdr_s),  0.0, 0.0, 0.0,
-  0.0,  1.0, 0.0, 0.0,
-  0.0,  0.0, 1.0, 0.0,
-  0.0,  0.0, 0.0, 1.0,
-}};
+                                                   driver_view_ratio*(1080-2*bdr_s)/(1920-2*bdr_s),  0.0, 0.0, 0.0,
+                                                   0.0,  1.0, 0.0, 0.0,
+                                                   0.0,  0.0, 1.0, 0.0,
+                                                   0.0,  0.0, 0.0, 1.0,
+                                           }};
 #else
 // from dmonitoring.cc
 static const int full_width_tici = 1928;
@@ -683,9 +480,9 @@ void ui_nvg_init(UIState *s) {
 
   // init fonts
   std::pair<const char *, const char *> fonts[] = {
-      {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
-      {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
-      {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
+          {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
+          {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
+          {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
   };
   for (auto [name, file] : fonts) {
     int font_id = nvgCreateFont(s->vg, name, file);
@@ -730,10 +527,10 @@ void ui_nvg_init(UIState *s) {
     }
     const uint8_t frame_indicies[] = {0, 1, 2, 0, 2, 3};
     const float frame_coords[4][4] = {
-      {-1.0, -1.0, x2, y1}, //bl
-      {-1.0,  1.0, x2, y2}, //tl
-      { 1.0,  1.0, x1, y2}, //tr
-      { 1.0, -1.0, x1, y1}, //br
+            {-1.0, -1.0, x2, y1}, //bl
+            {-1.0,  1.0, x2, y2}, //tl
+            { 1.0,  1.0, x1, y2}, //tr
+            { 1.0, -1.0, x1, y1}, //br
     };
 
     glGenVertexArrays(1, &s->frame_vao[i]);
@@ -767,11 +564,11 @@ void ui_nvg_init(UIState *s) {
   float zy = s->zoom * 2 * intrinsic_matrix.v[5] / s->video_rect.h;
 
   const mat4 frame_transform = {{
-    zx, 0.0, 0.0, 0.0,
-    0.0, zy, 0.0, -y_offset / s->video_rect.h * 2,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0,
-  }};
+                                        zx, 0.0, 0.0, 0.0,
+                                        0.0, zy, 0.0, -y_offset / s->video_rect.h * 2,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        0.0, 0.0, 0.0, 1.0,
+                                }};
 
   s->front_frame_mat = matmul(device_transform, driver_view_transform);
   s->rear_frame_mat = matmul(device_transform, frame_transform);
