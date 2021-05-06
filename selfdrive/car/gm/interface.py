@@ -54,7 +54,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.indi.outerLoopGainBP = [10., 30.]
       ret.lateralTuning.indi.outerLoopGainV = [4.5, 5.0]
       ret.lateralTuning.indi.timeConstantBP = [10., 30.]
-      ret.lateralTuning.indi.timeConstantV = [1.8, 2.2]
+      ret.lateralTuning.indi.timeConstantV = [1.8, 2.3]
       ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
       ret.lateralTuning.indi.actuatorEffectivenessV = [2.0]
     elif not LQR_enabled and not INDI_enabled:
