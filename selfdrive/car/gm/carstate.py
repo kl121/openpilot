@@ -128,4 +128,4 @@ class CarState(CarStateBase):
       ]
 
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN)
+    return CANParser(DBC[CP.carFingerprint]['pt'], signals, [], CanBus.POWERTRAIN, enforce_checks=False)
