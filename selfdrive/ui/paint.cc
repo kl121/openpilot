@@ -19,16 +19,12 @@
 #include "nanovg_gl.h"
 #include "nanovg_gl_utils.h"
 #include "paint.h"
+#include "selfdrive/hardware/hw.h"
 
 // TODO: this is also hardcoded in common/transformations/camera.py
 // TODO: choose based on frame input size
-#ifdef QCOM2
-const float y_offset = 150.0;
-const float zoom = 2912.8;
-#else
-const float y_offset = 0.0;
-const float zoom = 2138.5;
-#endif
+const float y_offset = Hardware::TICI() ? 150.0 : 0.0;
+const float zoom = Hardware::TICI() ? 2912.8 : 2138.5;
 
 static void ui_draw_text(const UIState *s, float x, float y, const char *string, float size, NVGcolor color, const char *font_name) {
   nvgFontFace(s->vg, font_name);
@@ -129,11 +125,11 @@ static void draw_frame(UIState *s) {
 
   if (s->last_frame) {
     glBindTexture(GL_TEXTURE_2D, s->texture[s->last_frame->idx]->frame_tex);
-#ifndef QCOM
-    // this is handled in ion on QCOM
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, s->last_frame->width, s->last_frame->height,
-                 0, GL_RGB, GL_UNSIGNED_BYTE, s->last_frame->addr);
-#endif
+    if (!Hardware::EON()) {
+      // this is handled in ion on QCOM
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, s->last_frame->width, s->last_frame->height,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, s->last_frame->addr);
+    }
   }
 
   glUseProgram(s->gl_shader->prog);
@@ -209,7 +205,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
     const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
     ui_draw_text(s, rect.centerX(), 242, maxspeed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
   } else {
-    ui_draw_text(s, rect.centerX(), 242, "N/A", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
+    ui_draw_text(s, rect.centerX(), 242, "-", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
   }
 }
 
@@ -253,13 +249,9 @@ static void ui_draw_driver_view(UIState *s) {
 
   // blackout
   const int blackout_x_r = valid_rect.right();
-#ifndef QCOM2
-  const int blackout_w_r = rect.right() - valid_rect.right();
-  const int blackout_x_l = rect.x;
-#else
-  const int blackout_w_r = s->viz_rect.right() - valid_rect.right();
-  const int blackout_x_l = s->viz_rect.x;
-#endif
+  const Rect &blackout_rect = Hardware::TICI() ? s->viz_rect : rect;
+  const int blackout_w_r = blackout_rect.right() - valid_rect.right();
+  const int blackout_x_l = blackout_rect.x;
   const int blackout_w_l = valid_rect.x - blackout_x_l;
   ui_fill_rect(s->vg, {blackout_x_l, rect.y, blackout_w_l, rect.h}, COLOR_BLACK_ALPHA(144));
   ui_fill_rect(s->vg, {blackout_x_r, rect.y, blackout_w_r, rect.h}, COLOR_BLACK_ALPHA(144));
@@ -308,6 +300,154 @@ static void ui_draw_vision_header(UIState *s) {
   ui_draw_vision_event(s);
 }
 
+//BB START: functions added for the display of various items
+static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
+    int bb_x, int bb_y, int bb_uom_dx,
+    NVGcolor bb_valueColor, NVGcolor bb_labelColor, NVGcolor bb_uomColor,
+    int bb_valueFontSize, int bb_labelFontSize, int bb_uomFontSize )  {
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+  int dx = 0;
+  if (strlen(bb_uom) > 0) {
+    dx = (int)(bb_uomFontSize*2.5/2);
+   }
+  //print value
+  nvgFontFace(s->vg, "sans-semibold");
+  nvgFontSize(s->vg, bb_valueFontSize*2.5);
+  nvgFillColor(s->vg, bb_valueColor);
+  nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
+  //print label
+  nvgFontFace(s->vg, "sans-regular");
+  nvgFontSize(s->vg, bb_labelFontSize*2.5);
+  nvgFillColor(s->vg, bb_labelColor);
+  nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
+  //print uom
+  if (strlen(bb_uom) > 0) {
+      nvgSave(s->vg);
+    int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
+    int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
+    nvgTranslate(s->vg,rx,ry);
+    nvgRotate(s->vg, -1.5708); //-90deg in radians
+    nvgFontFace(s->vg, "sans-regular");
+    nvgFontSize(s->vg, (int)(bb_uomFontSize*2.5));
+    nvgFillColor(s->vg, bb_uomColor);
+    nvgText(s->vg, 0, 0, bb_uom, NULL);
+    nvgRestore(s->vg);
+  }
+  return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
+}
+
+static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
+  const UIScene *scene = &s->scene;
+  int bb_rx = bb_x + (int)(bb_w/2);
+  int bb_ry = bb_y;
+  int bb_h = 5;
+  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
+  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
+  int value_fontSize=30;
+  int label_fontSize=15;
+  int uom_fontSize = 15;
+  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
+
+  //add visual radar relative distance
+  if (true) {
+    char val_str[16];
+    char uom_str[6];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    if (s->scene.lead_status) {
+      //show RED if less than 10 meters
+      //show orange if less than 30 meters
+      if((int)(s->scene.lead_d_rel) < 30) {
+        val_color = nvgRGBA(255, 188, 3, 200);
+      }
+      if((int)(s->scene.lead_d_rel) < 10) {
+        val_color = nvgRGBA(255, 0, 0, 200);
+      }
+      // lead car relative distance is always in meters
+      snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_d_rel);
+    } else {
+       snprintf(val_str, sizeof(val_str), "-");
+    }
+    snprintf(uom_str, sizeof(uom_str), "m");
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL DIST",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
+  //add visual radar relative speed
+  if (true) {
+    char val_str[16];
+    char uom_str[6];
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    if (s->scene.lead_status) {
+      //show Orange if negative speed (approaching)
+      //show Orange if negative speed faster than 5mph (approaching fast)
+      if((int)(s->scene.lead_v_rel) < 0) {
+        val_color = nvgRGBA(255, 188, 3, 200);
+      }
+      if((int)(s->scene.lead_v_rel) < -5) {
+        val_color = nvgRGBA(255, 0, 0, 200);
+      }
+      // lead car relative speed is always in meters
+      if (s->scene.is_metric) {
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 3.6 + 0.5));
+      } else {
+         snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_v_rel * 2.2374144 + 0.5));
+      }
+    } else {
+       snprintf(val_str, sizeof(val_str), "-");
+    }
+    if (s->scene.is_metric) {
+      snprintf(uom_str, sizeof(uom_str), "km/h");;
+    } else {
+      snprintf(uom_str, sizeof(uom_str), "mph");
+    }
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "REL SPEED",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
+  // add battery level
+  float batteryTemp = scene->deviceState.getBatteryTempC();
+  bool batteryless =  batteryTemp < -20;
+  if(UI_FEATURE_BATTERY_LEVEL && !batteryless) {
+    char val_str[16];
+    char uom_str[6];
+    //char bat_lvl[4] = "";
+    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+
+    int batteryPercent = scene->deviceState.getBatteryPercent();
+
+    snprintf(val_str, sizeof(val_str), "%d%%", batteryPercent);
+    snprintf(uom_str, sizeof(uom_str), "");
+    bb_h +=bb_ui_draw_measure(s,  val_str, uom_str, "BAT LVL",
+        bb_rx, bb_ry, bb_uom_dx,
+        val_color, lab_color, uom_color,
+        value_fontSize, label_fontSize, uom_fontSize );
+    bb_ry = bb_y + bb_h;
+  }
+
+  //finally draw the frame
+  bb_h += 20;
+  nvgBeginPath(s->vg);
+    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
+    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
+    nvgStrokeWidth(s->vg, 6);
+    nvgStroke(s->vg);
+}
+
+static void bb_ui_draw_UI(UIState *s) {
+  //const UIScene *scene = &s->scene;
+  const int bb_dml_w = 180;
+  const int bb_dml_x = (s->viz_rect.x + (bdr_s * 2));
+  const int bb_dml_y = (s->viz_rect.y + (bdr_s * 1.5)) + 220;
+
+  bb_ui_draw_measures_left(s, bb_dml_x, bb_dml_y, bb_dml_w);
+}
+
 static void ui_draw_vision_frame(UIState *s) {
   // Draw video frames
   glEnable(GL_SCISSOR_TEST);
@@ -330,6 +470,8 @@ static void ui_draw_vision(UIState *s) {
     ui_draw_vision_header(s);
     if (s->scene.controls_state.getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
       ui_draw_vision_face(s);
+	    ui_draw_vision_brake(s);
+	    bb_ui_draw_UI(s);
     }
   } else {
     ui_draw_driver_view(s);
@@ -403,86 +545,87 @@ void ui_fill_rect(NVGcontext *vg, const Rect &r, const NVGpaint &paint, float ra
 
 static const char frame_vertex_shader[] =
 #ifdef NANOVG_GL3_IMPLEMENTATION
-        "#version 150 core\n"
+  "#version 150 core\n"
 #else
-        "#version 300 es\n"
-        #endif
-        "in vec4 aPosition;\n"
-        "in vec4 aTexCoord;\n"
-        "uniform mat4 uTransform;\n"
-        "out vec4 vTexCoord;\n"
-        "void main() {\n"
-        "  gl_Position = uTransform * aPosition;\n"
-        "  vTexCoord = aTexCoord;\n"
-        "}\n";
+  "#version 300 es\n"
+#endif
+  "in vec4 aPosition;\n"
+  "in vec4 aTexCoord;\n"
+  "uniform mat4 uTransform;\n"
+  "out vec4 vTexCoord;\n"
+  "void main() {\n"
+  "  gl_Position = uTransform * aPosition;\n"
+  "  vTexCoord = aTexCoord;\n"
+  "}\n";
 
 static const char frame_fragment_shader[] =
 #ifdef NANOVG_GL3_IMPLEMENTATION
-        "#version 150 core\n"
+  "#version 150 core\n"
 #else
-        "#version 300 es\n"
-        #endif
-        "precision mediump float;\n"
-        "uniform sampler2D uTexture;\n"
-        "in vec4 vTexCoord;\n"
-        "out vec4 colorOut;\n"
-        "void main() {\n"
-        "  colorOut = texture(uTexture, vTexCoord.xy);\n"
-        #ifdef QCOM
-        "  vec3 dz = vec3(0.0627f, 0.0627f, 0.0627f);\n"
+  "#version 300 es\n"
+#endif
+  "precision mediump float;\n"
+  "uniform sampler2D uTexture;\n"
+  "in vec4 vTexCoord;\n"
+  "out vec4 colorOut;\n"
+  "void main() {\n"
+  "  colorOut = texture(uTexture, vTexCoord.xy);\n"
+#ifdef QCOM
+  "  vec3 dz = vec3(0.0627f, 0.0627f, 0.0627f);\n"
   "  colorOut.rgb = ((vec3(1.0f, 1.0f, 1.0f) - dz) * colorOut.rgb / vec3(1.0f, 1.0f, 1.0f)) + dz;\n"
-        #endif
-        "}\n";
+#endif
+  "}\n";
 
 static const mat4 device_transform = {{
-                                              1.0,  0.0, 0.0, 0.0,
-                                              0.0,  1.0, 0.0, 0.0,
-                                              0.0,  0.0, 1.0, 0.0,
-                                              0.0,  0.0, 0.0, 1.0,
-                                      }};
-
-static const float driver_view_ratio = 1.333;
-#ifndef QCOM2
-// frame from 4/3 to 16/9 display
-static const mat4 driver_view_transform = {{
-                                                   driver_view_ratio*(1080-2*bdr_s)/(1920-2*bdr_s),  0.0, 0.0, 0.0,
-                                                   0.0,  1.0, 0.0, 0.0,
-                                                   0.0,  0.0, 1.0, 0.0,
-                                                   0.0,  0.0, 0.0, 1.0,
-                                           }};
-#else
-// from dmonitoring.cc
-static const int full_width_tici = 1928;
-static const int full_height_tici = 1208;
-static const int adapt_width_tici = 668;
-static const int crop_x_offset = 32;
-static const int crop_y_offset = -196;
-static const float yscale = full_height_tici * driver_view_ratio / adapt_width_tici;
-static const float xscale = yscale*(1080-2*bdr_s)/(2160-2*bdr_s)*full_width_tici/full_height_tici;
-
-static const mat4 driver_view_transform = {{
-  xscale,  0.0, 0.0, xscale*crop_x_offset/full_width_tici*2,
-  0.0,  yscale, 0.0, yscale*crop_y_offset/full_height_tici*2,
+  1.0,  0.0, 0.0, 0.0,
+  0.0,  1.0, 0.0, 0.0,
   0.0,  0.0, 1.0, 0.0,
   0.0,  0.0, 0.0, 1.0,
 }};
-#endif
+
+static mat4 get_driver_view_transform() {
+  const float driver_view_ratio = 1.333;
+  mat4 transform;
+  if (Hardware::TICI()) {
+    // from dmonitoring.cc
+    const int full_width_tici = 1928;
+    const int full_height_tici = 1208;
+    const int adapt_width_tici = 668;
+    const int crop_x_offset = 32;
+    const int crop_y_offset = -196;
+    const float yscale = full_height_tici * driver_view_ratio / adapt_width_tici;
+    const float xscale = yscale*(1080-2*bdr_s)/(2160-2*bdr_s)*full_width_tici/full_height_tici;
+    transform = (mat4){{
+      xscale,  0.0, 0.0, xscale*crop_x_offset/full_width_tici*2,
+      0.0,  yscale, 0.0, yscale*crop_y_offset/full_height_tici*2,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0,
+    }};
+  
+  } else {
+     // frame from 4/3 to 16/9 display
+    transform = (mat4){{
+      driver_view_ratio*(1080-2*bdr_s)/(1920-2*bdr_s),  0.0, 0.0, 0.0,
+      0.0,  1.0, 0.0, 0.0,
+      0.0,  0.0, 1.0, 0.0,
+      0.0,  0.0, 0.0, 1.0,
+    }};
+  }
+  return transform;
+}
 
 void ui_nvg_init(UIState *s) {
   // init drawing
-#ifdef QCOM
-  // on QCOM, we enable MSAA
-  s->vg = nvgCreate(0);
-#else
-  s->vg = nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
-#endif
+
+  // on EON, we enable MSAA
+  s->vg = Hardware::EON() ? nvgCreate(0) : nvgCreate(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG);
   assert(s->vg);
 
   // init fonts
   std::pair<const char *, const char *> fonts[] = {
-          {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
-          {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
-          {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
+      {"sans-regular", "../assets/fonts/opensans_regular.ttf"},
+      {"sans-semibold", "../assets/fonts/opensans_semibold.ttf"},
+      {"sans-bold", "../assets/fonts/opensans_bold.ttf"},
   };
   for (auto [name, file] : fonts) {
     int font_id = nvgCreateFont(s->vg, name, file);
@@ -527,10 +670,10 @@ void ui_nvg_init(UIState *s) {
     }
     const uint8_t frame_indicies[] = {0, 1, 2, 0, 2, 3};
     const float frame_coords[4][4] = {
-            {-1.0, -1.0, x2, y1}, //bl
-            {-1.0,  1.0, x2, y2}, //tl
-            { 1.0,  1.0, x1, y2}, //tr
-            { 1.0, -1.0, x1, y1}, //br
+      {-1.0, -1.0, x2, y1}, //bl
+      {-1.0,  1.0, x2, y2}, //tl
+      { 1.0,  1.0, x1, y2}, //tr
+      { 1.0, -1.0, x1, y1}, //br
     };
 
     glGenVertexArrays(1, &s->frame_vao[i]);
@@ -564,13 +707,13 @@ void ui_nvg_init(UIState *s) {
   float zy = s->zoom * 2 * intrinsic_matrix.v[5] / s->video_rect.h;
 
   const mat4 frame_transform = {{
-                                        zx, 0.0, 0.0, 0.0,
-                                        0.0, zy, 0.0, -y_offset / s->video_rect.h * 2,
-                                        0.0, 0.0, 1.0, 0.0,
-                                        0.0, 0.0, 0.0, 1.0,
-                                }};
+    zx, 0.0, 0.0, 0.0,
+    0.0, zy, 0.0, -y_offset / s->video_rect.h * 2,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0,
+  }};
 
-  s->front_frame_mat = matmul(device_transform, driver_view_transform);
+  s->front_frame_mat = matmul(device_transform, get_driver_view_transform());
   s->rear_frame_mat = matmul(device_transform, frame_transform);
 
   // Apply transformation such that video pixel coordinates match video

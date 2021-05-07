@@ -1,6 +1,7 @@
 #include "common/util.h"
 #include "sidebar.h"
 #include "qt_window.h"
+#include "selfdrive/hardware/hw.h"
 
 StatusWidget::StatusWidget(bool has_substatus, QWidget *parent) : QFrame(parent) {
   layout = new QVBoxLayout();
@@ -65,13 +66,14 @@ SignalWidget::SignalWidget(QWidget *parent) : QFrame(parent), _strength(0) {
 
   label = new QLabel(this);
   label->setStyleSheet(R"(font-size: 35px; font-weight: 400;)");
-  layout->addWidget(label, 0, Qt::AlignLeft);
+  layout->addWidget(label, 0, Qt::AlignHCenter);
 
-  setFixedWidth(177);
+  setMinimumWidth(190);
   setLayout(layout);
 }
 
 void SignalWidget::paintEvent(QPaintEvent *e) {
+  int startX = (width() - (5 * _dotspace)) / 2;
   QPainter p(this);
   p.setRenderHint(QPainter::Antialiasing, true);
   p.setPen(Qt::NoPen);
@@ -81,7 +83,7 @@ void SignalWidget::paintEvent(QPaintEvent *e) {
       p.setPen(Qt::NoPen);
       p.setBrush(Qt::darkGray);
     }
-    p.drawEllipse(QRectF(_dotspace * i, _top, _dia, _dia));
+    p.drawEllipse(QRectF(startX + _dotspace * i, _top, _dia, _dia));
   }
 }
 
@@ -140,35 +142,35 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent) {
 
 void Sidebar::update(const UIState &s) {
   static std::map<NetStatus, std::pair<QString, QColor>> connectivity_map = {
-          {NET_ERROR, {"CONNECT\nERROR", COLOR_DANGER}},
-          {NET_CONNECTED, {"CONNECT\nONLINE", COLOR_GOOD}},
-          {NET_DISCONNECTED, {"CONNECT\nOFFLINE", COLOR_WARNING}},
+      {NET_ERROR, {"CONNECT\nERROR", COLOR_DANGER}},
+      {NET_CONNECTED, {"CONNECT\nONLINE", COLOR_GOOD}},
+      {NET_DISCONNECTED, {"CONNECT\nOFFLINE", COLOR_WARNING}},
   };
   auto net_params = connectivity_map[s.scene.athenaStatus];
   connect->update(net_params.first, net_params.second);
 
   static std::map<cereal::DeviceState::ThermalStatus, QColor> temp_severity_map = {
-          {cereal::DeviceState::ThermalStatus::GREEN, COLOR_GOOD},
-          {cereal::DeviceState::ThermalStatus::YELLOW, COLOR_WARNING},
-          {cereal::DeviceState::ThermalStatus::RED, COLOR_DANGER},
-          {cereal::DeviceState::ThermalStatus::DANGER, COLOR_DANGER}};
+      {cereal::DeviceState::ThermalStatus::GREEN, COLOR_GOOD},
+      {cereal::DeviceState::ThermalStatus::YELLOW, COLOR_WARNING},
+      {cereal::DeviceState::ThermalStatus::RED, COLOR_DANGER},
+      {cereal::DeviceState::ThermalStatus::DANGER, COLOR_DANGER}};
   QString temp_val = QString("%1 °C").arg((int)s.scene.deviceState.getAmbientTempC());
   temp->update(temp_val, temp_severity_map[s.scene.deviceState.getThermalStatus()], "TEMP");
 
   static std::map<cereal::DeviceState::NetworkType, const char *> network_type_map = {
-          {cereal::DeviceState::NetworkType::NONE, "--"},
-          {cereal::DeviceState::NetworkType::WIFI, "WiFi"},
-          {cereal::DeviceState::NetworkType::CELL2_G, "2G"},
-          {cereal::DeviceState::NetworkType::CELL3_G, "3G"},
-          {cereal::DeviceState::NetworkType::CELL4_G, "4G"},
-          {cereal::DeviceState::NetworkType::CELL5_G, "5G"}};
+      {cereal::DeviceState::NetworkType::NONE, "--"},
+      {cereal::DeviceState::NetworkType::WIFI, "WiFi"},
+      {cereal::DeviceState::NetworkType::CELL2_G, "2G"},
+      {cereal::DeviceState::NetworkType::CELL3_G, "3G"},
+      {cereal::DeviceState::NetworkType::CELL4_G, "4G"},
+      {cereal::DeviceState::NetworkType::CELL5_G, "5G"}};
   const char *network_type = network_type_map[s.scene.deviceState.getNetworkType()];
   static std::map<cereal::DeviceState::NetworkStrength, int> network_strength_map = {
-          {cereal::DeviceState::NetworkStrength::UNKNOWN, 1},
-          {cereal::DeviceState::NetworkStrength::POOR, 2},
-          {cereal::DeviceState::NetworkStrength::MODERATE, 3},
-          {cereal::DeviceState::NetworkStrength::GOOD, 4},
-          {cereal::DeviceState::NetworkStrength::GREAT, 5}};
+      {cereal::DeviceState::NetworkStrength::UNKNOWN, 1},
+      {cereal::DeviceState::NetworkStrength::POOR, 2},
+      {cereal::DeviceState::NetworkStrength::MODERATE, 3},
+      {cereal::DeviceState::NetworkStrength::GOOD, 4},
+      {cereal::DeviceState::NetworkStrength::GREAT, 5}};
   const int img_idx = s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::NONE ? 0 : network_strength_map[s.scene.deviceState.getNetworkStrength()];
 
   if(s.scene.deviceState.getNetworkType() == cereal::DeviceState::NetworkType::WIFI) {
@@ -184,11 +186,9 @@ void Sidebar::update(const UIState &s) {
     panda_color = COLOR_DANGER;
     panda_message = "NO\nPANDA";
   }
-#ifdef QCOM2
-  else if (s.scene.started) {
+  else if (Hardware::TICI() && s.scene.started) {
     panda_color = s.scene.gpsOK ? COLOR_GOOD : COLOR_WARNING;
     panda_message = QString("SAT CNT\n%1").arg(s.scene.satelliteCount);
   }
-#endif
   panda->update(panda_message, panda_color);
 }

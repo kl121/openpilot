@@ -4,6 +4,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.gm.values import CAR, CruiseButtons, AccState
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
+from common.params import Params
 
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
