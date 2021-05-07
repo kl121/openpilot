@@ -31,7 +31,7 @@ class CarControllerParams():
     self.BRAKE_LOOKUP_BP = [-1., -0.25]
     self.BRAKE_LOOKUP_V = [MAX_BRAKE, 0]
 
-    ACCEL_HYST_GAP = 0.02
+    self.ACCEL_HYST_GAP = 0.02
 
 class CAR:
   HOLDEN_ASTRA = "HOLDEN ASTRA RS-V BK 2017"
