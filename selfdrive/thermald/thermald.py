@@ -383,7 +383,7 @@ def thermald_thread():
     # Set EON charging disable
     # based on kegman, 차량 저압배터리의 전압, 이온 배터리 퍼센티지,
     if EON:
-      from eon_battery_manager import setEONChargingStatus
+      from selfdrive.thermald.eon_battery_manager import setEONChargingStatus
       setEONChargingStatus(power_monitor.car_voltage_mV, msg.deviceState.batteryPercent)
 
     # Check if we need to shut down
