@@ -86,9 +86,18 @@ public:
     std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot reset --hard");
     std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot clean -xfd");
   }
+  static void clean_build_cache() {
+    std::system("/system/bin/su -c rm -rf /data/build_cache");
+  }
   static void update_reboot() {
-    git_clean_reset();
+
     rm_prebuilt();
     reboot();
+  }
+  static void clean_build_reboot() {
+    git_clean_reset();
+    clean_build_cache();
+    update_reboot();
+
   }
 };
