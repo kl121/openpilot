@@ -155,7 +155,7 @@ void Sidebar::update(const UIState &s) {
       {cereal::DeviceState::ThermalStatus::RED, COLOR_DANGER},
       {cereal::DeviceState::ThermalStatus::DANGER, COLOR_DANGER}};
   QString temp_val = QString("%1 °C").arg((int)s.scene.deviceState.getAmbientTempC());
-  temp->update(temp_val, temp_severity_map[s.scene.deviceState.getThermalStatus()], "TEMP");
+  temp->update(temp_val, temp_severity_map[s.scene.deviceState.getThermalStatus()], s.scene.deviceState.getBatteryVoltage().c_str());
 
   static std::map<cereal::DeviceState::NetworkType, const char *> network_type_map = {
       {cereal::DeviceState::NetworkType::NONE, "--"},
