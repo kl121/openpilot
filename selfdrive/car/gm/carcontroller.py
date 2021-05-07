@@ -14,10 +14,10 @@ def accel_hysteresis(accel, accel_steady):
   # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
   if accel == 0:
     accel_steady = 0.
-  elif accel > accel_steady + CarControllerParams.ACCEL_HYST_GAP:
-    accel_steady = accel - CarControllerParams.ACCEL_HYST_GAP
-  elif accel < accel_steady - CarControllerParams.ACCEL_HYST_GAP:
-    accel_steady = accel + CarControllerParams.ACCEL_HYST_GAP
+  elif accel > accel_steady + 0.02:
+    accel_steady = accel - 0.02
+  elif accel < accel_steady - 0.02:
+    accel_steady = accel + 0.02
   accel = accel_steady
 
   return accel, accel_steady
