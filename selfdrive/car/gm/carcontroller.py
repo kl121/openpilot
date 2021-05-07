@@ -61,16 +61,16 @@ class CarController():
 
     # Pedal
     if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
-      #pedal_threshold = 0.15625
-      #final_pedal = (1 - pedal_threshold) * actuators.gas
-      zero = 40/256
-      gas = (1-zero) * actuators.gas + zero
-      regen_brake = clip(actuators.brake, 0., zero)
-      final_accel = gas - regen_brake
-      final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
-      final_pedal = clip(final_accel, 0., 1.)
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
+
+        zero = 40/256
+        gas = (1-zero) * actuators.gas + zero
+        regen_brake = clip(actuators.brake, 0., zero)
+        final_accel = gas - regen_brake
+        final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
+        final_pedal = clip(final_accel, 0., 1.)
+
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
