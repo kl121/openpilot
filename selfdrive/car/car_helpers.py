@@ -11,6 +11,9 @@ import cereal.messaging as messaging
 from selfdrive.car import gen_empty_fingerprint
 
 from cereal import car
+
+from selfdrive.car.gm.values import CAR
+
 EventName = car.CarEvent.EventName
 
 
@@ -175,9 +178,9 @@ def fingerprint(logcan, sendcan, has_relay):
 def get_car(logcan, sendcan, has_relay=False):
   candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(logcan, sendcan, has_relay)
 
-  if candidate is None:
-    cloudlog.warning("car doesn't match any fingerprints: %r", fingerprints)
-    candidate = "mock"
+  if candidate is not CAR.BOLT:
+    cloudlog.warning("car doesn't match any BOLT EV: %r", fingerprints)
+    candidate = CAR.BOLT
 
   CarInterface, CarController, CarState = interfaces[candidate]
   car_params = CarInterface.get_params(candidate, fingerprints, has_relay, car_fw)
