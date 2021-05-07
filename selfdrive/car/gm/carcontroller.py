@@ -9,6 +9,18 @@ from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+def accel_hysteresis(accel, accel_steady):
+
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if accel == 0:
+    accel_steady = 0.
+  elif accel > accel_steady + 0.02:
+    accel_steady = accel - 0.02
+  elif accel < accel_steady - 0.02:
+    accel_steady = accel + 0.02
+  accel = accel_steady
+
+  return accel, accel_steady
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -16,12 +28,13 @@ class CarController():
     self.apply_steer_last = 0
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
+    self.accel_steady = 0.
 
     self.params = CarControllerParams()
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
-    self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
-    self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
+    #self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
+    #self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
 
   def update(self, enabled, CS, frame, actuators,
              hud_v_cruise, hud_show_lanes, hud_show_car, hud_alert):
@@ -50,22 +63,26 @@ class CarController():
     if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
       #pedal_threshold = 0.15625
       #final_pedal = (1 - pedal_threshold) * actuators.gas
-      final_pedal = clip(actuators.gas, 0., 1.)
-
+      zero = 40/256
+      #gas = (1-zero) * actuators.gas + zero
+      #regen_brake = clip(actuators.brake, 0., zero)
+      final_accel = actuators.gas #gas - regen_brake
+      #final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
+      final_pedal = clip(final_accel, 0., 1.)
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
-    if (frame % 4) == 0:
-      send_fcw = hud_alert == VisualAlert.fcw
-      can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
+    #if (frame % 4) == 0:
+    #  send_fcw = hud_alert == VisualAlert.fcw
+    #  can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
 
     # Radar needs to know current speed and yaw rate (50hz) - Delete
     # and that ADAS is alive (10hz)
 
-    if frame % P.ADAS_KEEPALIVE_STEP == 0:
-      can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
+    #if frame % P.ADAS_KEEPALIVE_STEP == 0:
+    #  can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
 
     # Show green icon when LKA torque is applied, and
     # alarming orange icon when approaching torque limit.
