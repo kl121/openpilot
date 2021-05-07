@@ -83,8 +83,8 @@ public:
     std::remove("/data/openpilot/prebuilt"); //rm prebuilt
   }
   static void git_clean_reset() {
-    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot reset --hard")
-    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot clean -xfd")
+    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot reset --hard");
+    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot clean -xfd");
   }
   static void update_reboot() {
     git_clean_reset();
