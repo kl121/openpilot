@@ -195,13 +195,23 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   });
 
-  QPushButton *reboot_rmprebuilt_btn = new QPushButton("클린빌드 재부팅");
+  QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
         Hardware::update_reboot();
       }
   });
+
+#ifdef QCOM
+  QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
+  power_layout->addWidget(cleanbuild_btn);
+  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
+      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
+        Hardware::clean_build_reboot();
+      }
+  });
+#endif
 
 
   QPushButton *poweroff_btn = new QPushButton("끄기");
