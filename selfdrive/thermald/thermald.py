@@ -171,6 +171,9 @@ def thermald_thread():
 
   thermal_config = HARDWARE.get_thermal_config()
 
+
+  eon_charging = True
+
   # CPR3 logging
   if EON:
     base_path = "/sys/kernel/debug/cpr3-regulator/"
@@ -376,6 +379,12 @@ def thermald_thread():
 
     # Check if we need to disable charging (handled by boardd)
     msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts)
+
+    # Set EON charging disable
+    # based on kegman, 차량 저압배터리의 전압, 이온 배터리 퍼센티지,
+    if EON:
+      from eon_battery_manager import setEONChargingStatus
+      setEONChargingStatus(power_monitor.car_voltage_mV, msg.deviceState.batteryPercent)
 
     # Check if we need to shut down
     if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
