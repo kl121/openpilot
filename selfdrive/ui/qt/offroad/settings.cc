@@ -195,7 +195,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   });
 
-  QPushButton *reboot_rmprebuilt_btn = new QPushButton("prebuilt 임시삭제 & 재부팅");
+  QPushButton *reboot_rmprebuilt_btn = new QPushButton("클린빌드 재부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
