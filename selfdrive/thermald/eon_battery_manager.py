@@ -1,4 +1,4 @@
-from power_monitoring import VBATT_PAUSE_CHARGING
+from selfdrive.thermald.power_monitoring import VBATT_PAUSE_CHARGING
 from selfdrive.hardware import HARDWARE,EON
 BATT_PERC_MIN = 30
 BATT_PERC_MAX = 65
