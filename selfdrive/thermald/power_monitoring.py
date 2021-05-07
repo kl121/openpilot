@@ -161,8 +161,6 @@ class PowerMonitoring:
     if pandaState is None or offroad_timestamp is None:
       return False
 
-    BATT_PERC_MAX = 70
-
     now = sec_since_boot()
     disable_charging = False
     disable_charging |= (now - offroad_timestamp) > MAX_TIME_OFFROAD_S
@@ -171,7 +169,7 @@ class PowerMonitoring:
     disable_charging &= (not pandaState.pandaState.ignitionLine and not pandaState.pandaState.ignitionCan)
     disable_charging &= (not self.params.get_bool("DisablePowerDown"))
     disable_charging |= self.params.get_bool("ForcePowerDown")
-    disable_charging |= (HARDWARE.get_battery_capacity() > BATT_PERC_MAX)
+
     return disable_charging
 
   # See if we need to shutdown
