@@ -107,7 +107,7 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       //gas_interceptor_prev = gas_interceptor;
     }
 
-    if ((addr == MSG_RX_GAS) && (!gas_interceptor_detected) {
+    if ((addr == MSG_RX_GAS) && (!gas_interceptor_detected)) {
       gas_pressed = GET_BYTE(to_push, 6) != 0;
     }
 
