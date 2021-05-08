@@ -89,16 +89,16 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.longitudinalTuning.kpBP = [0., 35.]
-    ret.longitudinalTuning.kpV = [0.6, 0.7]
+    ret.longitudinalTuning.kpBP = [0.0, 35.0]
+    ret.longitudinalTuning.kpV = [0.5, 0.7]
     ret.longitudinalTuning.kiBP = [0., 35.]
-    ret.longitudinalTuning.kiV = [0.12, 0.2]
+    ret.longitudinalTuning.kiV = [0.2, 0.25]
 
     if ret.enableGasInterceptor:
-      ret.gasMaxBP = [0., 9., 35]
-      ret.gasMaxV = [0.25, 0.5, 0.7]
+      ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
+      ret.gasMaxV =  [0.4, 0.5, 0.7, 0.7]
 
-    ret.stoppingControl = False
+    ret.stoppingControl = True
     ret.startAccel = 0.8
 
     ret.steerLimitTimer = 1.5
@@ -163,7 +163,7 @@ class CarInterface(CarInterfaceBase):
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
-    elif self.CS.main_on or ret.brakePressed:
+    elif self.CS.main_on or ret.brakePressed or ret.regenPressed:
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 

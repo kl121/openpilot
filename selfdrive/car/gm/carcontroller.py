@@ -33,8 +33,8 @@ class CarController():
     self.params = CarControllerParams()
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
-    #self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
-    #self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
+    self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
+    self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
 
   def update(self, enabled, CS, frame, actuators,
              hud_v_cruise, hud_show_lanes, hud_show_car, hud_alert):
@@ -60,17 +60,19 @@ class CarController():
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
     # Pedal
-    if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
-      #pedal_threshold = 0.15625
-      #final_pedal = (1 - pedal_threshold) * actuators.gas
-      zero = 40/256
-      gas = (1-zero) * actuators.gas + zero
-      regen_brake = clip(actuators.brake, 0., zero)
-      final_accel = gas - regen_brake
-      final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
-      final_pedal = clip(final_accel, 0., 1.)
+    if CS.CP.enableGasInterceptor:
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
+
+        zero = 0.15625   #40/256
+        gas = (1-zero) * actuators.gas + zero
+        regen_brake = clip(actuators.brake, 0., zero)
+        final_accel = gas - regen_brake
+        if not enabled or not CS.adaptive_Cruise:
+          final_accel = 0.
+        final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
+        final_pedal = clip(final_accel, 0., 1.)
+
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
