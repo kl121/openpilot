@@ -36,7 +36,7 @@ class CarInterface(CarInterfaceBase):
     params = Params()
     LQR_enabled = params.get_bool("LQR_Selected")
     INDI_enabled = params.get_bool("INDI_Selected")
-    
+
     if LQR_enabled:
       ret.lateralTuning.init('lqr')
       ret.lateralTuning.lqr.scale = 1800.0
@@ -151,10 +151,10 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.longitudinalTuning.kpBP = [0.0, 5.0, 10.0, 20.0, 35.0]
-    ret.longitudinalTuning.kpV = [0.6, 0.95, 1.19, 1.27, 1.18]
+    ret.longitudinalTuning.kpBP = [0.0, 35.0]
+    ret.longitudinalTuning.kpV = [0.5, 0.7]
     ret.longitudinalTuning.kiBP = [0., 35.]
-    ret.longitudinalTuning.kiV = [0.31, 0.26]
+    ret.longitudinalTuning.kiV = [0.2, 0.25]
 
     if ret.enableGasInterceptor:
       ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
@@ -225,7 +225,7 @@ class CarInterface(CarInterfaceBase):
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
-    elif self.CS.main_on or ret.brakePressed:
+    elif self.CS.main_on or ret.brakePressed or ret.regenPressed:
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 
