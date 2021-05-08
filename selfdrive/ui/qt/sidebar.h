@@ -52,6 +52,7 @@ private:
   QColor panda_status = warning_color;
   int temp_val = 0;
   int batt_perc = 0;
+  char * wifi_addr = nullptr;
   QColor temp_status = warning_color;
   cereal::DeviceState::NetworkType net_type;
   cereal::DeviceState::NetworkStrength strength;

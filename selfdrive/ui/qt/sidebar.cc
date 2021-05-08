@@ -78,8 +78,8 @@ void Sidebar::update(const UIState &s) {
   }
   temp_val = (int)s.scene.deviceState.getAmbientTempC();
   batt_perc = s.scene.deviceState.getBatteryPercent();
-//    QString temp_val = QString("%1 °C").arg((int)s.scene.deviceState.getAmbientTempC());
-//  QString batt_perc = QString("BATT: %1 %2").arg(s.scene.deviceState.getBatteryPercent()).arg("%");
+  wifi_addr = s.scene.deviceState.getWifiIpAddress().c_str();
+
 
   panda_str = "VEHICLE\nONLINE";
   panda_status = good_color;
@@ -113,7 +113,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 247, 100, 50);
 //  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
-  p.drawText(r, Qt::AlignCenter, s.scene.deviceState.getWifiIpAddress().c_str());
+  p.drawText(r, Qt::AlignCenter, wifi_addr);
 
   // metrics
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
