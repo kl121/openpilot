@@ -78,8 +78,8 @@ void Sidebar::update(const UIState &s) {
   }
   temp_val = (int)s.scene.deviceState.getAmbientTempC();
   batt_perc = s.scene.deviceState.getBatteryPercent();
-  std::string ip = s.scene.deviceState.getWifiIpAddress();
-  wifi_addr = ip.c_str();
+  wifi_addr = s.scene.deviceState.getWifiIpAddress();
+
 
 
 
@@ -115,7 +115,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 247, 100, 50);
 //  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
-  p.drawText(r, Qt::AlignCenter, wifi_addr);
+  p.drawText(r, Qt::AlignCenter, wifi_addr.c_str());
 
   // metrics
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
