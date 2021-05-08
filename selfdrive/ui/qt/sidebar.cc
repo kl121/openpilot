@@ -112,7 +112,8 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   configFont(p, "Open Sans", 35, 400);
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 247, 100, 50);
-  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
+//  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
+  p.drawText(r, Qt::AlignCenter, s.scene.deviceState.getWifiIpAddress().c_str());
 
   // metrics
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
