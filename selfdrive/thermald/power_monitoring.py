@@ -169,7 +169,6 @@ class PowerMonitoring:
     disable_charging &= (not pandaState.pandaState.ignitionLine and not pandaState.pandaState.ignitionCan)
     disable_charging &= (not self.params.get_bool("DisablePowerDown"))
     disable_charging |= self.params.get_bool("ForcePowerDown")
-
     return disable_charging
 
   # See if we need to shutdown

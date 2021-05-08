@@ -171,9 +171,6 @@ def thermald_thread():
 
   thermal_config = HARDWARE.get_thermal_config()
 
-
-  eon_charging = True
-
   # CPR3 logging
   if EON:
     base_path = "/sys/kernel/debug/cpr3-regulator/"
