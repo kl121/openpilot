@@ -23,15 +23,16 @@ const int GM_GAS_INTERCEPTOR_THRESHOLD = 458;  // (610 + 306.25) / 2ratio betwee
 #define MSG_RX_BUTTON     0x1E1   // RX from BCM, for Cruise Buttons
 #define MSG_RX_BRAKE      0xF1    // RX from EBCM, for Brake Position
 #define MSG_RX_GAS        0x1A1   // RX from EBCM, for Pedal Position
+#define MSG_RX_PEDAL      0x201   // RX from Pedal Interceptor
 
 #define MSG_TX_LKA        0x180   // TX by OP, for LKA commands
 #define MSG_TX_ALIVE      0x409   // TX by OP, for ASCM Alive, To do : We need to check if this message is used for Bolt EV or not.
 #define MSG_TX_ASCM       0x40A   // TX by OP, for ASCM, To do : We need to check if this message is used for Bolt EV or not.
 #define MSG_TX_ACC        0x370   // TX by OP, for ACC Status, To do : We need to check if this message is used for Bolt EV or not.
-#define MSG_TX_PEDAL_01   0x200   // TX by OP, for Pedal Interceptor
-#define MSG_TX_PEDAL_02   0x201   // TX by OP, for Pedal Interceptor
+#define MSG_TX_PEDAL      0x200   // TX by OP, for Pedal Interceptor
 
-const CanMsg GM_TX_MSGS[] = {{MSG_TX_LKA, 0, 4}, {MSG_TX_ALIVE, 0, 7}, {MSG_TX_ASCM, 0, 7}, {MSG_TX_ACC, 0, 6}, {MSG_TX_PEDAL_01, 0, 6}, // pt bus
+
+const CanMsg GM_TX_MSGS[] = {{MSG_TX_LKA, 0, 4}, {MSG_TX_ALIVE, 0, 7}, {MSG_TX_ASCM, 0, 7}, {MSG_TX_ACC, 0, 6}, {MSG_TX_PEDAL, 0, 6}, // pt bus
                              {0x104c006c, 3, 3}, {0x10400060, 3, 5}};  // gmlan
 
 // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
@@ -98,16 +99,16 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       brake_pressed = GET_BYTE(to_push, 1) >= 10;
     }
 
-    if (addr == MSG_RX_GAS) {
-      gas_pressed = GET_BYTE(to_push, 6) != 0;
-    }
-
     // Gas Interceptor Check
     if (addr == MSG_TX_PEDAL_02) {
       gas_interceptor_detected = 1;
       //int gas_interceptor = GM_GET_INTERCEPTOR(to_push);
       //gas_pressed = gas_interceptor > HONDA_GAS_INTERCEPTOR_THRESHOLD;
       //gas_interceptor_prev = gas_interceptor;
+    }
+
+    if ((addr == MSG_RX_GAS) && (!gas_interceptor_detected) {
+      gas_pressed = GET_BYTE(to_push, 6) != 0;
     }
 
     // Check if LKA camera are online
@@ -171,7 +172,7 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   }
 
   // GAS: Interceptor safety check
-  if ((addr == MSG_TX_PEDAL_01) && gas_interceptor_detected) {
+  if (addr == MSG_TX_PEDAL) {
     if (!controls_allowed) {
       if (GET_BYTE(to_send, 0) || GET_BYTE(to_send, 1)) {
         tx = 0;
