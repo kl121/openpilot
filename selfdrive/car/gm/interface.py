@@ -154,7 +154,7 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kpBP = [0.0, 35.0]
     ret.longitudinalTuning.kpV = [0.5, 0.7]
     ret.longitudinalTuning.kiBP = [0., 35.]
-    ret.longitudinalTuning.kiV = [0.2, 0.25]
+    ret.longitudinalTuning.kiV = [0.18, 0.23]
 
     if ret.enableGasInterceptor:
       ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
@@ -212,6 +212,8 @@ class CarInterface(CarInterfaceBase):
     if self.CP.enableGasInterceptor:
       if self.CS.adaptive_Cruise and ret.regenPressed:
         events.add(EventName.pedalPressed)
+        self.CS.adaptive_Cruise = False
+        self.CS.enable_lkas = True
 
     # handle button presses
     if not self.CS.main_on and self.CP.enableGasInterceptor:
@@ -228,7 +230,7 @@ class CarInterface(CarInterfaceBase):
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
-    elif self.CS.main_on or ret.brakePressed or ret.regenPressed:
+    elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 
