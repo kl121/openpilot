@@ -60,14 +60,16 @@ class CarController():
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
     # Pedal
-    if enabled and CS.CP.enableGasInterceptor and CS.adaptive_Cruise:
+    if CS.CP.enableGasInterceptor:
       if (frame % 4) == 0:
         idx = (frame // 4) % 4
 
-        zero = 40/256
+        zero = 0.15625   #40/256
         gas = (1-zero) * actuators.gas + zero
         regen_brake = clip(actuators.brake, 0., zero)
         final_accel = gas - regen_brake
+        if not enabled or not CS.adaptive_Cruise:
+          final_accel = 0.
         final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
         final_pedal = clip(final_accel, 0., 1.)
 
