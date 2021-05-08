@@ -78,7 +78,9 @@ void Sidebar::update(const UIState &s) {
   }
   temp_val = (int)s.scene.deviceState.getAmbientTempC();
   batt_perc = s.scene.deviceState.getBatteryPercent();
-  wifi_addr = s.scene.deviceState.getWifiIpAddress().c_str();
+  std::string ip = s.scene.deviceState.getWifiIpAddress();
+  wifi_addr = ip.c_str();
+
 
 
   panda_str = "VEHICLE\nONLINE";
