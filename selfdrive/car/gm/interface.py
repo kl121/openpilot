@@ -78,14 +78,14 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kpBP = [0.0, 35.0]
     ret.longitudinalTuning.kpV = [0.5, 0.7]
     ret.longitudinalTuning.kiBP = [0., 35.]
-    ret.longitudinalTuning.kiV = [0.2, 0.25]
+    ret.longitudinalTuning.kiV = [0.18, 0.23]
 
     if ret.enableGasInterceptor:
       ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
       ret.gasMaxV =  [0.4, 0.5, 0.7, 0.7]
 
-    ret.stoppingControl = True
-    ret.startAccel = 0.8
+    ret.stoppingControl = False
+    ret.startAccel = 0.4
 
     ret.steerLimitTimer = 1.5
     ret.radarTimeStep = 0.0667  # GM radar runs at 15Hz instead of standard 20Hz
@@ -133,6 +133,11 @@ class CarInterface(CarInterfaceBase):
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
+    if self.CP.enableGasInterceptor:
+      if self.CS.adaptive_Cruise and (ret.brakePressed or ret.regenPressed):
+        events.add(EventName.pedalPressed)
+        self.CS.adaptive_Cruise = False
+        self.CS.enable_lkas = True
 
     # handle button presses
     if not self.CS.main_on and self.CP.enableGasInterceptor:
@@ -149,7 +154,7 @@ class CarInterface(CarInterfaceBase):
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
-    elif self.CS.main_on or ret.brakePressed or ret.regenPressed:
+    elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 
