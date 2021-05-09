@@ -67,6 +67,12 @@ void Sidebar::update(const UIState &s) {
   }
 
   net_type = s.scene.deviceState.getNetworkType();
+  if(net_type == cereal::DeviceState::NetworkType::WIFI) {
+    std::string ip = s.scene.deviceState.getWifiIpAddress();
+    network_str = ip.c_str();
+  } else {
+    network_str = network_type[net_type]
+  }
   strength = s.scene.deviceState.getNetworkStrength();
 
   temp_status = danger_color;
@@ -78,10 +84,6 @@ void Sidebar::update(const UIState &s) {
   }
   temp_val = (int)s.scene.deviceState.getAmbientTempC();
   batt_perc = s.scene.deviceState.getBatteryPercent();
-  wifi_addr = s.scene.deviceState.getWifiIpAddress();
-
-
-
 
   panda_str = "VEHICLE\nONLINE";
   panda_status = good_color;
@@ -114,8 +116,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   configFont(p, "Open Sans", 35, 400);
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 247, 225, 50);
-//  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
-  p.drawText(r, Qt::AlignCenter, wifi_addr.c_str());
+  p.drawText(r, Qt::AlignCenter, network_str);
 
   // metrics
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
