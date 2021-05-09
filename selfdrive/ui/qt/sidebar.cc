@@ -71,7 +71,7 @@ void Sidebar::update(const UIState &s) {
     std::string ip = s.scene.deviceState.getWifiIpAddress();
     network_str = ip.c_str();
   } else {
-    network_str = network_type[net_type]
+    network_str = network_type[net_type];
   }
   strength = s.scene.deviceState.getNetworkStrength();
 
