@@ -4,7 +4,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.gm.values import CAR, CruiseButtons, AccState
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
-from common.params import Params
+
 
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
@@ -33,52 +33,38 @@ class CarInterface(CarInterfaceBase):
     ret.enableGasInterceptor = 0x201 in fingerprint[0]
     ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
 
-    params = Params()
-    LQR_enabled = params.get_bool("LQR_Selected")
-    INDI_enabled = params.get_bool("INDI_Selected")
 
-    if LQR_enabled:
-      ret.lateralTuning.init('lqr')
-      ret.lateralTuning.lqr.scale = 1965.0
-      ret.lateralTuning.lqr.ki = 0.024
-      ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
-      ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
-      ret.lateralTuning.lqr.c = [1., 0.]
-      ret.lateralTuning.lqr.k = [-110., 451.]
-      ret.lateralTuning.lqr.l = [0.33, 0.318]
-      ret.lateralTuning.lqr.dcGain = 0.00225
-    elif not LQR_enabled and INDI_enabled:
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGainBP = [10., 30.]
-      ret.lateralTuning.indi.innerLoopGainV = [5.5, 6.0]
-      ret.lateralTuning.indi.outerLoopGainBP = [10., 30.]
-      ret.lateralTuning.indi.outerLoopGainV = [4.5, 5.0]
-      ret.lateralTuning.indi.timeConstantBP = [10., 30.]
-      ret.lateralTuning.indi.timeConstantV = [1.8, 2.3]
-      ret.lateralTuning.indi.actuatorEffectivenessBP = [0.]
-      ret.lateralTuning.indi.actuatorEffectivenessV = [2.0]
-    elif not LQR_enabled and not INDI_enabled:
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 30.0], [10., 30.0]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.24], [0.015, 0.023]]
-      ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [0.7]  #corolla from shane fork : 0.725
-      ret.lateralTuning.pid.kf = 0.000045
-
+    # Start with a baseline lateral tuning for all GM vehicles. Override tuning as needed in each model section below.
+    ret.minSteerSpeed = 10 * CV.KPH_TO_MS
+    #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+    #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
+    #ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
     ret.steerRateCost = 0.35 # def : 2.0
     ret.steerActuatorDelay = 0.15  # def: 0.2 Default delay, not measured yet
 
-
-
       # initial engage unkown - copied from Volt. Stop and go unknown.
     ret.minEnableSpeed = -1
-    ret.minSteerSpeed = 10 * CV.KPH_TO_MS
-    ret.mass = 1625. + STD_CARGO_KG
+    ret.mass = 1616. + STD_CARGO_KG
     ret.safetyModel = car.CarParams.SafetyModel.gm
     ret.wheelbase = 2.60096
     ret.steerRatio = 16.8
     ret.steerRatioRear = 0.
-    ret.centerToFront = ret.wheelbase * 0.49
+    ret.centerToFront = ret.wheelbase * 0.4 # wild guess
+    ret.lateralTuning.init('lqr')
+
+    ret.lateralTuning.lqr.scale = 1965.0
+    ret.lateralTuning.lqr.ki = 0.024
+    ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
+    ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
+    ret.lateralTuning.lqr.c = [1., 0.]
+    ret.lateralTuning.lqr.k = [-110., 451.]
+    ret.lateralTuning.lqr.l = [0.33, 0.318]
+    ret.lateralTuning.lqr.dcGain = 0.00225
     tire_stiffness_factor = 0.5
+
+    ret.steerRateCost = 0.35 # def : 2.0
+    ret.steerActuatorDelay = 0.15  # def: 0.2 Default delay, not measured yet
+
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
