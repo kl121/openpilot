@@ -343,11 +343,11 @@ class Controls:
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if CS.adaptiveCruise:
-      v_cruise_raw = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
       curv_speed_ms = self.cal_curve_speed(self.sm, CS.vEgo, self.sm.frame)
-      self.v_cruise_kph = min(v_cruise_raw, curv_speed_ms * CV.MS_TO_KPH)
+      self.v_cruise_kph_limit = min(self.v_cruise_kph, curv_speed_ms * CV.MS_TO_KPH)
     elif not CS.adaptiveCruise and CS.cruiseState.enabled:
-      self.v_cruise_kph = 40
+      self.v_cruise_kph_limit = 40
 
     # decrease the soft disable timer at every step, as it's reset on
     # entrance in SOFT_DISABLING state
@@ -491,7 +491,7 @@ class Controls:
     CC.cruiseControl.speedOverride = float(speed_override if self.CP.enableCruise else 0.0)
     CC.cruiseControl.accelOverride = self.CI.calc_accel_override(CS.aEgo, self.sm['longitudinalPlan'].aTarget, CS.vEgo, self.sm['longitudinalPlan'].vTarget)
 
-    CC.hudControl.setSpeed = float(self.v_cruise_kph * CV.KPH_TO_MS)
+    CC.hudControl.setSpeed = float(self.v_cruise_kph_limit * CV.KPH_TO_MS)
     CC.hudControl.speedVisible = self.enabled
     CC.hudControl.lanesVisible = self.enabled
     CC.hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
@@ -563,7 +563,7 @@ class Controls:
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
     controlsState.longControlState = self.LoC.long_control_state
     controlsState.vPid = float(self.LoC.v_pid)
-    controlsState.vCruise = float(self.v_cruise_kph)
+    controlsState.vCruise = float(self.v_cruise_kph_limit)
     controlsState.upAccelCmd = float(self.LoC.pid.p)
     controlsState.uiAccelCmd = float(self.LoC.pid.i)
     controlsState.ufAccelCmd = float(self.LoC.pid.f)
