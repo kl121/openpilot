@@ -160,7 +160,7 @@ class CarInterface(CarInterfaceBase):
       ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
       ret.gasMaxV =  [0.4, 0.5, 0.7, 0.7]
 
-    ret.stoppingControl = True
+    ret.stoppingControl = False
     ret.startAccel = 0.4
 
     ret.steerLimitTimer = 0.4
