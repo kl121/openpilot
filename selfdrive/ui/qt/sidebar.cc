@@ -69,7 +69,9 @@ void Sidebar::update(const UIState &s) {
   net_type = s.scene.deviceState.getNetworkType();
   if(net_type == cereal::DeviceState::NetworkType::WIFI) {
     std::string ip = s.scene.deviceState.getWifiIpAddress();
-    network_type = ip.c_str();
+    network_str = ip.c_str();
+  } else {
+    network_str = network_type[net_type]
   }
   strength = s.scene.deviceState.getNetworkStrength();
 
@@ -113,7 +115,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   configFont(p, "Open Sans", 35, 400);
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 247, 100, 50);
-  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
+  p.drawText(r, Qt::AlignCenter, network_str);
 
   // metrics
   drawMetric(p, "TEMP", QString("%1°C").arg(temp_val), temp_status, 338);
