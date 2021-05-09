@@ -40,8 +40,8 @@ def manager_init():
     ("PrebuiltEnabled", "0"),
 
     #Lateral Control Selection
-    ("INDI_Selected", "0"),
-    ("LQR_Selected", "1"),
+    #("INDI_Selected", "0"),
+    #("LQR_Selected", "1"),
 
   ]
 
