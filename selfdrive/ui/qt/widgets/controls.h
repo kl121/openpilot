@@ -127,7 +127,7 @@ public:
     });
   }
 
-private:
+protected:
   Params params;
 };
 
