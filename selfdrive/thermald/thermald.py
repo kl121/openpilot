@@ -405,6 +405,14 @@ def thermald_thread():
     msg.deviceState.thermalStatus = thermal_status
     pm.send("deviceState", msg)
 
+    import json
+    print("device state--------------------\n")
+    json.dumps(msg,sort_keys=True, indent =4 )
+    print("panda state--------------------\n")
+    json.dumps(msg,sort_keys=True, indent =4 )
+    print("end of logging--------------------\n")
+
+
     if EON and not is_uno:
       set_offroad_alert_if_changed("Offroad_ChargeDisabled", (not usb_power))
 
