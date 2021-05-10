@@ -68,7 +68,7 @@ class CarController():
         zero = 0.15625   #40/256
         accel = actuators.gas - actuators.brake
         final_accel = clip(accel, 0., 1.)
-        if not enabled or not CS.adaptive_Cruise or CS.regenPressed:
+        if not enabled or not CS.adaptive_Cruise:
           final_accel = 0.
         final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
         final_pedal = clip(final_accel, 0., 1.)
