@@ -404,22 +404,6 @@ def thermald_thread():
 
     msg.deviceState.thermalStatus = thermal_status
     pm.send("deviceState", msg)
-
-
-    def pretty(d, indent=0):
-      for key, value in d.items():
-        print('\t' * indent + str(key))
-        if isinstance(value, dict):
-          pretty(value, indent+1)
-        else:
-          print('\t' * (indent+1) + str(value))
-    print("devicestate-----------------------------------------")
-    pretty(msg.deviceState,2)
-    print("pandastate-----------------------------------------")
-    pretty(pandaState,2)
-    print("*********-----------------------------------------")
-
-
     if EON and not is_uno:
       set_offroad_alert_if_changed("Offroad_ChargeDisabled", (not usb_power))
 
