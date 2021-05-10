@@ -37,7 +37,7 @@ class CarState(CarStateBase):
       ret.brake = 0.
 
     if self.CP.enableGasInterceptor:
-      ret.gas = (pt_cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS'] + cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS2']) / 2.
+      ret.gas = (pt_cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS'] + pt_cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS2']) / 2.
       ret.gasPressed = ret.gas > 5   #TODO Need to check
     else:
       ret.gas = pt_cp.vl["AcceleratorPedal"]['AcceleratorPedal'] / 254.
