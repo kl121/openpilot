@@ -405,12 +405,19 @@ def thermald_thread():
     msg.deviceState.thermalStatus = thermal_status
     pm.send("deviceState", msg)
 
-    import json
-    print("device state--------------------\n")
-    json.dumps(msg,sort_keys=True, indent =4 )
-    print("panda state--------------------\n")
-    json.dumps(msg,sort_keys=True, indent =4 )
-    print("end of logging--------------------\n")
+
+    def pretty(d, indent=0):
+      for key, value in d.items():
+        print('\t' * indent + str(key))
+        if isinstance(value, dict):
+          pretty(value, indent+1)
+        else:
+          print('\t' * (indent+1) + str(value))
+    print("devicestate-----------------------------------------")
+    pretty(msg,2)
+    print("pandastate-----------------------------------------")
+    pretty(pandaState,2)
+    print("*********-----------------------------------------")
 
 
     if EON and not is_uno:
