@@ -8,16 +8,17 @@ from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
+ACCEL_HYST_GAP = 0.02
 
 def accel_hysteresis(accel, accel_steady):
 
   # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
   if accel == 0:
     accel_steady = 0.
-  elif accel > accel_steady + 0.02:
-    accel_steady = accel - 0.02
-  elif accel < accel_steady - 0.02:
-    accel_steady = accel + 0.02
+  elif accel > accel_steady + ACCEL_HYST_GAP:
+    accel_steady = accel - ACCEL_HYST_GAP
+  elif accel < accel_steady - ACCEL_HYST_GAP:
+    accel_steady = accel + ACCEL_HYST_GAP
   accel = accel_steady
 
   return accel, accel_steady
@@ -65,10 +66,9 @@ class CarController():
         idx = (frame // 4) % 4
 
         zero = 0.15625   #40/256
-        gas = (1-zero) * actuators.gas + zero
-        regen_brake = clip(actuators.brake, 0., zero)
-        final_accel = gas - regen_brake
-        if not enabled or not CS.adaptive_Cruise:
+        accel = actuators.gas - actuators.brake
+        final_accel = clip(accel, 0., 1.)
+        if not enabled or not CS.adaptive_Cruise or CS.regenPressed:
           final_accel = 0.
         final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
         final_pedal = clip(final_accel, 0., 1.)

@@ -36,11 +36,12 @@ class CarState(CarStateBase):
     if ret.brake < 10/0xd0:
       ret.brake = 0.
 
-    ret.gas = pt_cp.vl["AcceleratorPedal"]['AcceleratorPedal'] / 254.
-    if not self.CP.enableGasInterceptor:
-      ret.gasPressed = ret.gas > 1e-5
+    if self.CP.enableGasInterceptor:
+      ret.gas = (cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS'] + cp.vl["GAS_SENSOR"]['INTERCEPTOR_GAS2']) / 2.
+      ret.gasPressed = ret.gas > 5   #TODO Need to check
     else:
-      ret.gasPressed = False
+      ret.gas = pt_cp.vl["AcceleratorPedal"]['AcceleratorPedal'] / 254.
+      ret.gasPressed = ret.gas > 1e-5
 
     ret.steeringAngleDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelAngle']
     ret.steeringRateDeg = pt_cp.vl["PSCMSteeringAngle"]['SteeringWheelRate']
