@@ -27,7 +27,7 @@ class CarInterfaceBase():
     self.low_speed_alert = False
 
     ####added by jc01rho
-    self.initial_pcmEnable =True
+    self.flag_initial_pcmEnable =True
     self.initial_pcmEnable_counter = 0
 
     if CarState is not None:
@@ -135,16 +135,16 @@ class CarInterfaceBase():
       events.add(EventName.pcmDisable)
 
     #Added by jc01rho inspired by JangPoo
-    if self.initial_pcmEnable and cs_out.cruiseState.enabled and cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 2 and not cs_out.brakePressed :
+    if self.flag_initial_pcmEnable and cs_out.cruiseState.enabled and cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 2 and not cs_out.brakePressed :
       if cs_out.cruiseState.available and not cs_out.seatbeltUnlatched and not cs_out.espDisabled:
         self.initial_pcmEnable_counter = self.initial_pcmEnable_counter+1
         if self.initial_pcmEnable_counter > 1000 :
           events.add(EventName.pcmEnable)
         if self.initial_pcmEnable_counter > 1500 :
-          self.initial_pcmEnable = False
+          self.flag_initial_pcmEnable = False
           self.initial_pcmEnable_counter = 0
-    if not self.initial_pcmEnable  and  ( cs_out.gearShifter == GearShifter.park or cs_out.gearShifter == GearShifter.reverse or (cs_out.brakePressed and cs_out.vEgo < 1) ) :
-      self.initial_pcmEnable = True
+    if not self.flag_initial_pcmEnable  and  (cs_out.gearShifter == GearShifter.park or cs_out.gearShifter == GearShifter.reverse or (cs_out.brakePressed and cs_out.vEgo < 1)) :
+      self.flag_initial_pcmEnable = True
 
 
     return events
