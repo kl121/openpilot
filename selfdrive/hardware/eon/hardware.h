@@ -26,8 +26,8 @@ public:
   static void set_brightness(int percent) {
     std::ofstream brightness_control("/sys/class/leds/lcd-backlight/brightness");
     if (brightness_control.is_open()) {
-      if (percent > 30 ) {
-        percent -= 15;
+      if (percent > 50 ) {
+        percent *= 0.75;
       }
       brightness_control << (int)(percent * (255/100.)) << "\n";
       brightness_control.close();
