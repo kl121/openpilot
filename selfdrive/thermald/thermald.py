@@ -414,7 +414,7 @@ def thermald_thread():
         else:
           print('\t' * (indent+1) + str(value))
     print("devicestate-----------------------------------------")
-    pretty(msg,2)
+    pretty(msg.deviceState,2)
     print("pandastate-----------------------------------------")
     pretty(pandaState,2)
     print("*********-----------------------------------------")
