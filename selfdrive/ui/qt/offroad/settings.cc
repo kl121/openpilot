@@ -1,22 +1,23 @@
-#include <string>
+#include "settings.h"
+
+#include <cassert>
 #include <iostream>
 #include <sstream>
-#include <cassert>
+#include <string>
 
 #ifndef QCOM
-#include "networking.h"
+#include "selfdrive/ui/qt/offroad/networking.h"
 #endif
-#include "settings.h"
-#include "widgets/input.h"
-#include "widgets/toggle.h"
-#include "widgets/offroad_alerts.h"
-#include "widgets/scrollview.h"
-#include "widgets/controls.h"
-#include "widgets/ssh_keys.h"
-#include "common/params.h"
-#include "common/util.h"
+#include "selfdrive/common/params.h"
+#include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"
-#include "ui.h"
+#include "selfdrive/ui/qt/widgets/controls.h"
+#include "selfdrive/ui/qt/widgets/input.h"
+#include "selfdrive/ui/qt/widgets/offroad_alerts.h"
+#include "selfdrive/ui/qt/widgets/scrollview.h"
+#include "selfdrive/ui/qt/widgets/ssh_keys.h"
+#include "selfdrive/ui/qt/widgets/toggle.h"
+#include "selfdrive/ui/ui.h"
 
 TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *toggles_list = new QVBoxLayout();
@@ -107,22 +108,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
   device_layout->addWidget(new LabelControl("Serial", serial));
 
-
-  QHBoxLayout *reset_layout = new QHBoxLayout();
-  reset_layout->setSpacing(30);
-
-  // reset calibration button
-  QPushButton *reset_calib_btn = new QPushButton("Reset Calibration");
-  reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?")) {
-          Params().remove("CalibrationParams");
-      }
-  });
-
-  device_layout->addWidget(horizontal_line());
-  device_layout->addLayout(reset_layout);
-
   // offroad-only buttons
   QList<ButtonControl*> offroad_btns;
 
@@ -187,7 +172,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton *reboot_btn = new QPushButton("재부팅");
+  QPushButton *reboot_btn = new QPushButton("Reboot");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
@@ -195,26 +180,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   });
 
-  QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
-  power_layout->addWidget(reboot_rmprebuilt_btn);
-  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
-        Hardware::update_reboot();
-      }
-  });
-
-#ifdef QCOM
-  QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
-  power_layout->addWidget(cleanbuild_btn);
-  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
-        Hardware::clean_build_reboot();
-      }
-  });
-#endif
-
-
-  QPushButton *poweroff_btn = new QPushButton("끄기");
+  QPushButton *poweroff_btn = new QPushButton("Power Off");
   poweroff_btn->setStyleSheet("background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
@@ -297,30 +263,6 @@ QWidget * network_panel(QWidget * parent) {
   return w;
 }
 
-QWidget * community_panel() {
-  QVBoxLayout *toggles_list = new QVBoxLayout();
-  toggles_list->addWidget(new ParamControl("AutoLaneChangeEnabled",
-                                            "Enable Auto Lane Change Assist",
-                                            "warnings: it is beta, be careful!!",
-                                            "../assets/offroad/icon_road.png"
-                                              ));
-  toggles_list->addWidget(horizontal_line());
-  toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
-                                            "Enable Prebuilt File",
-                                            "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
-                                            "../assets/offroad/icon_checkmark.png"
-                                            ));
-
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new LQRSelection());
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new INDISelection());
-
-  QWidget *widget = new QWidget;
-  widget->setLayout(toggles_list);
-  return widget;
-}
-
 void SettingsWindow::showEvent(QShowEvent *event) {
   if (layout()) {
     panel_widget->setCurrentIndex(0);
@@ -360,7 +302,6 @@ void SettingsWindow::showEvent(QShowEvent *event) {
     {"Network", network_panel(this)},
     {"Toggles", new TogglesPanel(this)},
     {"Developer", new DeveloperPanel()},
-    {"Community", community_panel()},
   };
 
   sidebar_layout->addSpacing(45);
@@ -368,6 +309,7 @@ void SettingsWindow::showEvent(QShowEvent *event) {
   for (auto &[name, panel] : panels) {
     QPushButton *btn = new QPushButton(name);
     btn->setCheckable(true);
+    btn->setChecked(nav_btns->buttons().size() == 0);
     btn->setStyleSheet(R"(
       QPushButton {
         color: grey;

@@ -4,9 +4,9 @@ from selfdrive.controls.lib.pid import LongPIController
 
 LongCtrlState = log.ControlsState.LongControlState
 
-STOPPING_EGO_SPEED = 1.0
-STOPPING_TARGET_SPEED_OFFSET = 0.01
-STARTING_TARGET_SPEED = 1.0
+STOPPING_EGO_SPEED = 2.0
+STOPPING_TARGET_SPEED_OFFSET = 1.0
+STARTING_TARGET_SPEED = 0.2
 BRAKE_THRESHOLD_TO_PID = 0.2
 
 BRAKE_STOPPING_TARGET = 0.5  # apply at least this amount of brake to maintain the vehicle stationary
@@ -102,7 +102,11 @@ class LongControl():
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
-      output_gb = 0.
+      # Keep applying brakes until the car is stopped
+      if not CS.standstill or output_gb > -BRAKE_STOPPING_TARGET:
+        output_gb -= CP.stoppingBrakeRate / RATE
+      output_gb = clip(output_gb, -brake_max, 0.)
+
       self.reset(CS.vEgo)
 
     # Intention is to move again, release brake fast before handing control to PID

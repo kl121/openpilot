@@ -1,6 +1,7 @@
-#include "common/util.h"
-#include "sidebar.h"
-#include "qt_window.h"
+#include "selfdrive/ui/qt/sidebar.h"
+
+#include "selfdrive/ui/qt/qt_window.h"
+#include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"
 
 void configFont(QPainter &p, QString family, int size, int weight) {
@@ -115,7 +116,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.drawImage(58, 196, signal_imgs[strength]);
   configFont(p, "Open Sans", 35, 400);
   p.setPen(QColor(0xff, 0xff, 0xff));
-  const QRect r = QRect(50, 247, 225, 50);
+  const QRect r = QRect(25, 247, 250, 50);
   p.drawText(r, Qt::AlignCenter, network_str);
 
   // metrics
