@@ -152,6 +152,18 @@ class CarInterface(CarInterfaceBase):
       self.CS.adaptive_Cruise = False
       self.CS.enable_lkas = True
 
+    #Added by jc01rho inspired by JangPoo
+    if self.CS.main_on and self.flag_initial_pcmEnable and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
+      if ret.cruiseState.available and not ret.seatbeltUnlatched and not ret.espDisabled:
+        self.initial_pcmEnable_counter = self.initial_pcmEnable_counter+1
+        if self.initial_pcmEnable_counter > 750 :
+          events.add(EventName.pcmEnable)
+        if self.initial_pcmEnable_counter > 1500 :
+          self.flag_initial_pcmEnable = False
+          self.initial_pcmEnable_counter = 0
+    if not self.flag_initial_pcmEnable  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
+      self.flag_initial_pcmEnable = True
+
     ret.events = events.to_msg()
 
     # copy back carState packet to CS
