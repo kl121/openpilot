@@ -84,6 +84,10 @@ class LongControl():
       self.reset(v_ego_pid)
       output_gb = 0.
 
+    elif self.long_control_state != LongCtrlState.off and CS.regenPressed:
+      self.reset(CS.vEgo)
+      output_gb = 0.
+
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid or LongCtrlState.starting:
       self.v_pid = v_target
