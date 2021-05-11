@@ -66,8 +66,8 @@ class CarController():
         idx = (frame // 2) % 4
 
         zero = 0.15625   #40/256
-        regen_brake = -clip(-actuators.brake, 0, zero)
-        accel = (1 - zero) * actuators.gas + zero - regen_brake
+        regen_brake = actuators.brake * zero
+        accel = (1 - regen_brake) * actuators.gas
         final_accel = clip(accel, 0., 1.)
         if not enabled or not CS.adaptive_Cruise:
           final_accel = 0.
