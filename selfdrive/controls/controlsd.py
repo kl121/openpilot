@@ -344,8 +344,8 @@ class Controls:
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if CS.adaptiveCruise:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
-      curv_speed_ms = self.cal_curve_speed(self.sm, CS.vEgo, self.sm.frame)
-      self.v_cruise_kph_limit = min(self.v_cruise_kph, curv_speed_ms * CV.MS_TO_KPH)
+      #curv_speed_ms = self.cal_curve_speed(self.sm, CS.vEgo, self.sm.frame)
+      self.v_cruise_kph_limit = self.v_cruise_kph #min(self.v_cruise_kph, curv_speed_ms * CV.MS_TO_KPH)
     elif not CS.adaptiveCruise and CS.cruiseState.enabled:
       self.v_cruise_kph_limit = 40
 
