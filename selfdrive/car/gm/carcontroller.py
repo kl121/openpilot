@@ -62,11 +62,11 @@ class CarController():
 
     # Pedal
     if CS.CP.enableGasInterceptor:
-      if (frame % 4) == 0:
-        idx = (frame // 4) % 4
+      if (frame % 2) == 0:
+        idx = (frame // 2) % 4
 
         zero = 0.15625   #40/256
-        accel = actuators.gas - actuators.brake
+        accel = actuators.gas - actuators.brake * 0.5
         final_accel = clip(accel, 0., 1.)
         if not enabled or not CS.adaptive_Cruise:
           final_accel = 0.
