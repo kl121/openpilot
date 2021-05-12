@@ -62,12 +62,13 @@ class CarController():
 
     # Pedal
     if CS.CP.enableGasInterceptor:
-      if (frame % 4) == 0:
-        idx = (frame // 4) % 4
+      if (frame % 2) == 0:
+        idx = (frame // 2) % 4
 
         zero = 0.15625   #40/256
-        accel = actuators.gas - actuators.brake
-        final_accel = clip(accel, 0., 1.)
+        regen_brake = -clip(-actuators.brake, 0., zero)
+        final_accel = (1 - zero) * actuators.gas + zero - regen_brake
+        
         if not enabled or not CS.adaptive_Cruise:
           final_accel = 0.
         final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)

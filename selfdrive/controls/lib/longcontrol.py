@@ -6,7 +6,7 @@ LongCtrlState = log.ControlsState.LongControlState
 
 STOPPING_EGO_SPEED = 2.0
 STOPPING_TARGET_SPEED_OFFSET = 1.0
-STARTING_TARGET_SPEED = 0.2
+STARTING_TARGET_SPEED = 1.0
 BRAKE_THRESHOLD_TO_PID = 0.2
 
 BRAKE_STOPPING_TARGET = 0.5  # apply at least this amount of brake to maintain the vehicle stationary
@@ -82,10 +82,6 @@ class LongControl():
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.reset(v_ego_pid)
-      output_gb = 0.
-
-    elif self.long_control_state != LongCtrlState.off and CS.regenPressed:
-      self.reset(CS.vEgo)
       output_gb = 0.
 
     # tracking objects and driving
