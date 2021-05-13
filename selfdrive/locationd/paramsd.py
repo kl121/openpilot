@@ -81,7 +81,7 @@ def main(sm=None, pm=None):
   CP = car.CarParams.from_bytes(params_reader.get("CarParams", block=True))
   cloudlog.info("paramsd got CarParams")
 
-  min_sr, max_sr = 0.5 * CP.steerRatio, 2.0 * CP.steerRatio
+  min_sr, max_sr = 0.25 * CP.steerRatio, 4.0 * CP.steerRatio
 
   params = params_reader.get("LiveParameters")
 
@@ -146,9 +146,9 @@ def main(sm=None, pm=None):
       msg.liveParameters.angleOffsetAverageDeg = math.degrees(x[States.ANGLE_OFFSET])
       msg.liveParameters.angleOffsetDeg = msg.liveParameters.angleOffsetAverageDeg + math.degrees(x[States.ANGLE_OFFSET_FAST])
       msg.liveParameters.valid = all((
-        abs(msg.liveParameters.angleOffsetAverageDeg) < 10.0,
-        abs(msg.liveParameters.angleOffsetDeg) < 10.0,
-        0.2 <= msg.liveParameters.stiffnessFactor <= 5.0,
+        abs(msg.liveParameters.angleOffsetAverageDeg) < 15.0,
+        abs(msg.liveParameters.angleOffsetDeg) < 15.0,
+        0.15 <= msg.liveParameters.stiffnessFactor <= 7.5,
         min_sr <= msg.liveParameters.steerRatio <= max_sr,
       ))
 
