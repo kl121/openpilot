@@ -8,7 +8,7 @@ from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-ACCEL_HYST_GAP = 0.02
+ACCEL_HYST_GAP = 0.004
 
 def accel_hysteresis(accel, accel_steady):
 
@@ -30,6 +30,7 @@ class CarController():
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
     self.accel_steady = 0.
+    self.apply_pedal_last = 0.
 
     self.params = CarControllerParams()
 
@@ -66,14 +67,15 @@ class CarController():
         idx = (frame // 2) % 4
 
         zero = 0.15625   #40/256
-        accel = (1 - zero) * actuators.gas
-        regen_brake = zero * actuators.brake #clip(actuators.brake, 0., zero)
+        accel = (1 - zero) * actuators.gas + self.apply_pedal_last * zero
+        regen_brake = zero * actuators.brake
         final_accel = accel - regen_brake
-        
+
         if not enabled or not CS.adaptive_Cruise:
           final_accel = 0.
         final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
         final_pedal = clip(final_accel, 0., 1.)
+        self.apply_pedal_last = final_pedal
 
         can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
