@@ -8,7 +8,7 @@ from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-ACCEL_HYST_GAP = 0.004
+ACCEL_HYST_GAP = 0.008
 
 def accel_hysteresis(accel, accel_steady):
 
@@ -66,7 +66,7 @@ class CarController():
       if (frame % 2) == 0:
         idx = (frame // 2) % 4
 
-        zero = 0.15625   #40/256
+        zero = 0.15625 * 2  #40/256
         accel = (1 - zero) * actuators.gas + self.apply_pedal_last * zero
         regen_brake = zero * actuators.brake
         final_accel = accel - regen_brake
