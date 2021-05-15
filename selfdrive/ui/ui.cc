@@ -132,8 +132,8 @@ static void update_state(UIState *s) {
 
   if (sm.updated("carState")) {
     auto car_state = sm["carState"].getCarState();
-	s->scene.brakeLights = scene.car_state.getBrakeLights();
-
+	  s->scene.brakeLights = scene.car_state.getBrakeLights();
+  }
   if (sm.updated("radarState")) {
     std::optional<cereal::ModelDataV2::XYZTData::Reader> line;
     if (sm.rcv_frame("modelV2") > 0) {
