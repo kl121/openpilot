@@ -343,7 +343,6 @@ static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_
 }
 
 static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
   int bb_ry = bb_y;
   int bb_h = 5;
