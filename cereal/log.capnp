@@ -1074,6 +1074,7 @@ struct UbloxGnss {
     aStatus @2 :AntennaSupervisorState;
     aPower @3 :AntennaPowerStatus;
     jamInd @4 :UInt8;
+    flags @5 :UInt8;
 
     enum AntennaSupervisorState {
       init @0;
