@@ -71,7 +71,7 @@ void Sidebar::update(const UIState &s) {
   strength = s.scene.deviceState.getNetworkStrength();
 
   temp_status = danger_color;
-  auto ts = s.scene.deviceState.getThermalStatus();
+  auto ts = deviceState.getThermalStatus();
   if (ts == cereal::DeviceState::ThermalStatus::GREEN) {
     temp_status = good_color;
   } else if (ts == cereal::DeviceState::ThermalStatus::YELLOW) {
@@ -87,7 +87,7 @@ void Sidebar::update(const UIState &s) {
     panda_str = "NO\nPANDA";
   } else if (Hardware::TICI() && s.scene.started) {
     panda_str = QString("SAT CNT\n%1").arg(s.scene.satelliteCount);
-    panda_status = s.scene.gpsOK ? good_color : warning_color;
+    panda_status = (*s.sm)["liveLocationKalman"].getLiveLocationKalman().getGpsOK() ? good_color : warning_color;
   }
 
   if (s.sm->updated("deviceState") || s.sm->updated("pandaState")) {
