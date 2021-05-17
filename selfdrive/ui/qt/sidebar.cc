@@ -61,18 +61,17 @@ void Sidebar::update(const UIState &s) {
     repaint();
   }
 
-  auto deviceState = (*s.sm)["deviceState"].getDeviceState();
-  net_type = deviceState.getNetworkType();
-  strength = deviceState.getNetworkStrength();
+  net_type = s.scene.deviceState.getNetworkType();
+  strength = s.scene.deviceState.getNetworkStrength();
 
   temp_status = danger_color;
-  auto ts = deviceState.getThermalStatus();
+  auto ts = s.scene.deviceState.getThermalStatus();
   if (ts == cereal::DeviceState::ThermalStatus::GREEN) {
     temp_status = good_color;
   } else if (ts == cereal::DeviceState::ThermalStatus::YELLOW) {
     temp_status = warning_color;
   }
-  temp_val = (int)deviceState.getAmbientTempC();
+  temp_val = (int)s.scene.deviceState.getAmbientTempC();
 
   panda_str = "VEHICLE\nONLINE";
   panda_status = good_color;
@@ -81,7 +80,7 @@ void Sidebar::update(const UIState &s) {
     panda_str = "NO\nPANDA";
   } else if (Hardware::TICI() && s.scene.started) {
     panda_str = QString("SAT CNT\n%1").arg(s.scene.satelliteCount);
-    panda_status = (*s.sm)["liveLocationKalman"].getLiveLocationKalman().getGpsOK() ? good_color : warning_color;
+    panda_status = s.scene.gpsOK ? good_color : warning_color;
   }
 
   if (s.sm->updated("deviceState") || s.sm->updated("pandaState")) {
