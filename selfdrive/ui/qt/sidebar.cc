@@ -61,14 +61,15 @@ void Sidebar::update(const UIState &s) {
     repaint();
   }
 
-  net_type = s.scene.deviceState.getNetworkType();
+  auto deviceState = (*s.sm)["deviceState"].getDeviceState();
+  net_type = deviceState.getNetworkType();
   if(net_type == cereal::DeviceState::NetworkType::WIFI) {
-    std::string ip = s.scene.deviceState.getWifiIpAddress();
+    std::string ip = deviceState.getWifiIpAddress();
     network_str = ip.c_str();
   } else {
     network_str = network_type[net_type];
   }
-  strength = s.scene.deviceState.getNetworkStrength();
+  strength = deviceState.getNetworkStrength();
 
   temp_status = danger_color;
   auto ts = deviceState.getThermalStatus();
@@ -77,8 +78,8 @@ void Sidebar::update(const UIState &s) {
   } else if (ts == cereal::DeviceState::ThermalStatus::YELLOW) {
     temp_status = warning_color;
   }
-  temp_val = (int)s.scene.deviceState.getAmbientTempC();
-  batt_perc = s.scene.deviceState.getBatteryPercent();
+  temp_val = (int)deviceState.getAmbientTempC();
+  batt_perc = deviceState.getBatteryPercent();
 
   panda_str = "VEHICLE\nONLINE";
   panda_status = good_color;
@@ -110,7 +111,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.drawImage(58, 196, signal_imgs[strength]);
   configFont(p, "Open Sans", 35, "Regular");
   p.setPen(QColor(0xff, 0xff, 0xff));
-  const QRect r = QRect(15, 247, 275, 50);
+  const QRect r = QRect(25, 247, 250, 50);
   p.drawText(r, Qt::AlignCenter, network_str);
 
   // metrics

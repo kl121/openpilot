@@ -343,7 +343,6 @@ static int bb_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_
 }
 
 static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
   int bb_ry = bb_y;
   int bb_h = 5;
@@ -417,7 +416,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
   }
 
   // add battery level
-  float batteryTemp = scene->deviceState.getBatteryTempC();
+  float batteryTemp = (*s->sm)["deviceState"].getDeviceState().getBatteryTempC();
   bool batteryless =  batteryTemp < -20;
   if(UI_FEATURE_BATTERY_LEVEL && !batteryless) {
     char val_str[16];
@@ -425,7 +424,7 @@ static void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) 
     //char bat_lvl[4] = "";
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
 
-    int batteryPercent = scene->deviceState.getBatteryPercent();
+    int batteryPercent = (*s->sm)["deviceState"].getDeviceState().getBatteryPercent();
 
     snprintf(val_str, sizeof(val_str), "%d%%", batteryPercent);
     snprintf(uom_str, sizeof(uom_str), "");
@@ -607,7 +606,7 @@ static mat4 get_driver_view_transform() {
       0.0,  0.0, 1.0, 0.0,
       0.0,  0.0, 0.0, 1.0,
     }};
-  
+
   } else {
      // frame from 4/3 to 16/9 display
     transform = (mat4){{
