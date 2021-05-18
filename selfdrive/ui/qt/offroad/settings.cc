@@ -187,7 +187,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reboot_btn = new QPushButton("재부팅");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
+    if (ConfirmationDialog::confirm("단순 재부팅합니다.", this)) {
       Hardware::reboot();
     }
   });
@@ -195,7 +195,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
+      if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.")) {
         Hardware::update_reboot();
       }
   });
@@ -204,7 +204,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
   QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reboot?")) {
+      if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.")) {
         Hardware::clean_build_reboot();
       }
   });
@@ -214,7 +214,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   poweroff_btn->setStyleSheet("background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
+    if (ConfirmationDialog::confirm("전원을 끄시겠습니까?", this)) {
       Hardware::poweroff();
     }
   });
