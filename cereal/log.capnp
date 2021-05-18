@@ -289,7 +289,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   started @11 :Bool;
   startedMonoTime @13 :UInt64;
 
-  wifiIpAddress @31 :Text;
+  wifiIpAddress @32 :Text;
 
   # power
   batteryPercent @8 :Int16;
