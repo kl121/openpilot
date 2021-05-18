@@ -102,6 +102,14 @@ typedef struct UIScene {
   bool brakeLights;
   int lead_status;
   float lead_d_rel, lead_v_rel;
+
+  cereal::DeviceState::Reader deviceState;
+  cereal::RadarState::LeadData::Reader lead_data[2];
+  cereal::CarState::Reader car_state;
+  cereal::ControlsState::Reader controls_state;
+  cereal::DriverState::Reader driver_state;
+  cereal::DriverMonitoringState::Reader dmonitoring_state;
+
 } UIScene;
 
 typedef struct UIState {
