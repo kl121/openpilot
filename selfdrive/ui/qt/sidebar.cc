@@ -64,7 +64,12 @@ void Sidebar::update(const UIState &s) {
   auto deviceState = (*s.sm)["deviceState"].getDeviceState();
   net_type = deviceState.getNetworkType();
   strength = deviceState.getNetworkStrength();
-
+  if(net_type == cereal::DeviceState::NetworkType::WIFI) {
+    std::string ip = deviceState.getWifiIpAddress();
+    network_str = ip.c_str();
+  } else {
+    network_str = network_type[net_type];
+  }
   temp_status = danger_color;
   auto ts = deviceState.getThermalStatus();
   if (ts == cereal::DeviceState::ThermalStatus::GREEN) {
