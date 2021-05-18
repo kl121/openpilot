@@ -7,9 +7,13 @@ from common.realtime import sec_since_boot
 from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
 from selfdrive.controls.lib.longitudinal_mpc import libmpc_py
 from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
+from common.numpy_fast import interp
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
+STOPPING_DISTANCE = 2  # distance between you and lead car when you come to stop
+VEL = [0.0, 2.778, 5.556, 8.333, 11.111, 13.889, 16.667, 19.444, 22.222, 25.0, 27.778]  # velocities
+DIST = [2.0, 2.1, 2.2, 2.3, 2.35, 2.45, 2.6, 2.75, 2.9, 3.0, 3.1]
 
 class LongitudinalMpc():
   def __init__(self, mpc_id):
@@ -62,11 +66,14 @@ class LongitudinalMpc():
   def update(self, CS, lead):
     v_ego = CS.vEgo
 
+    # TR
+    TR = interp(v_ego, VEL, DIST)
+
     # Setup current mpc state
     self.cur_state[0].x_ego = 0.0
 
     if lead is not None and lead.status:
-      x_lead = lead.dRel
+      x_lead = max(0, lead.dRel -  STOPPING_DISTANCE)
       v_lead = max(0.0, lead.vLead)
       a_lead = lead.aLeadK
 
@@ -74,7 +81,7 @@ class LongitudinalMpc():
         v_lead = 0.0
         a_lead = 0.0
 
-      self.a_lead_tau = lead.aLeadTau
+      self.a_lead_tau = max(lead.aLeadTau, (a_lead ** 2 * math.pi) / (2 * (v_lead + 0.01) ** 2))
       self.new_lead = False
       if not self.prev_lead_status or abs(x_lead - self.prev_lead_x) > 2.5:
         self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
@@ -94,7 +101,7 @@ class LongitudinalMpc():
 
     # Calculate mpc
     t = sec_since_boot()
-    self.n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead)
+    self.n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, TR)
     self.duration = int((sec_since_boot() - t) * 1e9)
 
     # Get solution. MPC timestep is 0.2 s, so interpolation to 0.05 s is needed

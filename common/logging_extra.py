@@ -93,15 +93,10 @@ class SwagLogFileFormatter(SwagFormatter):
     return k, v
 
   def format(self, record):
-    try:
-      if isinstance(record, str):
-        v = json.loads(record)
-      else:
-        v = self.format_dict(record)
-    except:
-      print(v)
-      return
-
+    if isinstance(record, str):
+      v = json.loads(record)
+    else:
+      v = self.format_dict(record)
 
     mk, mv = self.fix_kv('msg', v['msg'])
     del v['msg']

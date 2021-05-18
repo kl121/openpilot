@@ -5,38 +5,14 @@ import time
 
 from panda import BASEDIR as PANDA_BASEDIR, Panda, PandaDFU
 from common.basedir import BASEDIR
-from common.gpio import gpio_init, gpio_set
-from selfdrive.hardware import TICI
-from selfdrive.hardware.tici.pins import GPIO_HUB_RST_N, GPIO_STM_BOOT0, GPIO_STM_RST_N
 from selfdrive.swaglog import cloudlog
 
 PANDA_FW_FN = os.path.join(PANDA_BASEDIR, "board", "obj", "panda.bin.signed")
-PANDA_FW_FN_UNSIGNED = os.path.join(PANDA_BASEDIR, "board", "obj", "panda.bin")
-
-
-def set_panda_power(power=True):
-  if not TICI:
-    return
-
-  gpio_init(GPIO_STM_RST_N, True)
-  gpio_init(GPIO_STM_BOOT0, True)
-
-  gpio_set(GPIO_STM_RST_N, True)
-  gpio_set(GPIO_HUB_RST_N, True)
-
-  time.sleep(0.1)
-
-  gpio_set(GPIO_STM_RST_N, not power)
 
 
 def get_expected_signature():
   try:
-    if os.path.exists(PANDA_FW_FN):
-      return Panda.get_signature_from_firmware(PANDA_FW_FN)
-    elif os.path.exists(PANDA_FW_FN_UNSIGNED):
-      return Panda.get_signature_from_firmware(PANDA_FW_FN_UNSIGNED)
-    else:
-      return b""
+    return Panda.get_signature_from_firmware(PANDA_FW_FN)
   except Exception:
     cloudlog.exception("Error computing expected signature")
     return b""
@@ -106,7 +82,6 @@ def update_panda():
 
 
 def main():
-  set_panda_power()
   update_panda()
 
   os.chdir(os.path.join(BASEDIR, "selfdrive/boardd"))

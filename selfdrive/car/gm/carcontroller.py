@@ -1,14 +1,27 @@
 from cereal import car
 from common.realtime import DT_CTRL
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip
 from selfdrive.config import Conversions as CV
-from selfdrive.car import apply_std_steer_torque_limits
+from selfdrive.car import apply_std_steer_torque_limits, create_gas_command
 from selfdrive.car.gm import gmcan
 from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
+ACCEL_HYST_GAP = 0.008
 
+def accel_hysteresis(accel, accel_steady):
+
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if accel == 0:
+    accel_steady = 0.
+  elif accel > accel_steady + ACCEL_HYST_GAP:
+    accel_steady = accel - ACCEL_HYST_GAP
+  elif accel < accel_steady - ACCEL_HYST_GAP:
+    accel_steady = accel + ACCEL_HYST_GAP
+  accel = accel_steady
+
+  return accel, accel_steady
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -16,6 +29,8 @@ class CarController():
     self.apply_steer_last = 0
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
+    self.accel_steady = 0.
+    self.apply_pedal_last = 0.
 
     self.params = CarControllerParams()
 
@@ -32,7 +47,7 @@ class CarController():
     can_sends = []
 
     # STEER
-    lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED
+    lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED and CS.enable_lkas
     if (frame % P.STEER_STEP) == 0:
       if lkas_enabled:
         new_steer = int(round(actuators.steer * P.STEER_MAX))
@@ -46,19 +61,34 @@ class CarController():
 
       can_sends.append(gmcan.create_steering_control(self.packer_pt, CanBus.POWERTRAIN, apply_steer, idx, lkas_enabled))
 
-    # GAS/BRAKE - Delete
+    # Pedal
+    if CS.CP.enableGasInterceptor:
+      if (frame % 2) == 0:
+        idx = (frame // 2) % 4
 
+        zero = 0.15625 * 2  #40/256
+        accel = (1 - zero) * actuators.gas + self.apply_pedal_last * zero
+        regen_brake = zero * actuators.brake
+        final_accel = accel - regen_brake
+
+        if not enabled or not CS.adaptive_Cruise:
+          final_accel = 0.
+        final_accel, self.accel_steady = accel_hysteresis(final_accel, self.accel_steady)
+        final_pedal = clip(final_accel, 0., 1.)
+        self.apply_pedal_last = final_pedal
+
+        can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
 
     # Send dashboard UI commands (ACC status), 25hz
-    if (frame % 4) == 0:
-      send_fcw = hud_alert == VisualAlert.fcw
-      can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
+    #if (frame % 4) == 0:
+    #  send_fcw = hud_alert == VisualAlert.fcw
+    #  can_sends.append(gmcan.create_acc_dashboard_command(self.packer_pt, CanBus.POWERTRAIN, enabled, hud_v_cruise * CV.MS_TO_KPH, hud_show_car, send_fcw))
 
     # Radar needs to know current speed and yaw rate (50hz) - Delete
     # and that ADAS is alive (10hz)
 
-    if frame % P.ADAS_KEEPALIVE_STEP == 0:
-      can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
+    #if frame % P.ADAS_KEEPALIVE_STEP == 0:
+    #  can_sends += gmcan.create_adas_keepalive(CanBus.POWERTRAIN)
 
     # Show green icon when LKA torque is applied, and
     # alarming orange icon when approaching torque limit.

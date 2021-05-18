@@ -53,7 +53,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     lowSpeedLockout @31;
     plannerError @32;
     debugAlert @34;
-    steerTempUnavailableMute @35;
+    steerTempUnavailableUserOverride @35;
     resumeRequired @36;
     preDriverDistracted @37;
     promptDriverDistracted @38;
@@ -64,7 +64,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     belowSteerSpeed @46;
     lowBattery @48;
     vehicleModelInvalid @50;
-    controlsFailed @51;
+    accFaulted @51;
     sensorDataInvalid @52;
     commIssue @53;
     tooDistracted @54;
@@ -89,6 +89,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     startupNoCar @76;
     startupNoControl @77;
     startupMaster @78;
+    startupFuzzyFingerprint @97;
     fcw @79;
     steerSaturated @80;
     belowEngageSpeed @84;
@@ -101,6 +102,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     gpsMalfunction @94;
     processNotRunning @95;
     dashcamMode @96;
+    controlsInitializing @98;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -146,6 +148,7 @@ struct CarState {
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
   brakeLights @19 :Bool;
+  regenPressed @37 :Bool; #this is regen button only
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
@@ -159,9 +162,11 @@ struct CarState {
   stockAeb @30 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
+  lkasEnable @39 :Bool;
 
   # cruise state
   cruiseState @10 :CruiseState;
+  adaptiveCruise @38 :Bool;
 
   # gear
   gearShifter @14 :GearShifter;
@@ -351,12 +356,14 @@ struct CarControl {
 struct CarParams {
   carName @0 :Text;
   carFingerprint @1 :Text;
+  fuzzyFingerprint @55 :Bool;
 
   enableGasInterceptor @2 :Bool;
   enableCruise @3 :Bool;
   enableCamera @4 :Bool;
   enableDsu @5 :Bool; # driving support unit
   enableApgs @6 :Bool; # advanced parking guidance system
+  enableBsm @56 :Bool; # blind spot monitoring
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
@@ -412,6 +419,7 @@ struct CarParams {
   dashcamOnly @41: Bool;
   transmissionType @43 :TransmissionType;
   carFw @44 :List(CarFw);
+
   radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;

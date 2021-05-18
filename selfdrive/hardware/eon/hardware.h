@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <cstdio>
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
@@ -15,6 +16,7 @@ public:
   static constexpr float MAX_VOLUME = 0.85;
   static constexpr float MIN_VOLUME = 0.45;
 
+  static bool EON() { return true; }
   static std::string get_os_version() {
     return "NEOS " + util::read_file("/VERSION");
   };
@@ -24,8 +26,8 @@ public:
   static void set_brightness(int percent) {
     std::ofstream brightness_control("/sys/class/leds/lcd-backlight/brightness");
     if (brightness_control.is_open()) {
-      if (percent > 30 ) {
-        percent -= 15;
+      if (percent > 50 ) {
+        percent *= 0.75;
       }
       brightness_control << (int)(percent * (255/100.)) << "\n";
       brightness_control.close();
@@ -50,6 +52,13 @@ public:
     int ret = std::system("dumpsys SurfaceFlinger --list | grep -Fq 'com.android.settings'");
     launched_activity = ret == 0;
   }
+
+  static void close_activities() {
+    if(launched_activity){
+      std::system("pm disable com.android.settings && pm enable com.android.settings");
+    }
+  }
+
   static void launch_activity(std::string activity, std::string opts = "") {
     if (!launched_activity) {
       std::string cmd = "am start -n " + activity + " " + opts +
@@ -64,5 +73,31 @@ public:
   }
   static void launch_tethering() {
     launch_activity("com.android.settings/.TetherSettings");
+  }
+
+  // added jc01rho
+  static void touch_prebuilt() {
+    std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
+  }
+  static void rm_prebuilt() {
+    std::remove("/data/openpilot/prebuilt"); //rm prebuilt
+  }
+  static void git_clean_reset() {
+    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot reset --hard");
+    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot clean -xfd");
+  }
+  static void clean_build_cache() {
+    std::system("/system/bin/su -c rm -rf /data/build_cache");
+  }
+  static void update_reboot() {
+
+    rm_prebuilt();
+    reboot();
+  }
+  static void clean_build_reboot() {
+    git_clean_reset();
+    clean_build_cache();
+    update_reboot();
+
   }
 };

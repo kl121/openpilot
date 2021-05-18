@@ -12,7 +12,7 @@ import cereal.messaging as messaging
 from cereal import log
 from common.filter_simple import FirstOrderFilter
 from common.numpy_fast import clip, interp
-from common.params import Params
+from common.params import Params, ParamKeyType
 from common.realtime import DT_TRML, sec_since_boot
 from common.dict_helpers import strip_deprecated_keys
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
@@ -24,8 +24,6 @@ from selfdrive.thermald.power_monitoring import PowerMonitoring
 from selfdrive.version import get_git_branch, terms_version, training_version
 
 FW_SIGNATURE = get_expected_signature()
-
-DISABLE_LTE_ONROAD = os.path.exists("/persist/disable_lte_onroad") or TICI
 
 ThermalStatus = log.DeviceState.ThermalStatus
 NetworkType = log.DeviceState.NetworkType
@@ -64,7 +62,6 @@ def read_thermal(thermal_config):
 
 def setup_eon_fan():
   os.system("echo 2 > /sys/module/dwc3_msm/parameters/otg_switch")
-
 
 
 def set_eon_fan(val):
@@ -158,6 +155,7 @@ def thermald_thread():
 
   network_type = NetworkType.none
   network_strength = NetworkStrength.unknown
+  wifiIpAddress = 'N/A'
 
   current_filter = FirstOrderFilter(0., CURRENT_TAU, DT_TRML)
   cpu_temp_filter = FirstOrderFilter(0., CPU_TEMP_TAU, DT_TRML)
@@ -177,6 +175,7 @@ def thermald_thread():
   if EON:
     base_path = "/sys/kernel/debug/cpr3-regulator/"
     cpr_files = [p for p in Path(base_path).glob("**/*") if p.is_file()]
+    cpr_files = ["/sys/kernel/debug/regulator/pm8994_s11/voltage"] + cpr_files
     cpr_data = {}
     for cf in cpr_files:
       with open(cf, "r") as f:
@@ -223,7 +222,7 @@ def thermald_thread():
       if pandaState_prev is not None:
         if pandaState.pandaState.pandaType == log.PandaState.PandaType.unknown and \
           pandaState_prev.pandaState.pandaType != log.PandaState.PandaType.unknown:
-          params.panda_disconnect()
+          params.clear_all(ParamKeyType.CLEAR_ON_PANDA_DISCONNECT)
       pandaState_prev = pandaState
 
     # get_network_type is an expensive call. update every 10s
@@ -231,6 +230,7 @@ def thermald_thread():
       try:
         network_type = HARDWARE.get_network_type()
         network_strength = HARDWARE.get_network_strength(network_type)
+        wifiIpAddress = HARDWARE.get_ip_address()
       except Exception:
         cloudlog.exception("Error getting network status")
 
@@ -239,6 +239,7 @@ def thermald_thread():
     msg.deviceState.cpuUsagePercent = int(round(psutil.cpu_percent()))
     msg.deviceState.networkType = network_type
     msg.deviceState.networkStrength = network_strength
+    msg.deviceState.wifiIpAddress = wifiIpAddress
     msg.deviceState.batteryPercent = HARDWARE.get_battery_capacity()
     msg.deviceState.batteryStatus = HARDWARE.get_battery_status()
     msg.deviceState.batteryCurrent = HARDWARE.get_battery_current()
@@ -328,7 +329,7 @@ def thermald_thread():
       set_offroad_alert_if_changed("Offroad_ConnectivityNeededPrompt", False)
 
     #startup_conditions["up_to_date"] = params.get("Offroad_ConnectivityNeeded") is None or params.get("DisableUpdates") == b"1"
-    startup_conditions["not_uninstalling"] = not params.get("DoUninstall") == b"1"
+    startup_conditions["not_uninstalling"] = not params.get_bool("DoUninstall")
     startup_conditions["accepted_terms"] = params.get("HasAcceptedTerms") == terms_version
 
     panda_signature = params.get("PandaFirmware")
@@ -339,8 +340,8 @@ def thermald_thread():
     startup_conditions["free_space"] = msg.deviceState.freeSpacePercent > 2
     startup_conditions["completed_training"] = params.get("CompletedTrainingVersion") == training_version or \
                                                (current_branch in ['dashcam', 'dashcam-staging'])
-    startup_conditions["not_driver_view"] = not params.get("IsDriverViewEnabled") == b"1"
-    startup_conditions["not_taking_snapshot"] = not params.get("IsTakingSnapshot") == b"1"
+    startup_conditions["not_driver_view"] = not params.get_bool("IsDriverViewEnabled")
+    startup_conditions["not_taking_snapshot"] = not params.get_bool("IsTakingSnapshot")
     # if any CPU gets above 107 or the battery gets above 63, kill all processes
     # controls will warn with CPU above 95 or battery above 60
     startup_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
@@ -348,12 +349,14 @@ def thermald_thread():
 
     # Handle offroad/onroad transition
     should_start = all(startup_conditions.values())
-    if should_start:
-      if not should_start_prev:
-        params.delete("IsOffroad")
-        if TICI and DISABLE_LTE_ONROAD:
-          os.system("sudo systemctl stop --no-block lte")
+    if should_start != should_start_prev or (count == 0):
+      params.put_bool("IsOffroad", not should_start)
+      HARDWARE.set_power_save(not should_start)
+      if TICI and not params.get_bool("EnableLteOnroad"):
+        fxn = "off" if should_start else "on"
+        os.system(f"nmcli radio wwan {fxn}")
 
+    if should_start:
       off_ts = None
       if started_ts is None:
         started_ts = sec_since_boot()
@@ -361,11 +364,6 @@ def thermald_thread():
     else:
       if startup_conditions["ignition"] and (startup_conditions != startup_conditions_prev):
         cloudlog.event("Startup blocked", startup_conditions=startup_conditions)
-
-      if should_start_prev or (count == 0):
-        params.put("IsOffroad", "1")
-        if TICI and DISABLE_LTE_ONROAD:
-          os.system("sudo systemctl start --no-block lte")
 
       started_ts = None
       if off_ts is None:
@@ -379,8 +377,14 @@ def thermald_thread():
     # Check if we need to disable charging (handled by boardd)
     msg.deviceState.chargingDisabled = power_monitor.should_disable_charging(pandaState, off_ts)
 
+    # Set EON charging disable
+    # based on kegman, 차량 저압배터리의 전압, 이온 배터리 퍼센티지,
+    if EON:
+      from selfdrive.thermald.eon_battery_manager import setEONChargingStatus
+      setEONChargingStatus(power_monitor.car_voltage_mV, msg.deviceState.batteryPercent)
+
     # Check if we need to shut down
-    if power_monitor.should_shutdown(pandaState, off_ts, started_seen,msg.deviceState.batteryCurrent):
+    if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
       cloudlog.info(f"shutting device down, offroad since {off_ts}")
       # TODO: add function for blocking cloudlog instead of sleep
       time.sleep(10)
@@ -400,15 +404,17 @@ def thermald_thread():
 
     msg.deviceState.thermalStatus = thermal_status
     pm.send("deviceState", msg)
-
     if EON and not is_uno:
       set_offroad_alert_if_changed("Offroad_ChargeDisabled", (not usb_power))
 
     should_start_prev = should_start
     startup_conditions_prev = startup_conditions.copy()
 
-    # report to server once per minute
-    if (count % int(60. / DT_TRML)) == 0:
+    # report to server once every 10 minutes
+    if (count % int(600. / DT_TRML)) == 0:
+      if EON and started_ts is None and msg.deviceState.memoryUsagePercent > 40:
+        cloudlog.event("High offroad memory usage", mem=msg.deviceState.memoryUsagePercent)
+
       location = messaging.recv_sock(location_sock)
       cloudlog.event("STATUS_PACKET",
                      count=count,

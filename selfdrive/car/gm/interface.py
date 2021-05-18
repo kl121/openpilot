@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
-from selfdrive.car.gm.values import CAR, Ecu, ECU_FINGERPRINT, CruiseButtons, AccState, FINGERPRINTS
-from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
+from selfdrive.car.gm.values import CAR, CruiseButtons, AccState
+from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
+GearShifter = car.CarState.GearShifter
 ButtonType = car.CarState.ButtonEvent.Type
 EventName = car.CarEvent.EventName
 
@@ -28,29 +29,26 @@ class CarInterface(CarInterfaceBase):
     # Presence of a camera on the object bus is ok.
     # Have to go to read_only if ASCM is online (ACC-enabled cars),
     # or camera is on powertrain bus (LKA cars without ACC).
-    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
-    ret.openpilotLongitudinalControl = ret.enableCamera
-    tire_stiffness_factor = 0.444  # not optimized yet
+    ret.enableCamera = True
+    ret.enableGasInterceptor = 0x201 in fingerprint[0]
+    ret.openpilotLongitudinalControl = ret.enableCamera and ret.enableGasInterceptor
 
-    # Start with a baseline lateral tuning for all GM vehicles. Override tuning as needed in each model section below.
-    ret.minSteerSpeed = 9 * CV.KPH_TO_MS
-    #ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    #ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.00]]
-    #ret.lateralTuning.pid.kf = 0.00004   # full torque for 20 deg at 80mph means 0.00007818594
+    tire_stiffness_factor = 0.5
+
+    ret.minSteerSpeed = 10 * CV.KPH_TO_MS
     ret.steerRateCost = 0.35 # def : 2.0
-    ret.steerActuatorDelay = 0.18  # def: 0.2 Default delay, not measured yet
+    ret.steerActuatorDelay = 0.2  # def: 0.2 Default delay, not measured yet
 
-      # initial engage unkown - copied from Volt. Stop and go unknown.
     ret.minEnableSpeed = -1
-    ret.mass = 1616. + STD_CARGO_KG
+    ret.mass = 1625. + STD_CARGO_KG
     ret.safetyModel = car.CarParams.SafetyModel.gm
     ret.wheelbase = 2.60096
     ret.steerRatio = 16.8
     ret.steerRatioRear = 0.
-    ret.centerToFront = ret.wheelbase * 0.4 # wild guess
+    ret.centerToFront = ret.wheelbase * 0.49 # wild guess
     ret.lateralTuning.init('lqr')
 
-    ret.lateralTuning.lqr.scale = 1950.0
+    ret.lateralTuning.lqr.scale = 1965.0
     ret.lateralTuning.lqr.ki = 0.024
     ret.lateralTuning.lqr.a = [0., 1., -0.22619643, 1.21822268]
     ret.lateralTuning.lqr.b = [-1.92006585e-04, 3.95603032e-05]
@@ -58,7 +56,8 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.lqr.k = [-110., 451.]
     ret.lateralTuning.lqr.l = [0.33, 0.318]
     ret.lateralTuning.lqr.dcGain = 0.00225
-    tire_stiffness_factor = 0.5
+
+
 
 
     # TODO: get actual value, for now starting with reasonable value for
@@ -70,15 +69,19 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.longitudinalTuning.kpBP = [5., 35.]
-    ret.longitudinalTuning.kpV = [2.4, 1.5]
-    ret.longitudinalTuning.kiBP = [0.]
-    ret.longitudinalTuning.kiV = [0.36]
+    ret.longitudinalTuning.kpBP = [0.0, 35.0]
+    ret.longitudinalTuning.kpV = [0.5, 0.4]
+    ret.longitudinalTuning.kiBP = [0., 35.]
+    ret.longitudinalTuning.kiV = [0.18, 0.2]
 
-    ret.stoppingControl = True
-    ret.startAccel = 0.8
+    if ret.enableGasInterceptor:
+      ret.gasMaxBP = [0.0, 5.0, 9.0, 35.0]
+      ret.gasMaxV =  [0.4, 0.5, 0.7, 0.7]
 
-    ret.steerLimitTimer = 0.4
+    ret.stoppingControl = False
+    ret.startAccel = 0.4
+
+    ret.steerLimitTimer = 1.5
     ret.radarTimeStep = 0.0667  # GM radar runs at 15Hz instead of standard 20Hz
 
     return ret
@@ -89,7 +92,7 @@ class CarInterface(CarInterfaceBase):
 
     ret = self.CS.update(self.cp)
 
-    ret.cruiseState.enabled = self.CS.main_on
+    ret.cruiseState.enabled = self.CS.main_on or self.CS.adaptive_Cruise
     ret.canValid = self.cp.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
@@ -118,18 +121,48 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    if ret.vEgo < self.CP.minEnableSpeed:
-      events.add(EventName.belowEngageSpeed)
+    # if ret.vEgo < self.CP.minEnableSpeed:
+    #   events.add(EventName.belowEngageSpeed)
     if self.CS.park_brake:
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
+    if self.CP.enableGasInterceptor:
+      if self.CS.adaptive_Cruise and (ret.brakePressed or ret.regenPressed):
+        events.add(EventName.pedalPressed)
+        self.CS.adaptive_Cruise = False
+        self.CS.enable_lkas = True
 
     # handle button presses
-    for b in ret.buttonEvents:
-      # do enable on both accel and decel buttons
-      if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
-        events.add(EventName.buttonEnable)
+    if not self.CS.main_on and self.CP.enableGasInterceptor:
+      for b in ret.buttonEvents:
+        if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = True
+          events.add(EventName.buttonEnable)
+        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = True
+          self.CS.enable_lkas = False
+          events.add(EventName.buttonEnable)
+        if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
+          self.CS.adaptive_Cruise = False
+          self.CS.enable_lkas = True
+          events.add(EventName.buttonCancel)
+    elif self.CS.main_on:
+      self.CS.adaptive_Cruise = False
+      self.CS.enable_lkas = True
+
+    #Added by jc01rho inspired by JangPoo
+    if self.flag_initial_pcmEnable and self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
+      if ret.cruiseState.available and not ret.seatbeltUnlatched and not ret.espDisabled:
+        self.initial_pcmEnable_counter = self.initial_pcmEnable_counter+1
+        if self.initial_pcmEnable_counter > 750 :
+          events.add(EventName.pcmEnable)
+        if self.initial_pcmEnable_counter > 1500 :
+          self.flag_initial_pcmEnable = False
+          self.initial_pcmEnable_counter = 0
+    if not self.flag_initial_pcmEnable  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
+      self.flag_initial_pcmEnable = True
 
     ret.events = events.to_msg()
 

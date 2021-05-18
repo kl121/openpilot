@@ -13,6 +13,9 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 
 GearShifter = car.CarState.GearShifter
 EventName = car.CarEvent.EventName
+
+# WARNING: this value was determined based on the model's training distribution,
+#          model predictions above this speed can be unpredictable
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS  # 135 + 4 = 86 mph
 
 # generic car and radar interfaces
@@ -27,7 +30,8 @@ class CarInterfaceBase():
     self.low_speed_alert = False
 
     ####added by jc01rho
-    self.initial_pcmEnable =True
+    self.flag_initial_pcmEnable =True
+    self.initial_pcmEnable_counter = 0
 
     if CarState is not None:
       self.CS = CarState(CP)
@@ -59,8 +63,8 @@ class CarInterfaceBase():
 
     # standard ALC params
     ret.steerControlType = car.CarParams.SteerControlType.torque
-    ret.steerMaxBP = [0.]
-    ret.steerMaxV = [1.]
+    ret.steerMaxBP = [10., 25.]
+    ret.steerMaxV = [1., 1.2]
     ret.minSteerSpeed = 0.
 
     # stock ACC by default
@@ -73,7 +77,7 @@ class CarInterfaceBase():
     ret.brakeMaxV = [1.]
     ret.openpilotLongitudinalControl = False
     ret.startAccel = 0.0
-    ret.minSpeedCan = 0.3
+    ret.minSpeedCan = 0.5
     ret.stoppingBrakeRate = 0.2 # brake_travel/s while trying to stop
     ret.startingBrakeRate = 0.8 # brake_travel/s while releasing on restart
     ret.stoppingControl = False
@@ -118,7 +122,10 @@ class CarInterfaceBase():
     if cs_out.steerError:
       events.add(EventName.steerUnavailable)
     elif cs_out.steerWarning:
-      events.add(EventName.steerTempUnavailable)
+      if cs_out.steeringPressed:
+        events.add(EventName.steerTempUnavailableUserOverride)
+      else:
+        events.add(EventName.steerTempUnavailable)
 
     # Disable on rising edge of gas or brake. Also disable on brake when speed > 0.
     if cs_out.brakePressed and (not self.CS.out.brakePressed or not cs_out.standstill):
@@ -130,13 +137,7 @@ class CarInterfaceBase():
     elif not cs_out.cruiseState.enabled:
       events.add(EventName.pcmDisable)
 
-    #Added by jc01rho inspired by JangPoo
-    if self.initial_pcmEnable and cs_out.cruiseState.enabled and cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 2 :
-      if cs_out.cruiseState.available and not cs_out.seatbeltUnlatched and not cs_out.espDisabled:
-        events.add(EventName.pcmEnable)
-        self.initial_pcmEnable = False
-    if not self.initial_pcmEnable  and  ( cs_out.gearShifter == GearShifter.park or cs_out.gearShifter == GearShifter.reverse ) :
-      self.initial_pcmEnable = True
+
 
 
     return events
