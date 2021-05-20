@@ -83,6 +83,7 @@ typedef struct UIScene {
 
   // gps
   int satelliteCount;
+  float gpsAccuracy;
 
   // modelV2
   float lane_line_probs[4];
@@ -116,6 +117,7 @@ typedef struct UIState {
   VisionIpcClient * vipc_client;
   VisionIpcClient * vipc_client_front;
   VisionIpcClient * vipc_client_rear;
+  VisionIpcClient * vipc_client_wide;
   VisionBuf * last_frame;
 
   // framebuffer
