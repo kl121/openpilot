@@ -1,3 +1,7 @@
+Version 0.8.5 (2021-XX-XX)
+========================
+ * Hyundai Elantra 2021 support thanks to CruiseBrantley!
+
 Version 0.8.4 (2021-05-17)
 ========================
  * Delay controls start until system is ready

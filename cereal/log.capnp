@@ -280,6 +280,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   cpuUsagePercent @20 :Int8;
   usbOnline @12 :Bool;
   networkType @22 :NetworkType;
+  networkInfo @31 :NetworkInfo;
   offroadPowerUsageUwh @23 :UInt32;
   networkStrength @24 :NetworkStrength;
   carBatteryCapacityUwh @25 :UInt32;
@@ -287,6 +288,8 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   fanSpeedPercentDesired @10 :UInt16;
   started @11 :Bool;
   startedMonoTime @13 :UInt64;
+
+  lastAthenaPingTime @32 :UInt64;
 
   # power
   batteryPercent @8 :Int16;
@@ -326,6 +329,14 @@ struct DeviceState @0xa4d8b5af2aa492eb {
     moderate @2;
     good @3;
     great @4;
+  }
+
+  struct NetworkInfo {
+    technology @0 :Text;
+    operator @1 :Text;
+    band @2 :Text;
+    channel @3 :UInt16;
+    extra @4 :Text;
   }
 
   # deprecated
@@ -867,6 +878,7 @@ struct LiveLocationKalman {
   gpsOK @19 :Bool = true;
   sensorsOK @21 :Bool = true;
   deviceStable @22 :Bool = true;
+  timeSinceReset @23 :Float64;
 
   enum Status {
     uninitialized @0;
