@@ -23,6 +23,7 @@ struct Map(Key, Value) {
 struct InitData {
   kernelArgs @0 :List(Text);
   kernelVersion @15 :Text;
+  osVersion @18 :Text;
 
   gctx @1 :Text;
   dongleId @2 :Text;
@@ -337,6 +338,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
     band @2 :Text;
     channel @3 :UInt16;
     extra @4 :Text;
+    state @5 :Text;
   }
 
   # deprecated
@@ -687,10 +689,24 @@ struct ModelDataV2 {
   struct MetaData {
     engagedProb @0 :Float32;
     desirePrediction @1 :List(Float32);
-    brakeDisengageProb @2 :Float32;
-    gasDisengageProb @3 :Float32;
-    steerOverrideProb @4 :Float32;
     desireState @5 :List(Float32);
+    disengagePredictions @6 :DisengagePredictions;
+    hardBrakePredicted @7 :Bool;
+
+    # deprecated
+    brakeDisengageProbDEPRECATED @2 :Float32;
+    gasDisengageProbDEPRECATED @3 :Float32;
+    steerOverrideProbDEPRECATED @4 :Float32;
+  }
+
+  struct DisengagePredictions {
+    t @0 :List(Float32);
+    brakeDisengageProbs @1 :List(Float32);
+    gasDisengageProbs @2 :List(Float32);
+    steerOverrideProbs @3 :List(Float32);
+    brake3MetersPerSecondSquaredProbs @4 :List(Float32);
+    brake4MetersPerSecondSquaredProbs @5 :List(Float32);
+    brake5MetersPerSecondSquaredProbs @6 :List(Float32);
   }
 }
 
