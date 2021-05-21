@@ -149,7 +149,7 @@ struct CarState {
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
-  #brakeLights @19 :Bool; deprecated at below
+  brakeLights @19 :Bool;
   regenPressed @37 :Bool; #this is regen button only
 
   # steering wheel
@@ -246,7 +246,7 @@ struct CarState {
   }
 
   errorsDEPRECATED @0 :List(CarEvent.EventName);
-  brakeLightsDEPRECATED @19 :Bool;
+  #brakeLightsDEPRECATED @19 :Bool;
 }
 
 # ******* radar state @ 20hz *******
