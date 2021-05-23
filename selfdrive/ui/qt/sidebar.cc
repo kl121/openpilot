@@ -66,9 +66,9 @@ void Sidebar::updateState(const UIState &s) {
     setProperty("connectStr",  online ? "ONLINE" : "ERROR");
     setProperty("connectStatus", online ? good_color : danger_color);
   }
-  auto deviceState = (*s.sm)["deviceState"].getDeviceState();
+
   net_type = deviceState.getNetworkType();
-  strength = deviceState.getNetworkStrength();
+  net_strength = deviceState.getNetworkStrength();
   if(net_type == cereal::DeviceState::NetworkType::WIFI) {
     std::string ip = deviceState.getWifiIpAddress();
     network_str = ip.c_str();
