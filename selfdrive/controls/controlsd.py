@@ -186,7 +186,7 @@ class Controls:
     if self.sm['deviceState'].freeSpacePercent < 7:
       # under 7% of space free no enable allowed
       self.events.add(EventName.outOfSpace)
-    if self.sm['deviceState'].memoryUsagePercent  > 90:
+    if self.sm['deviceState'].memoryUsagePercent > 65:
       self.events.add(EventName.lowMemory)
 
     # Alert if fan isn't spinning for 5 seconds
@@ -266,10 +266,15 @@ class Controls:
           pass
 
       for err in ["ERROR_CRC", "ERROR_ECC", "ERROR_STREAM_UNDERFLOW", "APPLY FAILED"]:
-        err_cnt = sum(err in m for m in messages)
-        if err_cnt:
-          self.events.add(EventName.cameraError)
-          break
+        for m in messages:
+          if err not in m:
+            continue
+
+          csid = m.split("CSID:")[-1].split(" ")[0]
+          evt = {"0": EventName.wideRoadCameraError, "1": EventName.roadCameraError,
+                 "2": EventName.driverCameraError}.get(csid, None)
+          if evt is not None:
+            self.events.add(evt)
 
     # TODO: fix simulator
     if not SIMULATION:
