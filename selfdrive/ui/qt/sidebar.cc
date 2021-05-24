@@ -54,8 +54,8 @@ void Sidebar::updateState(const UIState &s) {
   auto &sm = *(s.sm);
 
   auto deviceState = sm["deviceState"].getDeviceState();
-  setProperty("netType", (int)deviceState.getNetworkType());
-  setProperty("netStrength", (int)deviceState.getNetworkStrength());
+  setProperty("netType", network_type[deviceState.getNetworkType()]);
+  setProperty("netStrength", signal_imgs[deviceState.getNetworkStrength()]);
 
   auto last_ping = deviceState.getLastAthenaPingTime();
   if (last_ping == 0) {
@@ -113,7 +113,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.drawImage(60, 1080 - 180 - 40, home_img);
 
   // network
-  p.drawImage(58, 196, signal_imgs[net_strength]);
+  p.drawImage(58, 196, net_strength);
   configFont(p, "Open Sans", 35, "Regular");
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(25, 247, 250, 50);
