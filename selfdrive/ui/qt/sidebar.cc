@@ -54,7 +54,7 @@ void Sidebar::updateState(const UIState &s) {
   auto &sm = *(s.sm);
 
   auto deviceState = sm["deviceState"].getDeviceState();
-  setProperty("netType", deviceState.getNetworkType());
+  setProperty("netType", network_type[deviceState.getNetworkType()]);
   setProperty("netStrength", signal_imgs[deviceState.getNetworkStrength()]);
 
   auto last_ping = deviceState.getLastAthenaPingTime();
@@ -67,12 +67,13 @@ void Sidebar::updateState(const UIState &s) {
     setProperty("connectStatus", online ? good_color : danger_color);
   }
 
-
-  if(net_type == cereal::DeviceState::NetworkType::WIFI) {
+//  net_type = deviceState.getNetworkType();
+//  net_strength = deviceState.getNetworkStrength();
+  if(net_type == network_type[cereal::DeviceState::NetworkType::WIFI]) {
     std::string ip = deviceState.getWifiIpAddress();
     network_str = ip.c_str();
   } else {
-    network_str = network_type[net_type];
+    network_str = net_type;
   }
 
   QColor tempStatus = danger_color;
