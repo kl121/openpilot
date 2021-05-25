@@ -12,7 +12,7 @@ class Sidebar : public QFrame {
   Q_PROPERTY(QColor pandaStatus MEMBER panda_status NOTIFY valueChanged);
   Q_PROPERTY(int tempVal MEMBER temp_val NOTIFY valueChanged);
   Q_PROPERTY(QColor tempStatus MEMBER temp_status NOTIFY valueChanged);
-  Q_PROPERTY(QString netType MEMBER net_type NOTIFY valueChanged);
+  Q_PROPERTY(cereal::DeviceState::NetworkType netType MEMBER net_type NOTIFY valueChanged);
   Q_PROPERTY(QImage netStrength MEMBER net_strength NOTIFY valueChanged);
 
 public:
