@@ -61,7 +61,7 @@ private:
   int temp_val = 0;
   int batt_perc = 0;
   QColor temp_status = warning_color;
-  QString net_type;
-  QImage net_strength;
+  cereal::DeviceState::NetworkType net_type;
+  cereal::DeviceState::NetworkStrength net_strength;
   QString network_str = "--";
 };
