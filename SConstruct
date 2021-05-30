@@ -39,6 +39,10 @@ AddOption('--mpc-generate',
           action='store_true',
           help='regenerates the mpc sources')
 
+AddOption('--snpe',
+          action='store_true',
+          help='use SNPE on PC')
+
 AddOption('--external-sconscript',
           action='store',
           metavar='FILE',
@@ -53,7 +57,6 @@ if arch == "aarch64" and TICI:
   arch = "larch64"
 
 USE_WEBCAM = os.getenv("USE_WEBCAM") is not None
-QCOM_REPLAY = arch == "aarch64" and os.getenv("QCOM_REPLAY") is not None
 
 lenv = {
   "PATH": os.environ['PATH'],
@@ -100,10 +103,6 @@ if arch == "aarch64" or arch == "larch64":
     cflags = ["-DQCOM", "-mcpu=cortex-a57"]
     cxxflags = ["-DQCOM", "-mcpu=cortex-a57"]
     rpath = []
-
-    if QCOM_REPLAY:
-      cflags += ["-DQCOM_REPLAY"]
-      cxxflags += ["-DQCOM_REPLAY"]
 else:
   cflags = []
   cxxflags = []
@@ -339,7 +338,7 @@ if GetOption("clazy"):
   qt_env['ENV']['CLAZY_IGNORE_DIRS'] = qt_dirs[0]
   qt_env['ENV']['CLAZY_CHECKS'] = ','.join(checks)
 
-Export('env', 'qt_env', 'arch', 'real_arch', 'SHARED', 'USE_WEBCAM', 'QCOM_REPLAY')
+Export('env', 'qt_env', 'arch', 'real_arch', 'SHARED', 'USE_WEBCAM')
 
 # cereal and messaging are shared with the system
 SConscript(['cereal/SConscript'])
