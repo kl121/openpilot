@@ -1,8 +1,6 @@
 #include "settings.h"
 
 #include <cassert>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 #ifndef QCOM
@@ -18,6 +16,7 @@
 #include "selfdrive/ui/qt/widgets/ssh_keys.h"
 #include "selfdrive/ui/qt/widgets/toggle.h"
 #include "selfdrive/ui/ui.h"
+#include "selfdrive/ui/qt/util.h"
 
 TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   QVBoxLayout *toggles_list = new QVBoxLayout();
@@ -73,9 +72,13 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   if (Hardware::TICI()) {
     toggles.append(new ParamControl("EnableWideCamera",
                                     "Enable use of Wide Angle Camera",
-                                    "Use wide angle camera for driving and ui. Only takes effect after reboot.",
+                                    "Use wide angle camera for driving and ui.",
                                     "../assets/offroad/icon_openpilot.png",
                                     this));
+    QObject::connect(toggles.back(), &ToggleControl::toggleFlipped, [=](bool state) {
+      Params().remove("CalibrationParams");
+    });
+
     toggles.append(new ParamControl("EnableLteOnroad",
                                     "Enable LTE while onroad",
                                     "",
@@ -212,12 +215,31 @@ void DeveloperPanel::showEvent(QShowEvent *event) {
   Params params = Params();
   std::string brand = params.getBool("Passive") ? "dashcam" : "openpilot";
   QList<QPair<QString, std::string>> dev_params = {
-    {"Version", brand + " v" + params.get("Version", false).substr(0, 14)},
     {"Git Branch", params.get("GitBranch", false)},
     {"Git Commit", params.get("GitCommit", false).substr(0, 10)},
     {"Panda Firmware", params.get("PandaFirmwareHex", false)},
     {"OS Version", Hardware::get_os_version()},
   };
+
+  QString version = QString::fromStdString(brand + " v" + params.get("Version", false).substr(0, 14)).trimmed();
+  QDateTime lastUpdateDate = QDateTime::fromString(QString::fromStdString(params.get("LastUpdateTime", false)), Qt::ISODate);
+  QString lastUpdateTime = timeAgo(lastUpdateDate);
+
+  if (labels.size() < dev_params.size()) {
+    versionLbl = new LabelControl("Version", version, QString::fromStdString(params.get("ReleaseNotes", false)).trimmed());
+    layout()->addWidget(versionLbl);
+    layout()->addWidget(horizontal_line());
+
+    lastUpdateTimeLbl = new LabelControl("Last Update Check", lastUpdateTime, "The last time openpilot checked for an update.");
+    connect(lastUpdateTimeLbl, &LabelControl::showDescription, [=]() {
+      std::system("pkill -1 -f selfdrive.updated");
+    });
+    layout()->addWidget(lastUpdateTimeLbl);
+    layout()->addWidget(horizontal_line());
+  } else {
+    versionLbl->setText(version);
+    lastUpdateTimeLbl->setText(lastUpdateTime);
+  }
 
   for (int i = 0; i < dev_params.size(); i++) {
     const auto &[name, value] = dev_params[i];
