@@ -21,6 +21,7 @@ public:
   explicit DevicePanel(QWidget* parent = nullptr);
 signals:
   void reviewTrainingGuide();
+  void showDriverView();
 };
 
 class TogglesPanel : public QWidget {
@@ -41,6 +42,7 @@ private:
   QList<LabelControl *> labels;
   LabelControl *versionLbl;
   LabelControl *lastUpdateTimeLbl;
+  ButtonControl *updateButton;
   void updateLabels();
 
   QFileSystemWatcher *fs_watch;
@@ -60,6 +62,7 @@ signals:
   void closeSettings();
   void offroadTransition(bool offroad);
   void reviewTrainingGuide();
+  void showDriverView();
 
 private:
   QPushButton *sidebar_alert_widget;
