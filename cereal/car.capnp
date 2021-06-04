@@ -107,6 +107,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     roadCameraError @100;
     driverCameraError @101;
     wideRoadCameraError @102;
+    localizerMalfunction @103;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -365,6 +366,7 @@ struct CarParams {
   enableDsu @5 :Bool; # driving support unit
   enableApgs @6 :Bool; # advanced parking guidance system
   enableBsm @56 :Bool; # blind spot monitoring
+  hasStockCamera @57 :Bool; # factory LKAS/LDW camera is present
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
@@ -516,6 +518,7 @@ struct CarParams {
     automatic @1;  # Traditional auto, including DSG
     manual @2;  # True "stick shift" only
     direct @3;  # Electric vehicle or other direct drive
+    cvt @4;
   }
 
   struct CarFw {
