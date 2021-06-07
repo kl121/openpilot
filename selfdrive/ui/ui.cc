@@ -129,8 +129,10 @@ static void update_state(UIState *s) {
   SubMaster &sm = *(s->sm);
   UIScene &scene = s->scene;
 
-  if (scene.started && sm.updated("controlsState")) {
-    scene.controls_state = sm["controlsState"].getControlsState();
+  // update engageability and DM icons at 2Hz
+  if (sm.frame % (UI_FREQ / 2) == 0) {
+    scene.engageable = sm["controlsState"].getControlsState().getEngageable();
+    scene.dm_active = sm["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode();
   }
   if (sm.updated("carState")) {
     scene.car_state = sm["carState"].getCarState();
@@ -214,7 +216,7 @@ static void update_state(UIState *s) {
 
     scene.light_sensor = std::clamp<float>((1023.0 / max_lines) * (max_lines - camera_state.getIntegLines() * gain), 0.0, 1023.0);
   }
-  scene.started = sm["deviceState"].getDeviceState().getStarted() || scene.driver_view;
+  scene.started = sm["deviceState"].getDeviceState().getStarted();
 }
 
 static void update_params(UIState *s) {
@@ -262,7 +264,6 @@ static void update_status(UIState *s) {
       s->status = STATUS_DISENGAGED;
       s->scene.started_frame = s->sm->frame;
 
-      s->scene.is_rhd = Params().getBool("IsRHD");
       s->scene.end_to_end = Params().getBool("EndToEndToggle");
       s->wide_camera = Hardware::TICI() ? Params().getBool("EnableWideCamera") : false;
 
@@ -270,9 +271,7 @@ static void update_status(UIState *s) {
       ui_resize(s, s->fb_w, s->fb_h);
 
       // Choose vision ipc client
-      if (s->scene.driver_view) {
-        s->vipc_client = s->vipc_client_front;
-      } else if (s->wide_camera){
+      if (s->wide_camera){
         s->vipc_client = s->vipc_client_wide;
       } else {
         s->vipc_client = s->vipc_client_rear;
@@ -288,7 +287,7 @@ static void update_status(UIState *s) {
 QUIState::QUIState(QObject *parent) : QObject(parent) {
   ui_state.sm = std::make_unique<SubMaster, const std::initializer_list<const char *>>({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "liveLocationKalman",
-    "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss",
+    "pandaState", "carParams", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss",
     "gpsLocationExternal", "roadCameraState",
   });
 
@@ -299,7 +298,6 @@ QUIState::QUIState(QObject *parent) : QObject(parent) {
   ui_state.wide_camera = Hardware::TICI() ? Params().getBool("EnableWideCamera") : false;
 
   ui_state.vipc_client_rear = new VisionIpcClient("camerad", VISION_STREAM_RGB_BACK, true);
-  ui_state.vipc_client_front = new VisionIpcClient("camerad", VISION_STREAM_RGB_FRONT, true);
   ui_state.vipc_client_wide = new VisionIpcClient("camerad", VISION_STREAM_RGB_WIDE, true);
 
   ui_state.vipc_client = ui_state.vipc_client_rear;
