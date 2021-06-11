@@ -1,4 +1,4 @@
-#include "setup.h"
+#include "selfdrive/ui/qt/widgets/setup.h"
 
 #include <QDebug>
 #include <QJsonDocument>
@@ -27,11 +27,11 @@ PairingQRWidget::PairingQRWidget(QWidget* parent) : QWidget(parent) {
   connect(timer, &QTimer::timeout, this, &PairingQRWidget::refresh);
 }
 
-void PairingQRWidget::showEvent(QShowEvent *event){
+void PairingQRWidget::showEvent(QShowEvent *event) {
   refresh();
 }
 
-void PairingQRWidget::refresh(){
+void PairingQRWidget::refresh() {
   Params params;
   QString IMEI = QString::fromStdString(params.get("IMEI"));
   QString serial = QString::fromStdString(params.get("HardwareSerial"));
@@ -48,7 +48,7 @@ void PairingQRWidget::refresh(){
   this->updateQrCode(qrString);
 }
 
-void PairingQRWidget::updateQrCode(QString text) {
+void PairingQRWidget::updateQrCode(const QString &text) {
   QrCode qr = QrCode::encodeText(text.toUtf8().data(), QrCode::Ecc::LOW);
   qint32 sz = qr.getSize();
   // make the image larger so we can have a white border
@@ -254,7 +254,7 @@ void SetupWidget::parseError(const QString &response) {
   mainLayout->setCurrentIndex(0);
 }
 
-void SetupWidget::showQrCode(){
+void SetupWidget::showQrCode() {
   showQr = true;
   mainLayout->setCurrentIndex(1);
 }
