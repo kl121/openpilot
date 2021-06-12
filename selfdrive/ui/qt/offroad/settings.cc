@@ -157,8 +157,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   }, "", this));
 
-  QString brand = params.getBool("Passive") ? "dashcam" : "openpilot";
-  offroad_btns.append(new ButtonControl("Uninstall " + brand, "UNINSTALL", "", [=]() {
+  offroad_btns.append(new ButtonControl("Uninstall " + getBrand(), "UNINSTALL", "", [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to uninstall?", this)) {
       Params().putBool("DoUninstall", true);
     }
@@ -204,7 +203,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   )");
 }
 
-SoftwarePanel::SoftwarePanel(QWidget* parent) : QFrame(parent) {
+SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   setLayout(main_layout);
   setStyleSheet(R"(QLabel {font-size: 50px;})");
@@ -228,15 +227,12 @@ void SoftwarePanel::showEvent(QShowEvent *event) {
 
 void SoftwarePanel::updateLabels() {
   Params params = Params();
-  std::string brand = params.getBool("Passive") ? "dashcam" : "openpilot";
   QList<QPair<QString, std::string>> dev_params = {
     {"Git Branch", params.get("GitBranch")},
     {"Git Commit", params.get("GitCommit").substr(0, 10)},
-    {"Panda Firmware", params.get("PandaFirmwareHex")},
     {"OS Version", Hardware::get_os_version()},
   };
 
-  QString version = QString::fromStdString(brand + " v" + params.get("Version").substr(0, 14)).trimmed();
   QString lastUpdateTime = "";
 
   std::string last_update_param = params.get("LastUpdateTime");
@@ -246,7 +242,7 @@ void SoftwarePanel::updateLabels() {
   }
 
   if (labels.size() < dev_params.size()) {
-    versionLbl = new LabelControl("Version", version, QString::fromStdString(params.get("ReleaseNotes")).trimmed());
+    versionLbl = new LabelControl("Version", getBrandVersion(), QString::fromStdString(params.get("ReleaseNotes")).trimmed());
     layout()->addWidget(versionLbl);
     layout()->addWidget(horizontal_line());
 
@@ -267,7 +263,7 @@ void SoftwarePanel::updateLabels() {
     layout()->addWidget(updateButton);
     layout()->addWidget(horizontal_line());
   } else {
-    versionLbl->setText(version);
+    versionLbl->setText(getBrandVersion());
     lastUpdateTimeLbl->setText(lastUpdateTime);
     updateButton->setText("CHECK");
     updateButton->setEnabled(true);
