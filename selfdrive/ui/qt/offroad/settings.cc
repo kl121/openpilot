@@ -1,4 +1,4 @@
-#include "settings.h"
+#include "selfdrive/ui/qt/offroad/settings.h"
 
 #include <cassert>
 #include <string>
@@ -6,6 +6,11 @@
 #ifndef QCOM
 #include "selfdrive/ui/qt/offroad/networking.h"
 #endif
+
+#ifdef ENABLE_MAPS
+#include "selfdrive/ui/qt/maps/map_settings.h"
+#endif
+
 #include "selfdrive/common/params.h"
 #include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"
@@ -87,8 +92,8 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   bool record_lock = Params().getBool("RecordFrontLock");
   record_toggle->setEnabled(!record_lock);
 
-  for(ParamControl *toggle : toggles){
-    if(toggles_list->count() != 0){
+  for(ParamControl *toggle : toggles) {
+    if(toggles_list->count() != 0) {
       toggles_list->addWidget(horizontal_line());
     }
     toggles_list->addWidget(toggle);
@@ -152,14 +157,13 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     }
   }, "", this));
 
-  QString brand = params.getBool("Passive") ? "dashcam" : "openpilot";
-  offroad_btns.append(new ButtonControl("Uninstall " + brand, "UNINSTALL", "", [=]() {
+  offroad_btns.append(new ButtonControl("Uninstall " + getBrand(), "UNINSTALL", "", [=]() {
     if (ConfirmationDialog::confirm("Are you sure you want to uninstall?", this)) {
       Params().putBool("DoUninstall", true);
     }
   }, "", this));
 
-  for(auto &btn : offroad_btns){
+  for(auto &btn : offroad_btns) {
     device_layout->addWidget(horizontal_line());
     QObject::connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
     device_layout->addWidget(btn);
@@ -199,7 +203,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   )");
 }
 
-SoftwarePanel::SoftwarePanel(QWidget* parent) : QFrame(parent) {
+SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   setLayout(main_layout);
   setStyleSheet(R"(QLabel {font-size: 50px;})");
@@ -223,25 +227,22 @@ void SoftwarePanel::showEvent(QShowEvent *event) {
 
 void SoftwarePanel::updateLabels() {
   Params params = Params();
-  std::string brand = params.getBool("Passive") ? "dashcam" : "openpilot";
   QList<QPair<QString, std::string>> dev_params = {
     {"Git Branch", params.get("GitBranch")},
     {"Git Commit", params.get("GitCommit").substr(0, 10)},
-    {"Panda Firmware", params.get("PandaFirmwareHex")},
     {"OS Version", Hardware::get_os_version()},
   };
 
-  QString version = QString::fromStdString(brand + " v" + params.get("Version").substr(0, 14)).trimmed();
   QString lastUpdateTime = "";
 
   std::string last_update_param = params.get("LastUpdateTime");
-  if (!last_update_param.empty()){
+  if (!last_update_param.empty()) {
     QDateTime lastUpdateDate = QDateTime::fromString(QString::fromStdString(last_update_param + "Z"), Qt::ISODate);
     lastUpdateTime = timeAgo(lastUpdateDate);
   }
 
   if (labels.size() < dev_params.size()) {
-    versionLbl = new LabelControl("Version", version, QString::fromStdString(params.get("ReleaseNotes")).trimmed());
+    versionLbl = new LabelControl("Version", getBrandVersion(), QString::fromStdString(params.get("ReleaseNotes")).trimmed());
     layout()->addWidget(versionLbl);
     layout()->addWidget(horizontal_line());
 
@@ -262,7 +263,7 @@ void SoftwarePanel::updateLabels() {
     layout()->addWidget(updateButton);
     layout()->addWidget(horizontal_line());
   } else {
-    versionLbl->setText(version);
+    versionLbl->setText(getBrandVersion());
     lastUpdateTimeLbl->setText(lastUpdateTime);
     updateButton->setText("CHECK");
     updateButton->setEnabled(true);
@@ -304,7 +305,7 @@ QWidget * network_panel(QWidget * parent) {
 
   layout->addStretch(1);
 
-  QWidget *w = new QWidget;
+  QWidget *w = new QWidget(parent);
   w->setLayout(layout);
 #else
   Networking *w = new Networking(parent);
@@ -318,6 +319,9 @@ void SettingsWindow::showEvent(QShowEvent *event) {
     nav_btns->buttons()[0]->setChecked(true);
     return;
   }
+}
+
+SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
 
   // setup two main layouts
   QVBoxLayout *sidebar_layout = new QVBoxLayout();
@@ -347,33 +351,39 @@ void SettingsWindow::showEvent(QShowEvent *event) {
   QObject::connect(device, &DevicePanel::reviewTrainingGuide, this, &SettingsWindow::reviewTrainingGuide);
   QObject::connect(device, &DevicePanel::showDriverView, this, &SettingsWindow::showDriverView);
 
-  QPair<QString, QWidget *> panels[] = {
+  QList<QPair<QString, QWidget *>> panels = {
     {"Device", device},
     {"Network", network_panel(this)},
     {"Toggles", new TogglesPanel(this)},
-    {"Software", new SoftwarePanel()},
+    {"Software", new SoftwarePanel(this)},
   };
 
-  sidebar_layout->addSpacing(45);
+#ifdef ENABLE_MAPS
+  if (!Params().get("MapboxToken").empty()) {
+    panels.push_back({"Navigation", new MapPanel(this)});
+  }
+#endif
+  const int padding = panels.size() > 3 ? 25 : 35;
+
   nav_btns = new QButtonGroup();
   for (auto &[name, panel] : panels) {
     QPushButton *btn = new QPushButton(name);
     btn->setCheckable(true);
     btn->setChecked(nav_btns->buttons().size() == 0);
-    btn->setStyleSheet(R"(
+    btn->setStyleSheet(QString(R"(
       QPushButton {
         color: grey;
         border: none;
         background: none;
         font-size: 65px;
         font-weight: 500;
-        padding-top: 35px;
-        padding-bottom: 35px;
+        padding-top: %1px;
+        padding-bottom: %1px;
       }
       QPushButton:checked {
         color: white;
       }
-    )");
+    )").arg(padding));
 
     nav_btns->addButton(btn);
     sidebar_layout->addWidget(btn, 0, Qt::AlignRight);
@@ -410,15 +420,15 @@ void SettingsWindow::showEvent(QShowEvent *event) {
   )");
 }
 
-void SettingsWindow::hideEvent(QHideEvent *event){
+void SettingsWindow::hideEvent(QHideEvent *event) {
 #ifdef QCOM
   HardwareEon::close_activities();
 #endif
 
   // TODO: this should be handled by the Dialog classes
   QList<QWidget*> children = findChildren<QWidget *>();
-  for(auto &w : children){
-    if(w->metaObject()->superClass()->className() == QString("QDialog")){
+  for(auto &w : children) {
+    if(w->metaObject()->superClass()->className() == QString("QDialog")) {
       w->close();
     }
   }

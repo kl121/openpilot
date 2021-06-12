@@ -1,16 +1,29 @@
-#include "networking.h"
+#include "selfdrive/ui/qt/offroad/networking.h"
 
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QPixmap>
+#include <QPainter>
 
 #include "selfdrive/ui/qt/widgets/scrollview.h"
 #include "selfdrive/ui/qt/util.h"
 
+
+void NetworkStrengthWidget::paintEvent(QPaintEvent* event) {
+  QPainter p(this);
+  p.setRenderHint(QPainter::Antialiasing);
+  p.setPen(Qt::NoPen);
+  const QColor gray(0x54, 0x54, 0x54);
+  for (int i = 0, x = 0; i < 5; ++i) {
+    p.setBrush(i < strength_ ? Qt::white : gray);
+    p.drawEllipse(x, 0, 15, 15);
+    x += 20;
+  }
+}
+
 // Networking functions
 
-Networking::Networking(QWidget* parent, bool show_advanced) : QWidget(parent), show_advanced(show_advanced){
+Networking::Networking(QWidget* parent, bool show_advanced) : QWidget(parent), show_advanced(show_advanced) {
   s = new QStackedLayout;
 
   QLabel* warning = new QLabel("Network manager is inactive!");
@@ -26,7 +39,7 @@ Networking::Networking(QWidget* parent, bool show_advanced) : QWidget(parent), s
   attemptInitialization();
 }
 
-void Networking::attemptInitialization(){
+void Networking::attemptInitialization() {
   // Checks if network manager is active
   try {
     wifi = new WifiManager(this);
@@ -42,7 +55,7 @@ void Networking::attemptInitialization(){
     QPushButton* advancedSettings = new QPushButton("Advanced");
     advancedSettings->setStyleSheet("margin-right: 30px;");
     advancedSettings->setFixedSize(350, 100);
-    connect(advancedSettings, &QPushButton::released, [=](){ s->setCurrentWidget(an); });
+    connect(advancedSettings, &QPushButton::released, [=]() { s->setCurrentWidget(an); });
     vlayout->addSpacing(10);
     vlayout->addWidget(advancedSettings, 0, Qt::AlignRight);
     vlayout->addSpacing(10);
@@ -57,7 +70,7 @@ void Networking::attemptInitialization(){
   s->addWidget(wifiScreen);
 
   an = new AdvancedNetworking(this, wifi);
-  connect(an, &AdvancedNetworking::backPress, [=](){s->setCurrentWidget(wifiScreen);});
+  connect(an, &AdvancedNetworking::backPress, [=]() { s->setCurrentWidget(wifiScreen); });
   s->addWidget(an);
 
   setStyleSheet(R"(
@@ -79,7 +92,7 @@ void Networking::attemptInitialization(){
   ui_setup_complete = true;
 }
 
-void Networking::refresh(){
+void Networking::refresh() {
   if (!this->isVisible()) {
     return;
   }
@@ -93,7 +106,7 @@ void Networking::refresh(){
   an->refresh();
 }
 
-void Networking::connectToNetwork(Network n) {
+void Networking::connectToNetwork(const Network &n) {
   if (n.security_type == SecurityType::OPEN) {
     wifi->connect(n);
   } else if (n.security_type == SecurityType::WPA) {
@@ -102,7 +115,7 @@ void Networking::connectToNetwork(Network n) {
   }
 }
 
-void Networking::wrongPassword(QString ssid) {
+void Networking::wrongPassword(const QString &ssid) {
   for (Network n : wifi->seen_networks) {
     if (n.ssid == ssid) {
       QString pass = InputDialog::getText("Wrong password for \"" + n.ssid +"\"", 8);
@@ -114,7 +127,7 @@ void Networking::wrongPassword(QString ssid) {
 
 // AdvancedNetworking functions
 
-AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWidget(parent), wifi(wifi){
+AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWidget(parent), wifi(wifi) {
 
   QVBoxLayout* vlayout = new QVBoxLayout;
   vlayout->setMargin(40);
@@ -123,7 +136,7 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
   // Back button
   QPushButton* back = new QPushButton("Back");
   back->setFixedSize(500, 100);
-  connect(back, &QPushButton::released, [=](){emit backPress();});
+  connect(back, &QPushButton::released, [=]() { emit backPress(); });
   vlayout->addWidget(back, 0, Qt::AlignLeft);
 
   // Enable tethering layout
@@ -133,7 +146,7 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
   vlayout->addWidget(horizontal_line(), 0);
 
   // Change tethering password
-  editPasswordButton = new ButtonControl("Tethering Password", "EDIT", "", [=](){
+  editPasswordButton = new ButtonControl("Tethering Password", "EDIT", "", [=]() {
     QString pass = InputDialog::getText("Enter new tethering password", 8);
     if (pass.size()) {
       wifi->changeTetheringPassword(pass);
@@ -156,7 +169,7 @@ AdvancedNetworking::AdvancedNetworking(QWidget* parent, WifiManager* wifi): QWid
   setLayout(vlayout);
 }
 
-void AdvancedNetworking::refresh(){
+void AdvancedNetworking::refresh() {
   ipLabel->setText(wifi->ipv4_address);
   update();
 }
@@ -202,14 +215,9 @@ void WifiUI::refresh() {
     ssid_label->setStyleSheet("font-size: 55px;");
     hlayout->addWidget(ssid_label, 1, Qt::AlignLeft);
 
-    // TODO: don't use images for this
     // strength indicator
     unsigned int strength_scale = network.strength / 17;
-    QPixmap pix("../assets/images/network_" + QString::number(strength_scale) + ".png");
-    QLabel *icon = new QLabel();
-    icon->setPixmap(pix.scaledToWidth(100, Qt::SmoothTransformation));
-    icon->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    hlayout->addWidget(icon, 0, Qt::AlignRight);
+    hlayout->addWidget(new NetworkStrengthWidget(strength_scale), 0, Qt::AlignRight);
 
     // connect button
     QPushButton* btn = new QPushButton(network.security_type == SecurityType::UNSUPPORTED ? "Unsupported" : (network.connected == ConnectedType::CONNECTED ? "Connected" : (network.connected == ConnectedType::CONNECTING ? "Connecting" : "Connect")));

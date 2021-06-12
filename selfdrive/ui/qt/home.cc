@@ -9,6 +9,7 @@
 #include "selfdrive/common/swaglog.h"
 #include "selfdrive/common/timing.h"
 #include "selfdrive/common/util.h"
+#include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/widgets/drive_stats.h"
 #include "selfdrive/ui/qt/widgets/setup.h"
 
@@ -72,7 +73,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
 
     // TODO: Handle this without exposing pointer to map widget
     // Hide map first if visible, then hide sidebar
-    if (onroad->map != nullptr && onroad->map->isVisible()){
+    if (onroad->map != nullptr && onroad->map->isVisible()) {
       onroad->map->setVisible(false);
     } else if (!sidebar->isVisible()) {
       sidebar->setVisible(true);
@@ -102,8 +103,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
   QObject::connect(alert_notification, &QPushButton::released, this, &OffroadHome::openAlerts);
   header_layout->addWidget(alert_notification, 0, Qt::AlignHCenter | Qt::AlignRight);
 
-  std::string brand = Params().getBool("Passive") ? "dashcam" : "openpilot";
-  QLabel* version = new QLabel(QString::fromStdString(brand + " v" + Params().get("Version")));
+  QLabel* version = new QLabel(getBrandVersion());
   version->setStyleSheet(R"(font-size: 55px;)");
   header_layout->addWidget(version, 0, Qt::AlignHCenter | Qt::AlignRight);
 
@@ -175,7 +175,7 @@ void OffroadHome::refresh() {
 
   alerts_widget->refresh();
   if (!alerts_widget->alertCount && !alerts_widget->updateAvailable) {
-    emit closeAlerts();
+    closeAlerts();
     alert_notification->setVisible(false);
     return;
   }
@@ -188,7 +188,7 @@ void OffroadHome::refresh() {
   }
 
   if (!alert_notification->isVisible() && !first_refresh) {
-    emit openAlerts();
+    openAlerts();
   }
   alert_notification->setVisible(true);
 
