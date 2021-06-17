@@ -1,7 +1,4 @@
-#include "ssh_keys.h"
-
-#include <QHBoxLayout>
-#include <QNetworkReply>
+#include "selfdrive/ui/qt/widgets/ssh_keys.h"
 
 #include "selfdrive/common/params.h"
 #include "selfdrive/ui/qt/api.h"
@@ -61,7 +58,6 @@ void SshControl::getUserKeys(const QString &username) {
   HttpRequest *request = new HttpRequest(this, "https://github.com/" + username + ".keys", "", false);
   QObject::connect(request, &HttpRequest::receivedResponse, [=](const QString &resp) {
     if (!resp.isEmpty()) {
-      Params params;
       params.put("GithubUsername", username.toStdString());
       params.put("GithubSshKeys", resp.toStdString());
     } else {
