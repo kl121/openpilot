@@ -14,7 +14,6 @@
 #include "selfdrive/ui/qt/widgets/toggle.h"
 
 QFrame *horizontal_line(QWidget *parent = nullptr);
-
 class AbstractControl : public QFrame {
   Q_OBJECT
 
@@ -46,7 +45,7 @@ class LabelControl : public AbstractControl {
   Q_OBJECT
 
 public:
-  LabelControl(const QString &title, const QString &text, const QString &desc = "", QWidget *parent = nullptr) : AbstractControl(title, desc, "", parent) {
+  LabelControl(const QString &title, const QString &text = "", const QString &desc = "", QWidget *parent = nullptr) : AbstractControl(title, desc, "", parent) {
     label.setText(text);
     label.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     hlayout->addWidget(&label);
