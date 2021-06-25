@@ -37,11 +37,13 @@ const CanMsg GM_TX_MSGS[] = {{MSG_TX_LKA, 0, 4}, {MSG_TX_ALIVE, 0, 7}, {MSG_TX_A
 
 // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
 AddrCheckStruct gm_rx_checks[] = {
-  {.msg = {{MSG_RX_STEER, 0, 8, .expected_timestep = 100000U}}},
-  {.msg = {{MSG_RX_WHEEL, 0, 5, .expected_timestep = 100000U}}},
-  {.msg = {{MSG_RX_BUTTON, 0, 7, .expected_timestep = 100000U}}},
-  {.msg = {{MSG_RX_BRAKE, 0, 6, .expected_timestep = 100000U}}},
-  {.msg = {{MSG_RX_GAS, 0, 7, .expected_timestep = 100000U}}},
+
+  {.msg = {{MSG_RX_STEER, 0, 8, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+  {.msg = {{MSG_RX_WHEEL, 0, 5, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+  {.msg = {{MSG_RX_BUTTON, 0, 7, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+  {.msg = {{MSG_RX_BRAKE, 0, 6, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+  {.msg = {{MSG_RX_GAS, 0, 7, .expected_timestep = 100000U}, { 0 }, { 0 }}},
+
 };
 const int GM_RX_CHECK_LEN = sizeof(gm_rx_checks) / sizeof(gm_rx_checks[0]);
 
@@ -87,6 +89,9 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
         case 5:  // main on
           controls_allowed = 1;
           break;
+        case 6:
+          controls_allowed = 1;
+          break;
         default:
           break;  // any other button is irrelevant
       }
@@ -114,62 +119,30 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     // Check if LKA camera are online
     // on powertrain bus.
     // 384 = ASCMLKASteeringCmd
-    generic_rx_checks(addr == MSG_TX_LKA);
+    generic_rx_checks(((addr == MSG_TX_LKA) || (addr == 715)));
   }
   return valid;
 }
 
-static bool gm_steering_check(int desired_torque) {
-  bool violation = false;
-  uint32_t ts = TIM2->CNT;
-
-  if (controls_allowed) {
-    // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, GM_MAX_STEER, -GM_MAX_STEER);
-
-    // *** torque rate limit check ***
-    violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-      GM_MAX_STEER, GM_MAX_RATE_UP, GM_MAX_RATE_DOWN,
-      GM_DRIVER_TORQUE_ALLOWANCE, GM_DRIVER_TORQUE_FACTOR);
-
-    // used next time
-    desired_torque_last = desired_torque;
-
-    // *** torque real time rate limit check ***
-    violation |= rt_rate_limit_check(desired_torque, rt_torque_last, GM_MAX_RT_DELTA);
-
-    // every RT_INTERVAL set the new limits
-    uint32_t ts_elapsed = get_ts_elapsed(ts, ts_last);
-    if (ts_elapsed > GM_RT_INTERVAL) {
-      rt_torque_last = desired_torque;
-      ts_last = ts;
-    }
-  }
-
-  // no torque if controls is not allowed
-  if (!controls_allowed && (desired_torque != 0)) {
-    violation = true;
-  }
-
-  // reset to 0 if either controls is not allowed or there's a violation
-  if (violation || !controls_allowed) {
-    desired_torque_last = 0;
-    rt_torque_last = 0;
-    ts_last = ts;
-  }
-
-  return violation;
-}
-
+// all commands: gas/regen, friction brake and steering
+// if controls_allowed and no pedals pressed
+//     allow all commands up to limit
+// else
+//     block all commands that produce actuation
 
 static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
 
   int tx = 1;
   int addr = GET_ADDR(to_send);
 
-  if (!msg_allowed(to_send, GM_TX_MSGS, sizeof(GM_TX_MSGS)/sizeof(GM_TX_MSGS[0])) || relay_malfunction) {
+  if (!msg_allowed(to_send, GM_TX_MSGS, sizeof(GM_TX_MSGS)/sizeof(GM_TX_MSGS[0]))) {
     tx = 0;
   }
+
+  if (relay_malfunction) {
+    tx = 0;
+  }
+
 
   // GAS: Interceptor safety check
   if (addr == MSG_TX_PEDAL) {
@@ -179,13 +152,88 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       }
     }
   }
+  // disallow actuator commands if gas or brake (with vehicle moving) are pressed
+  // and the the latching controls_allowed flag is True
+  int pedal_pressed = brake_pressed_prev && vehicle_moving;
+  bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;
+  if (!unsafe_allow_gas) {
+    pedal_pressed = pedal_pressed || gas_pressed_prev;
+  }
+  bool current_controls_allowed = controls_allowed;
+
+  // BRAKE: safety check
+  if (addr == 789) {
+    int brake = ((GET_BYTE(to_send, 0) & 0xFU) << 8) + GET_BYTE(to_send, 1);
+    brake = (0x1000 - brake) & 0xFFF;
+    if (!current_controls_allowed) {
+      if (brake != 0) {
+        tx = 0;
+      }
+    }
+    if (brake > GM_MAX_BRAKE) {
+      tx = 0;
+    }
+  }
 
   // LKA STEER: safety check
   if (addr == MSG_TX_LKA) {
     int desired_torque = ((GET_BYTE(to_send, 0) & 0x7U) << 8) + GET_BYTE(to_send, 1);
+    uint32_t ts = TIM2->CNT;
+    bool violation = false;
     desired_torque = to_signed(desired_torque, 11);
 
-    if (gm_steering_check(desired_torque)) {
+    if (controls_allowed) {
+      // *** global torque limit check ***
+      violation |= max_limit_check(desired_torque, GM_MAX_STEER, -GM_MAX_STEER);
+
+      // *** torque rate limit check ***
+      violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
+        GM_MAX_STEER, GM_MAX_RATE_UP, GM_MAX_RATE_DOWN,
+        GM_DRIVER_TORQUE_ALLOWANCE, GM_DRIVER_TORQUE_FACTOR);
+
+      // used next time
+      desired_torque_last = desired_torque;
+
+      // *** torque real time rate limit check ***
+      violation |= rt_rate_limit_check(desired_torque, rt_torque_last, GM_MAX_RT_DELTA);
+
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_last);
+      if (ts_elapsed > GM_RT_INTERVAL) {
+        rt_torque_last = desired_torque;
+        ts_last = ts;
+      }
+    }
+
+    // no torque if controls is not allowed
+    if (!controls_allowed && (desired_torque != 0)) {
+      violation = true;
+    }
+
+    // reset to 0 if either controls is not allowed or there's a violation
+    if (violation || !controls_allowed) {
+      desired_torque_last = 0;
+      rt_torque_last = 0;
+      ts_last = ts;
+    }
+
+    if (violation) {
+      tx = 0;
+    }
+  }
+
+  // GAS/REGEN: safety check
+  if (addr == 715) {
+    int gas_regen = ((GET_BYTE(to_send, 2) & 0x7FU) << 5) + ((GET_BYTE(to_send, 3) & 0xF8U) >> 3);
+    // Disabled message is !engaged with gas
+    // value that corresponds to max regen.
+    if (!current_controls_allowed) {
+      bool apply = GET_BYTE(to_send, 0) & 1U;
+      if (apply || (gas_regen != GM_MAX_REGEN)) {
+        tx = 0;
+      }
+    }
+    if (gas_regen > GM_MAX_GAS) {
       tx = 0;
     }
   }

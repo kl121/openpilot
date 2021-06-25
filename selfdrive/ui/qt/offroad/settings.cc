@@ -82,12 +82,6 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
     QObject::connect(toggles.back(), &ToggleControl::toggleFlipped, [=](bool state) {
       Params().remove("CalibrationParams");
     });
-
-    toggles.append(new ParamControl("EnableLteOnroad",
-                                    "Enable LTE while onroad",
-                                    "",
-                                    "../assets/offroad/icon_network.png",
-                                    this));
   }
 
   bool record_lock = Params().getBool("RecordFrontLock");
@@ -112,20 +106,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
   main_layout->addWidget(new LabelControl("Serial", serial));
 
-  QHBoxLayout *reset_layout = new QHBoxLayout();
-  reset_layout->setSpacing(30);
-
-  // reset calibration button
-  QPushButton *reset_calib_btn = new QPushButton("Reset Calibration");
-  reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?")) {
-          Params().remove("CalibrationParams");
-      }
-  });
-
-  main_layout->addWidget(horizontal_line());
-  main_layout->addLayout(reset_layout);
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
@@ -191,51 +171,25 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton *reboot_btn = new QPushButton("재부팅");
+  QPushButton *reboot_btn = new QPushButton("Reboot");
+  reboot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("단순 재부팅합니다.", this)) {
+    if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
       Hardware::reboot();
     }
   });
 
-  QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
-  power_layout->addWidget(reboot_rmprebuilt_btn);
-  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.")) {
-        Hardware::update_reboot();
-      }
-  });
-
-#ifdef QCOM
-  QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
-  power_layout->addWidget(cleanbuild_btn);
-  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.")) {
-        Hardware::clean_build_reboot();
-      }
-  });
-#endif
-
-  QPushButton *poweroff_btn = new QPushButton("끄기");
-  poweroff_btn->setStyleSheet("background-color: #E22C2C;");
+  QPushButton *poweroff_btn = new QPushButton("Power Off");
+  poweroff_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("전원을 끄시겠습니까?", this)) {
+    if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
       Hardware::poweroff();
     }
   });
 
   main_layout->addLayout(power_layout);
-
-  setStyleSheet(R"(
-    QPushButton {
-      padding: 0;
-      height: 120px;
-      border-radius: 15px;
-      background-color: #393939;
-    }
-  )");
 }
 
 SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
@@ -300,7 +254,6 @@ void SoftwarePanel::updateLabels() {
   osVersionLbl->setText(QString::fromStdString(Hardware::get_os_version()).trimmed());
 }
 
-
 QWidget * network_panel(QWidget * parent) {
 #ifdef QCOM
   QWidget *w = new QWidget(parent);
@@ -329,31 +282,6 @@ QWidget * network_panel(QWidget * parent) {
 #endif
   return w;
 }
-
-QWidget * community_panel() {
-  QVBoxLayout *toggles_list = new QVBoxLayout();
-  toggles_list->addWidget(new ParamControl("AutoLaneChangeEnabled",
-                                            "Enable Auto Lane Change Assist",
-                                            "warnings: it is beta, be careful!!",
-                                            "../assets/offroad/icon_road.png"
-                                              ));
-  toggles_list->addWidget(horizontal_line());
-  toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
-                                            "Enable Prebuilt File",
-                                            "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
-                                            "../assets/offroad/icon_checkmark.png"
-                                            ));
-
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new LQRSelection());
-//  toggles_list->addWidget(horizontal_line());
-//  toggles_list->addWidget(new INDISelection());
-
-  QWidget *widget = new QWidget;
-  widget->setLayout(toggles_list);
-  return widget;
-}
-
 
 void SettingsWindow::showEvent(QShowEvent *event) {
   if (layout()) {
@@ -399,12 +327,13 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {"Network", network_panel(this)},
     {"Toggles", new TogglesPanel(this)},
     {"Software", new SoftwarePanel(this)},
-    {"Community", community_panel()},
   };
 
 #ifdef ENABLE_MAPS
   if (!Params().get("MapboxToken").empty()) {
-    panels.push_back({"Navigation", new MapPanel(this)});
+    auto map_panel = new MapPanel(this);
+    panels.push_back({"Navigation", map_panel});
+    QObject::connect(map_panel, &MapPanel::closeSettings, this, &SettingsWindow::closeSettings);
   }
 #endif
   const int padding = panels.size() > 3 ? 25 : 35;
