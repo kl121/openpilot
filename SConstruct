@@ -15,6 +15,10 @@ AddOption('--test',
           action='store_true',
           help='build test files')
 
+AddOption('--setup',
+          action='store_true',
+          help='build setup and installer files')
+
 AddOption('--kaitai',
           action='store_true',
           help='Regenerate kaitai struct parsers')
