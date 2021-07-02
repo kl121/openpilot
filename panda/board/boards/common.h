@@ -62,7 +62,6 @@ void peripherals_init(void){
   RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;  // IR PWM
   RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;  // k-line init
   RCC->APB1ENR |= RCC_APB1ENR_TIM6EN;  // interrupt timer
-  RCC->APB1ENR |= RCC_APB1ENR_TIM7EN;  //Message pump timer
   RCC->APB1ENR |= RCC_APB1ENR_TIM12EN; // gmlan_alt
   RCC->APB1ENR |= RCC_APB1ENR_PWREN;   // for RTC config
   RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
