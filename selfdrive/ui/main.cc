@@ -3,18 +3,12 @@
 
 #include "selfdrive/hardware/hw.h"
 #include "selfdrive/ui/qt/qt_window.h"
+#include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/window.h"
 
 int main(int argc, char *argv[]) {
-  QSurfaceFormat fmt;
-#ifdef __APPLE__
-  fmt.setVersion(3, 2);
-  fmt.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
-  fmt.setRenderableType(QSurfaceFormat::OpenGL);
-#else
-  fmt.setRenderableType(QSurfaceFormat::OpenGLES);
-#endif
-  QSurfaceFormat::setDefaultFormat(fmt);
+  qInstallMessageHandler(swagLogMessageHandler);
+  setQtSurfaceFormat();
 
   if (Hardware::EON()) {
     QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
