@@ -426,12 +426,12 @@ def thermald_thread():
 
     # dp - auto shutdown
     if off_ts is not None:
-      shutdown_sec = 10 * 60
+      shutdown_sec = 30
       sec_now = sec_since_boot() - off_ts
       if (shutdown_sec - 5) < sec_now:
         msg.deviceState.chargingDisabled = True
       if shutdown_sec < sec_now:
-        time.sleep(10)
+        time.sleep(5)
         HARDWARE.shutdown()
 
     # If UI has crashed, set the brightness to reasonable non-zero value
