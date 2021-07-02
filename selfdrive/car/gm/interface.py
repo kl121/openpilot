@@ -153,7 +153,7 @@ class CarInterface(CarInterfaceBase):
       self.CS.enable_lkas = True
 
     #Added by jc01rho inspired by JangPoo
-    if self.flag_pcmEnable_initialSet and self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
+    if self.c and self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
       if ret.cruiseState.available and not ret.seatbeltUnlatched and not ret.espDisabled:
 
         if self.flag_pcmEnable_initialSet == False :
@@ -170,8 +170,8 @@ class CarInterface(CarInterfaceBase):
           self.flag_pcmEnable_initialSet = True
           self.initial_pcmEnable_counter = 0
 
-    if not self.flag_initial_pcmEnable  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
-      self.flag_initial_pcmEnable = True
+    if not self.flag_pcmEnable_initialSet  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
+      self.flag_pcmEnable_initialSet = True
 
     ret.events = events.to_msg()
 
