@@ -30,7 +30,9 @@ class CarInterfaceBase():
     self.low_speed_alert = False
 
     ####added by jc01rho
-    self.flag_initial_pcmEnable =True
+    self.flag_pcmEnable_able =True
+    self.flag_pcmEnable_initialSet = False
+
     self.initial_pcmEnable_counter = 0
 
     if CarState is not None:

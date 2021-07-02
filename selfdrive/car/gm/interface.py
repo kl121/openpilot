@@ -155,12 +155,21 @@ class CarInterface(CarInterfaceBase):
     #Added by jc01rho inspired by JangPoo
     if self.flag_initial_pcmEnable and self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
       if ret.cruiseState.available and not ret.seatbeltUnlatched and not ret.espDisabled:
-        self.initial_pcmEnable_counter = self.initial_pcmEnable_counter+1
-        if self.initial_pcmEnable_counter > 750 :
+
+        if self.flag_pcmEnable_initialSet == False :
+          self.initial_pcmEnable_counter = self.initial_pcmEnable_counter + 1
+          if self.initial_pcmEnable_counter > 750 :
+            events.add(EventName.pcmEnable)
+            self.flag_pcmEnable_initialSet = True
+          if self.initial_pcmEnable_counter > 1500 :
+            self.flag_initial_pcmEnable = False
+            self.initial_pcmEnable_counter = 0
+
+        else :
           events.add(EventName.pcmEnable)
-        if self.initial_pcmEnable_counter > 1500 :
-          self.flag_initial_pcmEnable = False
+          self.flag_pcmEnable_initialSet = True
           self.initial_pcmEnable_counter = 0
+
     if not self.flag_initial_pcmEnable  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
       self.flag_initial_pcmEnable = True
 
