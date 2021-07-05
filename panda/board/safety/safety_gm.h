@@ -36,6 +36,7 @@ const CanMsg GM_TX_MSGS[] = {{MSG_TX_LKA, 0, 4}, {MSG_TX_ALIVE, 0, 7}, {MSG_TX_A
                              {0x104c006c, 3, 3}, {0x10400060, 3, 5}};  // gmlan
 
 // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
+
 AddrCheckStruct gm_rx_checks[] = {
   {.msg = {{MSG_RX_STEER, 0, 8, .expected_timestep = 100000U}, { 0 }, { 0 }}},
   {.msg = {{MSG_RX_WHEEL, 0, 5, .expected_timestep = 100000U}, { 0 }, { 0 }}},

@@ -106,6 +106,21 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
   main_layout->addWidget(new LabelControl("Serial", serial));
 
+  QHBoxLayout *reset_layout = new QHBoxLayout();
+  reset_layout->setSpacing(30);
+
+  // reset calibration button
+  QPushButton *reset_calib_btn = new QPushButton("Reset Calibration");
+  reset_layout->addWidget(reset_calib_btn);
+  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
+      if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?")) {
+          Params().remove("CalibrationParams");
+      }
+  });
+
+  main_layout->addWidget(horizontal_line());
+  main_layout->addLayout(reset_layout);
+
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
@@ -171,7 +186,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton *reboot_btn = new QPushButton("Reboot");
+  QPushButton *reboot_btn = new QPushButton("재부팅");
   reboot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::released, [=]() {
@@ -179,8 +194,25 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
       Hardware::reboot();
     }
   });
+  QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
+  power_layout->addWidget(reboot_rmprebuilt_btn);
+  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
+      if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.")) {
+        Hardware::update_reboot();
+      }
+  });
 
-  QPushButton *poweroff_btn = new QPushButton("Power Off");
+#ifdef QCOM
+  QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
+  power_layout->addWidget(cleanbuild_btn);
+  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
+      if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.")) {
+        Hardware::clean_build_reboot();
+      }
+  });
+#endif
+
+  QPushButton *poweroff_btn = new QPushButton("전원종료");
   poweroff_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
