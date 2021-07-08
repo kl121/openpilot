@@ -367,11 +367,10 @@ struct CarParams {
 
   enableGasInterceptor @2 :Bool;
   enableCruise @3 :Bool;
-  enableCamera @4 :Bool;
-  enableDsu @5 :Bool; # driving support unit
-  enableApgs @6 :Bool; # advanced parking guidance system
-  enableBsm @56 :Bool; # blind spot monitoring
-  hasStockCamera @57 :Bool; # factory LKAS/LDW camera is present
+  enableDsu @5 :Bool;        # driving support unit
+  enableApgs @6 :Bool;       # advanced parking guidance system
+  enableBsm @56 :Bool;       # blind spot monitoring
+  hasStockCamera @57 :Bool;  # factory LKAS/LDW camera is present
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
@@ -570,5 +569,6 @@ struct CarParams {
     gateway @1;    # Integration at vehicle's CAN gateway
   }
 
+  enableCameraDEPRECATED @4 :Bool;
   isPandaBlackDEPRECATED @39: Bool;
 }
