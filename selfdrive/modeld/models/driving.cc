@@ -1,10 +1,10 @@
+#include "selfdrive/modeld/models/driving.h"
 
-#include "driving.h"
-
-#include <assert.h>
 #include <fcntl.h>
-#include <string.h>
 #include <unistd.h>
+
+#include <cassert>
+#include <cstring>
 
 #include <eigen3/Eigen/Dense>
 
@@ -17,10 +17,6 @@ constexpr int OTHER_META_SIZE = 32;
 constexpr int NUM_META_INTERVALS = 5;
 constexpr int META_STRIDE = 6;
 
-constexpr int MODEL_WIDTH = 512;
-constexpr int MODEL_HEIGHT = 256;
-constexpr int MODEL_FRAME_SIZE = MODEL_WIDTH * MODEL_HEIGHT * 3 / 2;
-
 constexpr int PLAN_MHP_N = 5;
 constexpr int PLAN_MHP_COLUMNS = 15;
 constexpr int PLAN_MHP_VALS = 15*33;
@@ -28,7 +24,9 @@ constexpr int PLAN_MHP_SELECTION = 1;
 constexpr int PLAN_MHP_GROUP_SIZE =  (2*PLAN_MHP_VALS + PLAN_MHP_SELECTION);
 
 constexpr int LEAD_MHP_N = 5;
-constexpr int LEAD_MHP_VALS = 4;
+constexpr int LEAD_TRAJ_LEN = 6;
+constexpr int LEAD_PRED_DIM = 4;
+constexpr int LEAD_MHP_VALS = LEAD_PRED_DIM*LEAD_TRAJ_LEN;
 constexpr int LEAD_MHP_SELECTION = 3;
 constexpr int LEAD_MHP_GROUP_SIZE = (2*LEAD_MHP_VALS + LEAD_MHP_SELECTION);
 
@@ -60,8 +58,7 @@ float prev_brake_3ms2_probs[3] = {0,0,0};
 // #define DUMP_YUV
 
 void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
-  frame_init(&s->frame, MODEL_WIDTH, MODEL_HEIGHT, device_id, context);
-  s->input_frames = std::make_unique<float[]>(MODEL_FRAME_SIZE * 2);
+  s->frame = new ModelFrame(device_id, context);
 
   constexpr int output_size = OUTPUT_SIZE + TEMPORAL_SIZE;
   s->output.resize(output_size);
@@ -85,8 +82,6 @@ void model_init(ModelState* s, cl_device_id device_id, cl_context context) {
   s->traffic_convention[idx] = 1.0;
   s->m->addTrafficConvention(s->traffic_convention, TRAFFIC_CONVENTION_LEN);
 #endif
-
-  s->q = CL_CHECK_ERR(clCreateCommandQueue(context, device_id, 0, &err));
 }
 
 ModelDataRaw model_eval_frame(ModelState* s, cl_mem yuv_cl, int width, int height,
@@ -108,19 +103,8 @@ ModelDataRaw model_eval_frame(ModelState* s, cl_mem yuv_cl, int width, int heigh
 
   //for (int i = 0; i < OUTPUT_SIZE + TEMPORAL_SIZE; i++) { printf("%f ", s->output[i]); } printf("\n");
 
-  float *new_frame_buf = frame_prepare(&s->frame, s->q, yuv_cl, width, height, transform);
-  memmove(&s->input_frames[0], &s->input_frames[MODEL_FRAME_SIZE], sizeof(float)*MODEL_FRAME_SIZE);
-  memmove(&s->input_frames[MODEL_FRAME_SIZE], new_frame_buf, sizeof(float)*MODEL_FRAME_SIZE);
-  s->m->execute(&s->input_frames[0], MODEL_FRAME_SIZE*2);
-
-  #ifdef DUMP_YUV
-    FILE *dump_yuv_file = fopen("/sdcard/dump.yuv", "wb");
-    fwrite(new_frame_buf, MODEL_HEIGHT*MODEL_WIDTH*3/2, sizeof(float), dump_yuv_file);
-    fclose(dump_yuv_file);
-    assert(1==2);
-  #endif
-
-  clEnqueueUnmapMemObject(s->q, s->frame.net_input, (void*)new_frame_buf, 0, NULL, NULL);
+  auto net_input_buf = s->frame->prepare(yuv_cl, width, height, transform);
+  s->m->execute(net_input_buf, s->frame->buf_size);
 
   // net outputs
   ModelDataRaw net_outputs;
@@ -136,8 +120,7 @@ ModelDataRaw model_eval_frame(ModelState* s, cl_mem yuv_cl, int width, int heigh
 }
 
 void model_free(ModelState* s) {
-  frame_free(&s->frame);
-  CL_CHECK(clReleaseCommandQueue(s->q));
+  delete s->frame;
 }
 
 static const float *get_best_data(const float *data, int size, int group_size, int offset) {
@@ -166,18 +149,38 @@ void fill_sigmoid(const float *input, float *output, int len, int stride) {
   }
 }
 
-void fill_lead_v2(cereal::ModelDataV2::LeadDataV2::Builder lead, const float *lead_data, const float *prob, int t_offset, float t) {
+void fill_lead_v3(cereal::ModelDataV2::LeadDataV3::Builder lead, const float *lead_data, const float *prob, int t_offset, float prob_t) {
+  float t[LEAD_TRAJ_LEN] = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
   const float *data = get_lead_data(lead_data, t_offset);
   lead.setProb(sigmoid(prob[t_offset]));
-  lead.setT(t);
-  float xyva_arr[LEAD_MHP_VALS];
-  float xyva_stds_arr[LEAD_MHP_VALS];
-  for (int i=0; i<LEAD_MHP_VALS; i++) {
-    xyva_arr[i] = data[i];
-    xyva_stds_arr[i] = exp(data[LEAD_MHP_VALS + i]);
+  lead.setProbTime(prob_t);
+  float x_arr[LEAD_TRAJ_LEN];
+  float y_arr[LEAD_TRAJ_LEN];
+  float v_arr[LEAD_TRAJ_LEN];
+  float a_arr[LEAD_TRAJ_LEN];
+  float x_stds_arr[LEAD_TRAJ_LEN];
+  float y_stds_arr[LEAD_TRAJ_LEN];
+  float v_stds_arr[LEAD_TRAJ_LEN];
+  float a_stds_arr[LEAD_TRAJ_LEN];
+  for (int i=0; i<LEAD_TRAJ_LEN; i++) {
+    x_arr[i] = data[i*LEAD_PRED_DIM+0];
+    y_arr[i] = data[i*LEAD_PRED_DIM+1];
+    v_arr[i] = data[i*LEAD_PRED_DIM+2];
+    a_arr[i] = data[i*LEAD_PRED_DIM+3];
+    x_stds_arr[i] = exp(data[LEAD_MHP_VALS + i*LEAD_PRED_DIM+0]);
+    y_stds_arr[i] = exp(data[LEAD_MHP_VALS + i*LEAD_PRED_DIM+1]);
+    v_stds_arr[i] = exp(data[LEAD_MHP_VALS + i*LEAD_PRED_DIM+2]);
+    a_stds_arr[i] = exp(data[LEAD_MHP_VALS + i*LEAD_PRED_DIM+3]);
   }
-  lead.setXyva(xyva_arr);
-  lead.setXyvaStd(xyva_stds_arr);
+  lead.setT(t);
+  lead.setX(x_arr);
+  lead.setY(y_arr);
+  lead.setV(v_arr);
+  lead.setA(a_arr);
+  lead.setXStd(x_stds_arr);
+  lead.setYStd(y_stds_arr);
+  lead.setVStd(v_stds_arr);
+  lead.setAStd(a_stds_arr);
 }
 
 void fill_meta(cereal::ModelDataV2::MetaData::Builder meta, const float *meta_data) {
@@ -203,8 +206,8 @@ void fill_meta(cereal::ModelDataV2::MetaData::Builder meta, const float *meta_da
   fill_sigmoid(&meta_data[DESIRE_LEN+5], brake_4ms2_sigmoid, NUM_META_INTERVALS, META_STRIDE);
   fill_sigmoid(&meta_data[DESIRE_LEN+6], brake_5ms2_sigmoid, NUM_META_INTERVALS, META_STRIDE);
 
-  memmove(prev_brake_5ms2_probs, &prev_brake_5ms2_probs[1], 4*sizeof(float));
-  memmove(prev_brake_3ms2_probs, &prev_brake_3ms2_probs[1], 2*sizeof(float));
+  std::memmove(prev_brake_5ms2_probs, &prev_brake_5ms2_probs[1], 4*sizeof(float));
+  std::memmove(prev_brake_3ms2_probs, &prev_brake_3ms2_probs[1], 2*sizeof(float));
   prev_brake_5ms2_probs[4] = brake_5ms2_sigmoid[0];
   prev_brake_3ms2_probs[2] = brake_3ms2_sigmoid[0];
 
@@ -324,10 +327,10 @@ void fill_model(cereal::ModelDataV2::Builder &framed, const ModelDataRaw &net_ou
   fill_meta(framed.initMeta(), net_outputs.meta);
 
   // leads
-  auto leads = framed.initLeads(LEAD_MHP_SELECTION);
+  auto leads = framed.initLeadsV3(LEAD_MHP_SELECTION);
   float t_offsets[LEAD_MHP_SELECTION] = {0.0, 2.0, 4.0};
   for (int t_offset=0; t_offset<LEAD_MHP_SELECTION; t_offset++) {
-    fill_lead_v2(leads[t_offset], net_outputs.lead, net_outputs.lead_prob, t_offset, t_offsets[t_offset]);
+    fill_lead_v3(leads[t_offset], net_outputs.lead, net_outputs.lead_prob, t_offset, t_offsets[t_offset]);
   }
 }
 
