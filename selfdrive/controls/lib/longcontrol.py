@@ -1,8 +1,9 @@
 from cereal import log
 from common.numpy_fast import clip, interp
-from selfdrive.controls.lib.pid import PIController
+from selfdrive.controls.lib.pid import LongPIController
 from selfdrive.controls.lib.drive_helpers import CONTROL_N
 from selfdrive.modeld.constants import T_IDXS
+
 
 LongCtrlState = log.ControlsState.LongControlState
 
