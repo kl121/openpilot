@@ -106,21 +106,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
   main_layout->addWidget(new LabelControl("Serial", serial));
 
-  QHBoxLayout *reset_layout = new QHBoxLayout();
-  reset_layout->setSpacing(30);
-
-  // reset calibration button
-  QPushButton *reset_calib_btn = new QPushButton("Reset Calibration");
-  reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("Are you sure you want to reset calibration?")) {
-          Params().remove("CalibrationParams");
-      }
-  });
-
-  main_layout->addWidget(horizontal_line());
-  main_layout->addLayout(reset_layout);
-
   // offroad-only buttons
 
   auto dcamBtn = new ButtonControl("Driver Camera", "PREVIEW",
@@ -197,7 +182,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.")) {
+      if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.",this)) {
         Hardware::update_reboot();
       }
   });
@@ -206,7 +191,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
   QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.")) {
+      if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.",this)) {
         Hardware::clean_build_reboot();
       }
   });
@@ -316,11 +301,8 @@ QWidget * network_panel(QWidget * parent) {
 }
 
 void SettingsWindow::showEvent(QShowEvent *event) {
-  if (layout()) {
-    panel_widget->setCurrentIndex(0);
-    nav_btns->buttons()[0]->setChecked(true);
-    return;
-  }
+  panel_widget->setCurrentIndex(0);
+  nav_btns->buttons()[0]->setChecked(true);
 }
 
 SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
@@ -399,6 +381,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     panel_widget->addWidget(panel_frame);
 
     QObject::connect(btn, &QPushButton::released, [=, w = panel_frame]() {
+      btn->setChecked(true);
       panel_widget->setCurrentWidget(w);
     });
   }
@@ -426,12 +409,4 @@ void SettingsWindow::hideEvent(QHideEvent *event) {
 #ifdef QCOM
   HardwareEon::close_activities();
 #endif
-
-  // TODO: this should be handled by the Dialog classes
-  QList<QWidget*> children = findChildren<QWidget *>();
-  for(auto &w : children) {
-    if(w->metaObject()->superClass()->className() == QString("QDialog")) {
-      w->close();
-    }
-  }
 }

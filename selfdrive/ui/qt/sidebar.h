@@ -54,9 +54,7 @@ private:
   QString panda_str = "NO\nPANDA";
   QColor panda_status = warning_color;
   int temp_val = 0;
-  int batt_perc = 0;
   QColor temp_status = warning_color;
   QString net_type;
   int net_strength = 0;
-  QString network_str = "--";
 };
