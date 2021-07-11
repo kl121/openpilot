@@ -3,20 +3,10 @@ import math
 
 from selfdrive.swaglog import cloudlog
 from common.realtime import sec_since_boot
-
-from selfdrive.controls.lib.radar_helpers import _LEAD_ACCEL_TAU
 from selfdrive.controls.lib.longitudinal_mpc_lib import libmpc_py
-from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
-from common.numpy_fast import interp
 from selfdrive.controls.lib.drive_helpers import LON_MPC_N
 from selfdrive.modeld.constants import T_IDXS
-import os
-LOG_MPC = os.environ.get('LOG_MPC', False)
 
-
-STOPPING_DISTANCE = 2  # distance between you and lead car when you come to stop
-VEL = [0.0, 2.778, 5.556, 8.333, 11.111, 13.889, 16.667, 19.444, 22.222, 25.0, 27.778]  # velocities
-DIST = [2.0, 2.1, 2.2, 2.3, 2.35, 2.45, 2.6, 2.75, 2.9, 3.0, 3.1]
 
 class LongitudinalMpc():
   def __init__(self):
