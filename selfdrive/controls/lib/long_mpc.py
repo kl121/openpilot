@@ -10,7 +10,7 @@ from selfdrive.controls.lib.drive_helpers import MPC_COST_LONG
 from common.numpy_fast import interp
 from selfdrive.controls.lib.drive_helpers import LON_MPC_N
 from selfdrive.modeld.constants import T_IDXS
-
+import os
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
 
