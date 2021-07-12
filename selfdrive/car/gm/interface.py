@@ -37,7 +37,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.minSteerSpeed = 10 * CV.KPH_TO_MS
     ret.steerRateCost = 0.3 # def : 2.0
-    ret.steerActuatorDelay = 0.19  # def: 0.2 Default delay, not measured yet
+    ret.steerActuatorDelay = 0.21  # def: 0.2 Default delay, not measured yet
 
     ret.minEnableSpeed = -1
     ret.mass = 1625. + STD_CARGO_KG
@@ -81,7 +81,7 @@ class CarInterface(CarInterfaceBase):
     ret.stoppingControl = False
     ret.startAccel = 0.4
 
-    ret.steerLimitTimer = 1.5
+    ret.steerLimitTimer = 2.5
     ret.radarTimeStep = 0.0667  # GM radar runs at 15Hz instead of standard 20Hz
 
     return ret
