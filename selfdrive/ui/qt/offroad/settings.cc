@@ -332,6 +332,35 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     background-color: #292929;
   )");
 
+QWidget * community_panel(QWidget * parent) {
+  QWidget *w = new QWidget(parent);
+  QVBoxLayout *toggles_list = new QVBoxLayout(w);
+  layout->setSpacing(30);
+
+  toggles_list->addWidget(new ParamControl("AutoLaneChangeEnabled",
+                                            "Enable Auto Lane Change Assist",
+                                            "warnings: it is beta, be careful!!",
+                                            "../assets/offroad/icon_road.png"
+                                              ));
+  toggles_list->addWidget(horizontal_line());
+  toggles_list->addWidget(new PrebuiltParamControl("PrebuiltEnabled",
+                                            "Enable Prebuilt File",
+                                            "완전 정상주행 2회 이후 활성화하세요. prebuilt 파일이 있는경우 새로 빌드하지 않습니다. 업데이트창이 뜰때 내용을 확인하세요.",
+                                            "../assets/offroad/icon_checkmark.png"
+                                            ));
+
+//  toggles_list->addWidget(horizontal_line());
+//  toggles_list->addWidget(new LQRSelection());
+//  toggles_list->addWidget(horizontal_line());
+//  toggles_list->addWidget(new INDISelection());
+
+  QWidget *widget = new QWidget;
+  widget->setLayout(toggles_list);
+  return widget;
+}
+
+
+
   // close button
   QPushButton *close_btn = new QPushButton("X");
   close_btn->setStyleSheet(R"(
@@ -356,6 +385,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {"Network", network_panel(this)},
     {"Toggles", new TogglesPanel(this)},
     {"Software", new SoftwarePanel(this)},
+    {"Community", community_panel(this)},
   };
 
 #ifdef ENABLE_MAPS
