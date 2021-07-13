@@ -124,8 +124,9 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 }
 
 static bool gm_steering_check(int desired_torque) {
-  bool violation = false;
-  uint32_t ts = TIM2->CNT;
+  
+  uint32_t ts = MICROSECOND_TIMER->CNT;
+  bool violation = 0;
 
   if (controls_allowed) {
     // *** global torque limit check ***
@@ -187,6 +188,8 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   // LKA STEER: safety check
   if (addr == MSG_TX_LKA) {
     int desired_torque = ((GET_BYTE(to_send, 0) & 0x7U) << 8) + GET_BYTE(to_send, 1);
+    
+
     desired_torque = to_signed(desired_torque, 11);
 
     if (gm_steering_check(desired_torque)) {

@@ -393,3 +393,6 @@ class Android(HardwareBase):
       return min(max(perc, 0), 100)
     except Exception:
       return 0
+
+  def get_modem_version(self):
+    return None
