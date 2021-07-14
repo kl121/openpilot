@@ -328,17 +328,6 @@ void SettingsWindow::showEvent(QShowEvent *event) {
   nav_btns->buttons()[0]->setChecked(true);
 }
 
-SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
-
-  // setup two main layouts
-  sidebar_widget = new QWidget;
-  QVBoxLayout *sidebar_layout = new QVBoxLayout(sidebar_widget);
-  sidebar_layout->setMargin(0);
-  panel_widget = new QStackedWidget();
-  panel_widget->setStyleSheet(R"(
-    border-radius: 30px;
-    background-color: #292929;
-  )");
 
 QWidget * community_panel(QWidget * parent) {
   QWidget *w = new QWidget(parent);
@@ -368,6 +357,18 @@ QWidget * community_panel(QWidget * parent) {
 }
 
 
+
+SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
+
+  // setup two main layouts
+  sidebar_widget = new QWidget;
+  QVBoxLayout *sidebar_layout = new QVBoxLayout(sidebar_widget);
+  sidebar_layout->setMargin(0);
+  panel_widget = new QStackedWidget();
+  panel_widget->setStyleSheet(R"(
+    border-radius: 30px;
+    background-color: #292929;
+  )");
 
   // close button
   QPushButton *close_btn = new QPushButton("X");
