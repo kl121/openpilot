@@ -332,7 +332,7 @@ void SettingsWindow::showEvent(QShowEvent *event) {
 QWidget * community_panel(QWidget * parent) {
   QWidget *w = new QWidget(parent);
   QVBoxLayout *toggles_list = new QVBoxLayout(w);
-  layout->setSpacing(30);
+  toggles_list->setSpacing(30);
 
   toggles_list->addWidget(new ParamControl("AutoLaneChangeEnabled",
                                             "Enable Auto Lane Change Assist",
