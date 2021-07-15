@@ -120,6 +120,57 @@ public:
     });
   }
 
-private:
+protected:
   Params params;
+};
+//prebuilt param control class, this only uses for prebuilt toggle button.
+class PrebuiltParamControl : public ParamControl {
+  Q_OBJECT
+
+
+
+public:
+  PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
+          ParamControl(param, title,desc, icon, parent) {
+
+    //when instantiate object
+    if (params.getBool(param.toStdString().c_str())) {
+        std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
+    } else {
+        std::remove("/data/openpilot/prebuilt"); //rm prebuilt
+    }
+    QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
+          if (state ) {
+            std::ofstream output("/data/openpilot/prebuilt");
+        } else {
+            std::remove("/data/openpilot/prebuilt");
+        }
+    });
+ }
+};
+
+//Lateral Control Selection class, this only uses for INDI_Selectd toggle button.
+class INDISelection : public ToggleControl {
+  Q_OBJECT
+
+public:
+  INDISelection() : ToggleControl("Select INDI for Lateral Control", "INDI 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using INDI)", "../assets/offroad/icon_checkmark.png", Params().getBool("INDI_Selected")) {
+    QObject::connect(this, &INDISelection::toggleFlipped, [=](int state) {
+      char value = state ? '1' : '0';
+      Params().put("INDI_Selected", &value, 1);
+    });
+  }
+};
+
+//Lateral Control Selection class, this only uses for LQR_Selectd toggle button.
+class LQRSelection : public ToggleControl {
+  Q_OBJECT
+
+public:
+  LQRSelection() : ToggleControl("Select LQR for Lateral Control", "LQR 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using LQR)", "../assets/offroad/icon_checkmark.png", Params().getBool("LQR_Selected")) {
+    QObject::connect(this, &LQRSelection::toggleFlipped, [=](int state) {
+      char value = state ? '1' : '0';
+      Params().put("LQR_Selected", &value, 1);
+    });
+  }
 };
