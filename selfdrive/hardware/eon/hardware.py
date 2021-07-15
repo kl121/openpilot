@@ -383,7 +383,7 @@ class Android(HardwareBase):
     except Exception:
       return "--"
 
-  def set_power_save(self, enabled):
+  def set_power_save(self, powersave_enabled):
     pass
 
   def get_gpu_usage_percent(self):
@@ -395,4 +395,10 @@ class Android(HardwareBase):
       return 0
 
   def get_modem_version(self):
+    return None
+
+  def initialize_hardware(self):
+    pass
+
+  def get_networks(self):
     return None
