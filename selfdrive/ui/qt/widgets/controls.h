@@ -4,15 +4,14 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <fstream>
-#include <cstdio>
-
-#include "selfdrive/hardware/hw.h"
 
 #include "selfdrive/common/params.h"
 #include "selfdrive/ui/qt/widgets/toggle.h"
 
+#include <fstream>
+#include <cstdio>
 
+#include "selfdrive/hardware/hw.h"
 QFrame *horizontal_line(QWidget *parent = nullptr);
 
 class ElidedLabel : public QLabel {
