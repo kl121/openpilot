@@ -27,8 +27,6 @@ public:
 protected:
   QNetworkReply *reply;
 
-protected:
-  QNetworkReply *reply;
 
 private:
   QNetworkAccessManager *networkAccessManager;
