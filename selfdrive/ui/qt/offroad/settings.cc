@@ -121,7 +121,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reset_calib_btn = new QPushButton("캘리브레이션 리셋");
   reset_layout->addWidget(reset_calib_btn);
   QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
-      if (ConfirmationDialog::confirm("캘리브레이션을 다시 하시겠습니까?")) {
+      if (ConfirmationDialog::confirm("캘리브레이션을 다시 하시겠습니까?",this)) {
           Params().remove("CalibrationParams");
       }
   });
