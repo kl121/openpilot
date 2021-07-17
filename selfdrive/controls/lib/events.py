@@ -466,14 +466,6 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
   },
 
-  EventName.driverMonitorLowAcc: {
-    ET.WARNING: Alert(
-      "운전자 모니터링 확인",
-      "운전자 모니터링 상태가 비정상입니다",
-      AlertStatus.normal, AlertSize.mid,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, .4, 0., 1.5),
-  },
-
   EventName.manualRestart: {
     ET.WARNING: Alert(
       "핸들을 잡아주세요",
