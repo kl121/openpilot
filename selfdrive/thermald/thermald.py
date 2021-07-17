@@ -239,7 +239,9 @@ def thermald_thread():
         network_strength = HARDWARE.get_network_strength(network_type)
         network_info = HARDWARE.get_network_info()  # pylint: disable=assignment-from-none
 
+
         wifiIpAddress = HARDWARE.get_ip_address()
+
         # Log modem version once
         if modem_version is None:
           modem_version = HARDWARE.get_modem_version()  # pylint: disable=assignment-from-none
