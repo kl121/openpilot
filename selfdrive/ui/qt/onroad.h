@@ -1,15 +1,11 @@
 #pragma once
 
-#include <map>
-
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
-#include <QSoundEffect>
 #include <QStackedLayout>
 #include <QWidget>
 
 #include "cereal/gen/cpp/log.capnp.h"
-#include "selfdrive/hardware/hw.h"
 #include "selfdrive/ui/qt/qt_window.h"
 #include "selfdrive/ui/ui.h"
 
