@@ -120,7 +120,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   // reset calibration button
   QPushButton *reset_calib_btn = new QPushButton("캘리브레이션 리셋");
   reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::clicked, [=]() {
+  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("캘리브레이션을 다시 하시겠습니까?",this)) {
           Params().remove("CalibrationParams");
       }
@@ -133,7 +133,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 
   auto dcamBtn = new ButtonControl("운전자 영상", "미리보기",
                                         "운전자 영상이 제대로 작동하는지 확인을 합니다. 차량을 끄고 사용하도록 하십시오.");
-  connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
+  connect(dcamBtn, &ButtonControl::released, [=]() { emit showDriverView(); });
 
   QString resetCalibDesc = "오픈파일럿은 좌우로 4° 위아래로 5° 를 보정합니다. 그 이상의 경우 보정이 필요합니다.";
   auto resetCalibBtn = new ButtonControl("캘리브레이션 리셋", "리셋", resetCalibDesc);
@@ -167,7 +167,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   ButtonControl *retrainingBtn = nullptr;
   if (!params.getBool("Passive")) {
     retrainingBtn = new ButtonControl("트레이닝 가이드", "가이드 보기", "오픈파일럿의 제한적 상황과 규정을 확인");
-    connect(retrainingBtn, &ButtonControl::clicked, [=]() {
+    connect(retrainingBtn, &ButtonControl::released, [=]() {
       if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
         Params().remove("CompletedTrainingVersion");
         emit reviewTrainingGuide();
@@ -176,7 +176,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   }
 
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
-  connect(uninstallBtn, &ButtonControl::clicked, [=]() {
+  connect(uninstallBtn, &ButtonControl::released, [=]() {
     if (ConfirmationDialog::confirm("오픈파일럿을 제거하시겠습니까?", this)) {
       Params().putBool("DoUninstall", true);
     }
@@ -197,14 +197,14 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reboot_btn = new QPushButton("재부팅");
   reboot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   power_layout->addWidget(reboot_btn);
-  QObject::connect(reboot_btn, &QPushButton::clicked, [=]() {
+  QObject::connect(reboot_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("단순 재부팅합니다.", this)) {
       Hardware::reboot();
     }
   });
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
-  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::clicked, [=]() {
+  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.",this)) {
         Hardware::update_reboot();
       }
@@ -213,7 +213,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 #ifdef QCOM
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
-  QObject::connect(cleanbuild_btn, &QPushButton::clicked, [=]() {
+  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
       if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.",this)) {
         Hardware::clean_build_reboot();
       }
@@ -223,7 +223,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *poweroff_btn = new QPushButton("전원종료");
   poweroff_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
-  QObject::connect(poweroff_btn, &QPushButton::clicked, [=]() {
+  QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
     if (ConfirmationDialog::confirm("전원을 끄시겠습니까?", this)) {
       Hardware::poweroff();
     }
@@ -239,7 +239,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   versionLbl = new LabelControl("Version", "", QString::fromStdString(params.get("ReleaseNotes")).trimmed());
   lastUpdateLbl = new LabelControl("Last Update Check", "", "The last time openpilot successfully checked for an update. The updater only runs while the car is off.");
   updateBtn = new ButtonControl("Check for Update", "");
-  connect(updateBtn, &ButtonControl::clicked, [=]() {
+  connect(updateBtn, &ButtonControl::released, [=]() {
     if (params.getBool("IsOffroad")) {
       const QString paramsPath = QString::fromStdString(params.getParamsPath());
       fs_watch->addPath(paramsPath + "/d/LastUpdateTime");
@@ -302,12 +302,12 @@ QWidget * network_panel(QWidget * parent) {
 
   // wifi + tethering buttons
   auto wifiBtn = new ButtonControl("네트워크 설정열기", "열기");
-  QObject::connect(wifiBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_wifi(); });
+  QObject::connect(wifiBtn, &ButtonControl::released, [=]() { HardwareEon::launch_wifi(); });
   layout->addWidget(wifiBtn);
   layout->addWidget(horizontal_line());
 
   auto tetheringBtn = new ButtonControl("테더링 설정열기", "열기");
-  QObject::connect(tetheringBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_tethering(); });
+  QObject::connect(tetheringBtn, &ButtonControl::released, [=]() { HardwareEon::launch_tethering(); });
   layout->addWidget(tetheringBtn);
   layout->addWidget(horizontal_line());
 
@@ -382,7 +382,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   close_btn->setFixedSize(200, 200);
   sidebar_layout->addSpacing(45);
   sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
-  QObject::connect(close_btn, &QPushButton::clicked, this, &SettingsWindow::closeSettings);
+  QObject::connect(close_btn, &QPushButton::released, this, &SettingsWindow::closeSettings);
 
   // setup panels
   DevicePanel *device = new DevicePanel(this);
@@ -435,7 +435,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     ScrollView *panel_frame = new ScrollView(panel, this);
     panel_widget->addWidget(panel_frame);
 
-    QObject::connect(btn, &QPushButton::clicked, [=, w = panel_frame]() {
+    QObject::connect(btn, &QPushButton::released, [=, w = panel_frame]() {
       btn->setChecked(true);
       panel_widget->setCurrentWidget(w);
     });

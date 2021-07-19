@@ -27,6 +27,7 @@ public:
 protected:
   QNetworkReply *reply;
 
+
 private:
   QNetworkAccessManager *networkAccessManager;
   QTimer *networkTimer;

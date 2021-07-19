@@ -79,7 +79,7 @@ public:
   inline QString text() const { return btn.text(); }
 
 signals:
-  void clicked();
+  void released();
 
 public slots:
   void setEnabled(bool enabled) { btn.setEnabled(enabled); };
