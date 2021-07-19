@@ -99,13 +99,13 @@ OffroadHome::OffroadHome(QWidget* parent) : QFrame(parent) {
   update_notif = new QPushButton("UPDATE");
   update_notif->setVisible(false);
   update_notif->setStyleSheet("background-color: #364DEF;");
-  QObject::connect(update_notif, &QPushButton::released, [=]() { center_layout->setCurrentIndex(1); });
+  QObject::connect(update_notif, &QPushButton::clicked, [=]() { center_layout->setCurrentIndex(1); });
   header_layout->addWidget(update_notif, 0, Qt::AlignHCenter | Qt::AlignRight);
 
   alert_notif = new QPushButton();
   alert_notif->setVisible(false);
   alert_notif->setStyleSheet("background-color: #E22C2C;");
-  QObject::connect(alert_notif, &QPushButton::released, [=] { center_layout->setCurrentIndex(2); });
+  QObject::connect(alert_notif, &QPushButton::clicked, [=] { center_layout->setCurrentIndex(2); });
   header_layout->addWidget(alert_notif, 0, Qt::AlignHCenter | Qt::AlignRight);
 
   header_layout->addWidget(new QLabel(getBrandVersion()), 0, Qt::AlignHCenter | Qt::AlignRight);
@@ -169,7 +169,7 @@ void OffroadHome::hideEvent(QHideEvent *event) {
 }
 
 void OffroadHome::refresh() {
-  date->setText(QDateTime::currentDateTime().toString("yyyy년 M월 d일"));
+  date->setText(QDateTime::currentDateTime().toString("dddd, MMMM d"));
 
   bool updateAvailable = update_widget->refresh();
   int alerts = alerts_widget->refresh();
@@ -188,6 +188,6 @@ void OffroadHome::refresh() {
   update_notif->setVisible(updateAvailable);
   alert_notif->setVisible(alerts);
   if (alerts) {
-    alert_notif->setText(QString::number(alerts) + " 경고" + (alerts > 1 ? "S" : ""));
+    alert_notif->setText(QString::number(alerts) + " ALERT" + (alerts > 1 ? "S" : ""));
   }
 }
