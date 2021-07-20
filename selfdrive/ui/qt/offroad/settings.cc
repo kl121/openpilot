@@ -133,11 +133,11 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 
   auto dcamBtn = new ButtonControl("운전자 영상", "미리보기",
                                         "운전자 영상이 제대로 작동하는지 확인을 합니다. 차량을 끄고 사용하도록 하십시오.");
-  connect(dcamBtn, &ButtonControl::released, [=]() { emit showDriverView(); });
+  connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
 
   QString resetCalibDesc = "오픈파일럿은 좌우로 4° 위아래로 5° 를 보정합니다. 그 이상의 경우 보정이 필요합니다.";
   auto resetCalibBtn = new ButtonControl("캘리브레이션 리셋", "리셋", resetCalibDesc);
-  connect(resetCalibBtn, &ButtonControl::released, [=]() {
+  connect(resetCalibBtn, &ButtonControl::clicked, [=]() {
     if (ConfirmationDialog::confirm("캘리브레이션을 리셋하시겠습니까?", this)) {
       Params().remove("CalibrationParams");
     }
@@ -167,7 +167,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   ButtonControl *retrainingBtn = nullptr;
   if (!params.getBool("Passive")) {
     retrainingBtn = new ButtonControl("트레이닝 가이드", "가이드 보기", "오픈파일럿의 제한적 상황과 규정을 확인");
-    connect(retrainingBtn, &ButtonControl::released, [=]() {
+    connect(retrainingBtn, &ButtonControl::clicked, [=]() {
       if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
         Params().remove("CompletedTrainingVersion");
         emit reviewTrainingGuide();
@@ -176,7 +176,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   }
 
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
-  connect(uninstallBtn, &ButtonControl::released, [=]() {
+  connect(uninstallBtn, &ButtonControl::clicked, [=]() {
     if (ConfirmationDialog::confirm("오픈파일럿을 제거하시겠습니까?", this)) {
       Params().putBool("DoUninstall", true);
     }
