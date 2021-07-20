@@ -1,10 +1,7 @@
 #pragma once
 
-#include <map>
-
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
-#include <QSoundEffect>
 #include <QStackedLayout>
 #include <QWidget>
 

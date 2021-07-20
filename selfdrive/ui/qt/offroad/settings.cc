@@ -120,7 +120,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   // reset calibration button
   QPushButton *reset_calib_btn = new QPushButton("캘리브레이션 리셋");
   reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::released, [=]() {
+  QObject::connect(reset_calib_btn, &QPushButton::clicked, [=]() {
       if (ConfirmationDialog::confirm("캘리브레이션을 다시 하시겠습니까?",this)) {
           Params().remove("CalibrationParams");
       }
@@ -197,14 +197,14 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *reboot_btn = new QPushButton("재부팅");
   reboot_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #393939;");
   power_layout->addWidget(reboot_btn);
-  QObject::connect(reboot_btn, &QPushButton::released, [=]() {
+  QObject::connect(reboot_btn, &QPushButton::clicked, [=]() {
     if (ConfirmationDialog::confirm("단순 재부팅합니다.", this)) {
       Hardware::reboot();
     }
   });
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
-  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::released, [=]() {
+  QObject::connect(reboot_rmprebuilt_btn, &QPushButton::clicked, [=]() {
       if (ConfirmationDialog::confirm("prebuilt 파일을 임시 삭제하고 부팅합니다.",this)) {
         Hardware::update_reboot();
       }
@@ -213,7 +213,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 #ifdef QCOM
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
-  QObject::connect(cleanbuild_btn, &QPushButton::released, [=]() {
+  QObject::connect(cleanbuild_btn, &QPushButton::clicked, [=]() {
       if (ConfirmationDialog::confirm("완전에 가까운재설치를 합니다. 약 30분 소요됩니다.",this)) {
         Hardware::clean_build_reboot();
       }
@@ -223,7 +223,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
   QPushButton *poweroff_btn = new QPushButton("전원종료");
   poweroff_btn->setStyleSheet("height: 120px;border-radius: 15px;background-color: #E22C2C;");
   power_layout->addWidget(poweroff_btn);
-  QObject::connect(poweroff_btn, &QPushButton::released, [=]() {
+  QObject::connect(poweroff_btn, &QPushButton::clicked, [=]() {
     if (ConfirmationDialog::confirm("전원을 끄시겠습니까?", this)) {
       Hardware::poweroff();
     }
@@ -239,7 +239,7 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
   versionLbl = new LabelControl("Version", "", QString::fromStdString(params.get("ReleaseNotes")).trimmed());
   lastUpdateLbl = new LabelControl("Last Update Check", "", "The last time openpilot successfully checked for an update. The updater only runs while the car is off.");
   updateBtn = new ButtonControl("Check for Update", "");
-  connect(updateBtn, &ButtonControl::released, [=]() {
+  connect(updateBtn, &ButtonControl::clicked, [=]() {
     if (params.getBool("IsOffroad")) {
       const QString paramsPath = QString::fromStdString(params.getParamsPath());
       fs_watch->addPath(paramsPath + "/d/LastUpdateTime");
@@ -258,8 +258,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
       main_layout->addWidget(horizontal_line());
     }
   }
-
-  setStyleSheet(R"(QLabel {font-size: 50px;})");
 
   fs_watch = new QFileSystemWatcher(this);
   QObject::connect(fs_watch, &QFileSystemWatcher::fileChanged, [=](const QString path) {
@@ -301,13 +299,13 @@ QWidget * network_panel(QWidget * parent) {
   layout->setSpacing(30);
 
   // wifi + tethering buttons
-  auto wifiBtn = new ButtonControl("네트워크 설정열기", "열기");
-  QObject::connect(wifiBtn, &ButtonControl::released, [=]() { HardwareEon::launch_wifi(); });
+  auto wifiBtn = new ButtonControl("WiFi Settings", "OPEN");
+  QObject::connect(wifiBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_wifi(); });
   layout->addWidget(wifiBtn);
   layout->addWidget(horizontal_line());
 
-  auto tetheringBtn = new ButtonControl("테더링 설정열기", "열기");
-  QObject::connect(tetheringBtn, &ButtonControl::released, [=]() { HardwareEon::launch_tethering(); });
+  auto tetheringBtn = new ButtonControl("Tethering Settings", "OPEN");
+  QObject::connect(tetheringBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_tethering(); });
   layout->addWidget(tetheringBtn);
   layout->addWidget(horizontal_line());
 
@@ -371,18 +369,20 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   )");
 
   // close button
-  QPushButton *close_btn = new QPushButton("X");
+  QPushButton *close_btn = new QPushButton("×");
   close_btn->setStyleSheet(R"(
-    font-size: 90px;
+    font-size: 140px;
+    padding-bottom: 20px;
     font-weight: bold;
     border 1px grey solid;
     border-radius: 100px;
     background-color: #292929;
+    font-weight: 400;
   )");
   close_btn->setFixedSize(200, 200);
   sidebar_layout->addSpacing(45);
   sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
-  QObject::connect(close_btn, &QPushButton::released, this, &SettingsWindow::closeSettings);
+  QObject::connect(close_btn, &QPushButton::clicked, this, &SettingsWindow::closeSettings);
 
   // setup panels
   DevicePanel *device = new DevicePanel(this);
@@ -435,7 +435,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     ScrollView *panel_frame = new ScrollView(panel, this);
     panel_widget->addWidget(panel_frame);
 
-    QObject::connect(btn, &QPushButton::released, [=, w = panel_frame]() {
+    QObject::connect(btn, &QPushButton::clicked, [=, w = panel_frame]() {
       btn->setChecked(true);
       panel_widget->setCurrentWidget(w);
     });
