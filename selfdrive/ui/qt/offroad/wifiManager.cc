@@ -94,7 +94,8 @@ void WifiManager::refreshNetworks() {
     unsigned int strength = get_ap_strength(path.path());
     SecurityType security = getSecurityType(path.path());
     ConnectedType ctype;
-    if (path.path() != activeAp) {
+    QString activeSsid = (activeAp != "" && activeAp != "/") ? get_property(activeAp, "Ssid") : "";
+    if (ssid != activeSsid) {
       ctype = ConnectedType::DISCONNECTED;
     } else {
       if (ssid == connecting_to_network) {
@@ -305,7 +306,7 @@ QString WifiManager::getAdapter() {
 void WifiManager::stateChange(unsigned int new_state, unsigned int previous_state, unsigned int change_reason) {
   raw_adapter_state = new_state;
   if (new_state == NM_DEVICE_STATE_NEED_AUTH && change_reason == NM_DEVICE_STATE_REASON_SUPPLICANT_DISCONNECT) {
-    knownConnections.remove(getConnectionPath(connecting_to_network));
+    forgetConnection(connecting_to_network);
     emit wrongPassword(connecting_to_network);
   } else if (new_state == NM_DEVICE_STATE_ACTIVATED) {
     connecting_to_network = "";
