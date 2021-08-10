@@ -46,7 +46,7 @@ Sidebar::Sidebar(QWidget *parent) : QFrame(parent) {
   setStyleSheet("background-color: rgb(57, 57, 57);");
 }
 
-void Sidebar::mousePressEvent(QMouseEvent *event) {
+void Sidebar::mouseReleaseEvent(QMouseEvent *event) {
   if (settings_btn.contains(event->pos())) {
     emit openSettings();
   }
@@ -62,11 +62,16 @@ void Sidebar::updateState(const UIState &s) {
 
   auto last_ping = deviceState.getLastAthenaPingTime();
   if (last_ping == 0) {
-    setProperty("connectStr", "연결안됨");
-    setProperty("connectStatus", warning_color);
+    if (params.getBool("PrimeRedirected")) {
+      setProperty("connectStr", "NO\nPRIME");
+      setProperty("connectStatus", danger_color);
+    } else {
+      setProperty("connectStr", "CONNECT\nOFFLINE");
+      setProperty("connectStatus", warning_color);
+    }
   } else {
     bool online = nanos_since_boot() - last_ping < 80e9;
-    setProperty("connectStr",  online ? "연결됨" : "에러");
+    setProperty("connectStr",  (online ? "CONNECT\nONLINE" : "CONNECT\nERROR"));
     setProperty("connectStatus", online ? good_color : danger_color);
   }
 

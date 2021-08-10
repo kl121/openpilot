@@ -7,11 +7,20 @@
 #include <QVBoxLayout>
 
 #include "selfdrive/common/util.h"
+#include "selfdrive/common/params.h"
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/widgets/input.h"
 
+TrainingGuide::TrainingGuide(QWidget *parent) : QFrame(parent) {
+  setAttribute(Qt::WA_OpaquePaintEvent);
+}
+
 void TrainingGuide::mouseReleaseEvent(QMouseEvent *e) {
   if (boundingRect[currentIndex].contains(e->x(), e->y())) {
+    if (currentIndex == 9) {
+      const QRect yes = QRect(692, 842, 492, 148);
+      Params().putBool("RecordFront", yes.contains(e->x(), e->y()));
+    }
     currentIndex += 1;
   } else if (currentIndex == (boundingRect.size() - 2) && boundingRect.last().contains(e->x(), e->y())) {
     currentIndex = 0;
@@ -34,12 +43,18 @@ void TrainingGuide::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
 
   QRect bg(0, 0, painter.device()->width(), painter.device()->height());
-  QBrush bgBrush("#000000");
-  painter.fillRect(bg, bgBrush);
+  painter.fillRect(bg, QColor("#000000"));
 
   QRect rect(image.rect());
   rect.moveCenter(bg.center());
   painter.drawImage(rect.topLeft(), image);
+
+  // progress bar
+  if (currentIndex > 0 && currentIndex < (boundingRect.size() - 2)) {
+    const int h = 20;
+    const int w = (currentIndex / (float)(boundingRect.size() - 2)) * width();
+    painter.fillRect(QRect(0, height() - h, w, h), QColor("#465BEA"));
+  }
 }
 
 void TermsPage::showEvent(QShowEvent *event) {

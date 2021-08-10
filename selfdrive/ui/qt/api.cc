@@ -67,24 +67,24 @@ QString create_jwt(const QJsonObject &payloads, int expiry) {
 
 }  // namespace CommaApi
 
-HttpRequest::HttpRequest(QObject *parent, const QString &requestURL, bool create_jwt_,
-                         int timeout) : create_jwt(create_jwt_), QObject(parent) {
+HttpRequest::HttpRequest(QObject *parent, bool create_jwt, int timeout) : create_jwt(create_jwt), QObject(parent) {
   networkAccessManager = new QNetworkAccessManager(this);
-  reply = NULL;
 
   networkTimer = new QTimer(this);
   networkTimer->setSingleShot(true);
   networkTimer->setInterval(timeout);
   connect(networkTimer, &QTimer::timeout, this, &HttpRequest::requestTimeout);
-
-  sendRequest(requestURL);
 }
 
 bool HttpRequest::active() {
-  return reply != NULL;
+  return reply != nullptr;
 }
 
-void HttpRequest::sendRequest(const QString &requestURL) {
+void HttpRequest::sendRequest(const QString &requestURL, const HttpRequest::Method method) {
+  if (active()) {
+    qDebug() << "HttpRequest is active";
+    return;
+  }
   QString token;
   if(create_jwt) {
     token = CommaApi::create_jwt();
@@ -98,7 +98,11 @@ void HttpRequest::sendRequest(const QString &requestURL) {
   request.setUrl(QUrl(requestURL));
   request.setRawHeader(QByteArray("Authorization"), ("JWT " + token).toUtf8());
 
-  reply = networkAccessManager->get(request);
+  if (method == HttpRequest::Method::GET) {
+    reply = networkAccessManager->get(request);
+  } else if (method == HttpRequest::Method::DELETE) {
+    reply = networkAccessManager->deleteResource(request);
+  }
 
   networkTimer->start();
   connect(reply, &QNetworkReply::finished, this, &HttpRequest::requestFinished);
@@ -129,5 +133,5 @@ void HttpRequest::requestFinished() {
   }
   emit requestDone(success);
   reply->deleteLater();
-  reply = NULL;
+  reply = nullptr;
 }
