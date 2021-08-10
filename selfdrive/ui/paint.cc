@@ -228,8 +228,8 @@ static void ui_draw_vision_face(UIState *s) {
 
 static void ui_draw_vision_brake(UIState *s) {
   const int brake_size = 96;
-  const int brake_x = s->viz_rect.x + brake_size + (bdr_s * 2) + 255;
-  const int brake_y = s->viz_rect.bottom() - footer_h / 2;
+  const int brake_x = brake_size + (bdr_s * 2) + 255;
+  const int brake_y = s->fb_h - footer_h / 2;
   ui_draw_circle_image(s, brake_x, brake_y, brake_size, "brake_img", s->scene.brakeLights);
 }
 
