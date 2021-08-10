@@ -116,15 +116,20 @@ class ParamControl : public ToggleControl {
 
 public:
   ParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) : ToggleControl(title, desc, icon, false, parent) {
-    if (params.getBool(param.toStdString().c_str())) {
-      toggle.togglePosition();
-    }
+    key = param.toStdString();
     QObject::connect(this, &ToggleControl::toggleFlipped, [=](bool state) {
-      params.putBool(param.toStdString().c_str(), state);
+      params.putBool(key, state);
     });
   }
 
+  void showEvent(QShowEvent *event) override {
+    if (params.getBool(key) != toggle.on) {
+      toggle.togglePosition();
+    }
+  };
+
 protected:
+  std::string key;
   Params params;
 };
 //prebuilt param control class, this only uses for prebuilt toggle button.
@@ -136,7 +141,7 @@ class PrebuiltParamControl : public ParamControl {
 public:
   PrebuiltParamControl(const QString &param, const QString &title, const QString &desc, const QString &icon, QWidget *parent = nullptr) :
           ParamControl(param, title,desc, icon, parent) {
-
+	key = param.toStdString();
     //when instantiate object
     if (params.getBool(param.toStdString().c_str())) {
         std::ofstream output("/data/openpilot/prebuilt"); //touch prebuilt
@@ -153,28 +158,4 @@ public:
  }
 };
 
-//Lateral Control Selection class, this only uses for INDI_Selectd toggle button.
-class INDISelection : public ToggleControl {
-  Q_OBJECT
 
-public:
-  INDISelection() : ToggleControl("Select INDI for Lateral Control", "INDI 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using INDI)", "../assets/offroad/icon_checkmark.png", Params().getBool("INDI_Selected")) {
-    QObject::connect(this, &INDISelection::toggleFlipped, [=](int state) {
-      char value = state ? '1' : '0';
-      Params().put("INDI_Selected", &value, 1);
-    });
-  }
-};
-
-//Lateral Control Selection class, this only uses for LQR_Selectd toggle button.
-class LQRSelection : public ToggleControl {
-  Q_OBJECT
-
-public:
-  LQRSelection() : ToggleControl("Select LQR for Lateral Control", "LQR 방식으로 조향제어를 합니다 (If you select this option, EON controls the steering using LQR)", "../assets/offroad/icon_checkmark.png", Params().getBool("LQR_Selected")) {
-    QObject::connect(this, &LQRSelection::toggleFlipped, [=](int state) {
-      char value = state ? '1' : '0';
-      Params().put("LQR_Selected", &value, 1);
-    });
-  }
-};
