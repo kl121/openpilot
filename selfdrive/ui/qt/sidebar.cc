@@ -71,11 +71,11 @@ void Sidebar::updateState(const UIState &s) {
   }
   setProperty("tempStatus", QVariant::fromValue(tempStatus));
 
-  ItemStatus pandaStatus = {"VEHICLE\nONLINE", good_color};
+  ItemStatus pandaStatus = {"판다\n연결됨", good_color};
   if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
-    pandaStatus = {"NO\nPANDA", danger_color};
+    pandaStatus = {"판다\n연결안됨", danger_color};
   } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
-    pandaStatus = {"GPS\nSEARCHING", warning_color};
+    pandaStatus = {"GPS\n검색중", warning_color};
   }
   setProperty("pandaStatus", QVariant::fromValue(pandaStatus));
 
@@ -87,6 +87,8 @@ void Sidebar::updateState(const UIState &s) {
   }
   temp_val = deviceState.getAmbientTempC();
   batt_perc = deviceState.getBatteryPercent();
+  setProperty("tempVal", deviceState.getAmbientTempC());
+
 
 }
 
@@ -122,7 +124,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
 //  drawMetric(p, panda_status.first, "", panda_status.second, 518);
 //  drawMetric(p, connect_status.first, "", connect_status.second, 676);
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
-  drawMetric(p, batt_perc_qstring, QString("%1°C").arg(temp_val), temp_status, 338);
-  drawMetric(p, panda_str, "", panda_status, 496);
-  drawMetric(p, "네트워크\n" + connect_str, "", connect_status, 654);
+  drawMetric(p, batt_perc_qstring, QString("%1°C").arg(temp_val), temp_status.second, 338);
+  drawMetric(p, panda_status.first, "", panda_status.second, 518);
+  drawMetric(p, "네트워크\n" + connect_status.first, "", connect_status.second, 676);
 }
