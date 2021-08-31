@@ -158,7 +158,7 @@ struct FrameData {
   enum FrameType {
     unknown @0;
     neo @1;
-    chffrAndroid @2;
+    chffrAndroid @2;rr
     front @3;
   }
 
@@ -301,7 +301,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   startedMonoTime @13 :UInt64;
 
   lastAthenaPingTime @32 :UInt64;
-  wifiIpAddress @34 :Text;
+  wifiIpAddress @35 :Text;
 
   # system utilization
   freeSpacePercent @7 :Float32;
