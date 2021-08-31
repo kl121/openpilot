@@ -129,7 +129,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
 //  drawMetric(p, panda_status.first, "", panda_status.second, 518);
 //  drawMetric(p, connect_status.first, "", connect_status.second, 676);
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
-  drawMetric(p, batt_perc_qstring, QString("%1°C").arg(temp_val), temp_status, 338);
+  drawMetric(p, batt_perc_qstring, QString("%1°C").arg(temp_val), temp_status.first, 338);
   drawMetric(p, panda_str, "", panda_status, 518);
   drawMetric(p, "네트워크\n" + connect_str, "", connect_status, 676);
 }
