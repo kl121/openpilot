@@ -94,7 +94,6 @@ void Sidebar::updateState(const UIState &s) {
   }
   temp_val = deviceState.getAmbientTempC();
   batt_perc = deviceState.getBatteryPercent();
-  setProperty("tempStatus", tempStatus);
   setProperty("tempVal", deviceState.getAmbientTempC());
 
   QString pandaStr = "판다\n연결됨";
