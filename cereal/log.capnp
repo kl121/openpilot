@@ -158,7 +158,7 @@ struct FrameData {
   enum FrameType {
     unknown @0;
     neo @1;
-    chffrAndroid @2;rr
+    chffrAndroid @2;
     front @3;
   }
 
