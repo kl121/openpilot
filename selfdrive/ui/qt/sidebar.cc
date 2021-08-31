@@ -94,6 +94,20 @@ void Sidebar::updateState(const UIState &s) {
   }
   temp_val = deviceState.getAmbientTempC();
   batt_perc = deviceState.getBatteryPercent();
+  setProperty("tempStatus", tempStatus);
+  setProperty("tempVal", deviceState.getAmbientTempC());
+
+  QString pandaStr = "판다\n연결됨";
+  QColor pandaStatus = good_color;
+  if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
+    pandaStatus = danger_color;
+    pandaStr = "판다\n연결안됨";
+  } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
+    pandaStatus = warning_color;
+    pandaStr = "GPS\n찾는중";
+  }
+  setProperty("pandaStr", pandaStr);
+  setProperty("pandaStatus", pandaStatus);
 
 }
 
