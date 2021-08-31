@@ -18,8 +18,7 @@ class Sidebar : public QFrame {
   Q_PROPERTY(int netStrength MEMBER net_strength NOTIFY valueChanged);
 
   Q_PROPERTY(float tempVal MEMBER temp_val NOTIFY valueChanged);
-  Q_PROPERTY(QString pandaStr MEMBER panda_str NOTIFY valueChanged);
-  Q_PROPERTY(QString connectStr MEMBER connect_str NOTIFY valueChanged);
+
 
 public:
   explicit Sidebar(QWidget* parent = 0);
