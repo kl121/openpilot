@@ -10,13 +10,9 @@ class CarInterface(CarInterfaceBase):
     self.cp_adas = self.CS.get_adas_can_parser(CP)
 
   @staticmethod
-  def compute_gb(accel, speed):
-    return float(accel) / 4.0
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=None):
 
-  @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=None):
-
-    ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
+    ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
     ret.carName = "nissan"
     ret.safetyModel = car.CarParams.SafetyModel.nissan
 
