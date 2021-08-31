@@ -2,6 +2,7 @@
 
 #include <QMouseEvent>
 
+
 #include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"
 #include "selfdrive/ui/qt/util.h"
@@ -59,53 +60,41 @@ void Sidebar::updateState(const UIState &s) {
   int strength = (int)deviceState.getNetworkStrength();
   setProperty("netStrength", strength > 0 ? strength + 1 : 0);
 
+  ItemStatus connectstatus;
   auto last_ping = deviceState.getLastAthenaPingTime();
   if (last_ping == 0) {
-    if (params.getBool("PrimeRedirected")) {
-      setProperty("connectStr", "NO\nPRIME");
-      setProperty("connectStatus", danger_color);
-    } else {
-      setProperty("connectStr", "CONNECT\nOFFLINE");
-      setProperty("connectStatus", warning_color);
-    }
+    connectstatus = params.getBool("PrimeRedirected") ? ItemStatus{"NO\nPRIME", danger_color} : ItemStatus{"CONNECT\nOFFLINE", warning_color};
   } else {
-    bool online = nanos_since_boot() - last_ping < 80e9;
-    setProperty("connectStr",  (online ? "CONNECT\nONLINE" : "CONNECT\nERROR"));
-    setProperty("connectStatus", online ? good_color : danger_color);
+    connectstatus = nanos_since_boot() - last_ping < 80e9 ? ItemStatus{"CONNECT\nONLINE", good_color} : ItemStatus{"CONNECT\nERROR", danger_color};
   }
+  setProperty("connectStatus", QVariant::fromValue(connectstatus));
 
-//  net_type = deviceState.getNetworkType();
-//  net_strength = deviceState.getNetworkStrength();
+  QColor tempColor = danger_color;
+  auto ts = deviceState.getThermalStatus();
+  if (ts == cereal::DeviceState::ThermalStatus::GREEN) {
+    tempColor = good_color;
+  } else if (ts == cereal::DeviceState::ThermalStatus::YELLOW) {
+    tempColor = warning_color;
+  }
+  setProperty("tempStatus", QVariant::fromValue(ItemStatus{QString("%1°C").arg((int)deviceState.getAmbientTempC()), tempColor}));
+
+  ItemStatus pandaStatus = {"VEHICLE\nONLINE", good_color};
+  if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
+    pandaStatus = {"NO\nPANDA", danger_color};
+  } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
+    pandaStatus = {"GPS\nSEARCHING", warning_color};
+  }
+  setProperty("pandaStatus", QVariant::fromValue(pandaStatus));
+
   if(net_type == network_type[cereal::DeviceState::NetworkType::WIFI]) {
     std::string ip = deviceState.getWifiIpAddress();
     network_str = ip.c_str();
   } else {
     network_str = net_type;
   }
-
-  QColor tempStatus = danger_color;
-  auto ts = deviceState.getThermalStatus();
-  if (ts == cereal::DeviceState::ThermalStatus::GREEN) {
-    tempStatus = good_color;
-  } else if (ts == cereal::DeviceState::ThermalStatus::YELLOW) {
-    tempStatus = warning_color;
-  }
-  temp_val = (int)deviceState.getAmbientTempC();
+  temp_val = deviceState.getAmbientTempC();
   batt_perc = deviceState.getBatteryPercent();
-  setProperty("tempStatus", tempStatus);
-  setProperty("tempVal", (int)deviceState.getAmbientTempC());
 
-  QString pandaStr = "판다\n연결됨";
-  QColor pandaStatus = good_color;
-  if (s.scene.pandaType == cereal::PandaState::PandaType::UNKNOWN) {
-    pandaStatus = danger_color;
-    pandaStr = "판다\n연결안됨";
-  } else if (s.scene.started && !sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK()) {
-    pandaStatus = warning_color;
-    pandaStr = "GPS\n찾는중";
-  }
-  setProperty("pandaStr", pandaStr);
-  setProperty("pandaStatus", pandaStatus);
 }
 
 void Sidebar::paintEvent(QPaintEvent *event) {
@@ -132,10 +121,13 @@ void Sidebar::paintEvent(QPaintEvent *event) {
 
   configFont(p, "Open Sans", 35, "Regular");
   p.setPen(QColor(0xff, 0xff, 0xff));
-  const QRect r = QRect(25, 247, 250, 50);
-  p.drawText(r, Qt::AlignCenter, network_str);
+  const QRect r = QRect(50, 247, 100, 50);
+  p.drawText(r, Qt::AlignCenter, net_type);
 
   // metrics
+//  drawMetric(p, "TEMP", temp_status.first, temp_status.second, 338);
+//  drawMetric(p, panda_status.first, "", panda_status.second, 518);
+//  drawMetric(p, connect_status.first, "", connect_status.second, 676);
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
   drawMetric(p, batt_perc_qstring, QString("%1°C").arg(temp_val), temp_status, 338);
   drawMetric(p, panda_str, "", panda_status, 518);
