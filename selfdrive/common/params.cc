@@ -20,17 +20,6 @@
 #include "selfdrive/common/util.h"
 #include "selfdrive/hardware/hw.h"
 
-// keep trying if x gets interrupted by a signal
-#define HANDLE_EINTR(x)                                       \
-  ({                                                          \
-    decltype(x) ret;                                          \
-    int try_cnt = 0;                                          \
-    do {                                                      \
-      ret = (x);                                              \
-    } while (ret == -1 && errno == EINTR && try_cnt++ < 100); \
-    ret;                                                      \
-  })
-
 namespace {
 
 volatile sig_atomic_t params_do_exit = 0;
@@ -276,7 +265,7 @@ int Params::put(const char* key, const char* value, size_t value_size) {
   } while (false);
 
   close(tmp_fd);
-  remove(tmp_path.c_str());
+  ::unlink(tmp_path.c_str());
   return result;
 }
 
@@ -285,9 +274,8 @@ int Params::remove(const char *key) {
   std::lock_guard<FileLock> lk(file_lock);
   // Delete value.
   std::string path = params_path + "/d/" + key;
-  int result = ::remove(path.c_str());
+  int result = unlink(path.c_str());
   if (result != 0) {
-    result = ERR_NO_VALUE;
     return result;
   }
   // fsync parent directory
@@ -328,9 +316,18 @@ std::map<std::string, std::string> Params::readAll() {
 }
 
 void Params::clearAll(ParamKeyType key_type) {
+  FileLock file_lock(params_path + "/.lock", LOCK_EX);
+  std::lock_guard<FileLock> lk(file_lock);
+
+  std::string path;
   for (auto &[key, type] : keys) {
     if (type & key_type) {
-      remove(key);
+      path = params_path + "/d/" + key;
+      unlink(path.c_str());
     }
   }
+
+  // fsync parent directory
+  path = params_path + "/d";
+  fsync_dir(path.c_str());
 }
