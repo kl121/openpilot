@@ -1,17 +1,16 @@
 import math
 
-from selfdrive.controls.lib.pid import LatPIDController
+from selfdrive.controls.lib.pid import PIController
 from selfdrive.controls.lib.drive_helpers import get_steer_max
 from cereal import log
 
 
 class LatControlPID():
   def __init__(self, CP):
-    self.pid = LatPIDController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
-                                (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
-                                (CP.lateralTuning.pid.kdBP, CP.lateralTuning.pid.kdV),
-                                k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, neg_limit=-1.0,
-                                sat_limit=CP.steerLimitTimer)
+    self.pid = PIController((CP.lateralTuning.pid.kpBP, CP.lateralTuning.pid.kpV),
+                            (CP.lateralTuning.pid.kiBP, CP.lateralTuning.pid.kiV),
+                            k_f=CP.lateralTuning.pid.kf, pos_limit=1.0, neg_limit=-1.0,
+                            sat_limit=CP.steerLimitTimer)
 
   def reset(self):
     self.pid.reset()
@@ -24,7 +23,8 @@ class LatControlPID():
     angle_steers_des_no_offset = math.degrees(VM.get_steer_from_curvature(-desired_curvature, CS.vEgo))
     angle_steers_des = angle_steers_des_no_offset + params.angleOffsetDeg
 
-    if CS.vEgo < 0.3 or not active or not CS.lkasEnable:
+    pid_log.angleError = angle_steers_des - CS.steeringAngleDeg
+    if CS.vEgo < 0.3 or not active:
       output_steer = 0.0
       pid_log.active = False
       self.pid.reset()
@@ -36,8 +36,6 @@ class LatControlPID():
       # TODO: feedforward something based on lat_plan.rateSteers
       steer_feedforward = angle_steers_des_no_offset  # offset does not contribute to resistive torque
       steer_feedforward *= CS.vEgo**2  # proportional to realigning tire momentum (~ lateral accel)
-      #_c1, _c2, _c3 = [0.35189607550172824, 7.506201251644202, 69.226826411091]
-      #steer_feedforward *= _c1 * CS.vEgo ** 2 + _c2 * CS.vEgo + _c3
 
       deadzone = 0.0
 
