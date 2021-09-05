@@ -17,6 +17,9 @@ EventName = car.CarEvent.EventName
 # WARNING: this value was determined based on the model's training distribution,
 #          model predictions above this speed can be unpredictable
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS  # 135 + 4 = 86 mph
+ACCEL_MAX = 2.0
+ACCEL_MIN = -4.0
+
 
 # generic car and radar interfaces
 
@@ -48,12 +51,12 @@ class CarInterfaceBase():
       self.CC = CarController(self.cp.dbc_name, CP, self.VM)
 
   @staticmethod
-  def calc_accel_override(a_ego, a_target, v_ego, v_target):
-    return 1.
+  def get_pid_accel_limits(current_speed, cruise_speed):
+    return ACCEL_MIN, ACCEL_MAX
 
   @staticmethod
-  def compute_gb(accel, speed):
-    raise NotImplementedError
+  def calc_accel_override(a_ego, a_target, v_ego, v_target):
+    return 1.
 
   @staticmethod
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=None):
@@ -78,10 +81,6 @@ class CarInterfaceBase():
     ret.pcmCruise = True     # openpilot's state is tied to the PCM's cruise state on most cars
     ret.minEnableSpeed = -1. # enable is done by stock ACC, so ignore this
     ret.steerRatioRear = 0.  # no rear steering, at least on the listed cars aboveA
-    ret.gasMaxBP = [0.]
-    ret.gasMaxV = [.5]       # half max brake
-    ret.brakeMaxBP = [0.]
-    ret.brakeMaxV = [1.]
     ret.openpilotLongitudinalControl = False
     ret.startAccel = 0.0
     ret.minSpeedCan = 0.3
