@@ -85,7 +85,7 @@ void Sidebar::updateState(const UIState &s) {
   } else {
     network_str = net_type;
   }
-  temp_val = deviceState.getAmbientTempC();
+//  temp_val = deviceState.getAmbientTempC();
   batt_perc = deviceState.getBatteryPercent();
   setProperty("tempVal", deviceState.getAmbientTempC());
 
@@ -116,7 +116,8 @@ void Sidebar::paintEvent(QPaintEvent *event) {
 
   configFont(p, "Open Sans", 35, "Regular");
   p.setPen(QColor(0xff, 0xff, 0xff));
-  const QRect r = QRect(50, 247, 100, 50);
+  const QRect r = QRect(25, 247, 250, 50);
+
   p.drawText(r, Qt::AlignCenter, network_str);
 
   // metrics
@@ -124,7 +125,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
 //  drawMetric(p, panda_status.first,  panda_status.second, 518);
 //  drawMetric(p, connect_status.first, connect_status.second, 676);
   QString batt_perc_qstring = QString("BATT: %1 %2").arg(batt_perc).arg("%");
-  drawMetric(p, batt_perc_qstring +"\n"+ QString("%1°C").arg(temp_val), temp_status.second, 338);
+  drawMetric(p, batt_perc_qstring +"\n"+ QString("%1°C").arg((double)temp_val,4,'f',1), temp_status.second, 338);
   drawMetric(p, panda_status.first,  panda_status.second, 518);
   drawMetric(p, "네트워크\n" + connect_status.first, connect_status.second, 676);
 }
