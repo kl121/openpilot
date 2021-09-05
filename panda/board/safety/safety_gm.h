@@ -201,18 +201,6 @@ static int gm_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   return tx;
 }
 
-static void gm_init_origin(int16_t param) {
-  UNUSED(param);
-  controls_allowed = false;
-  relay_malfunction_reset();
-  gas_interceptor_detected = 0;
-  cam_can_bus = -1;
-  bus_camera = -1;
-  //bus_radar = 1;  // Radar can bus, Bolt EV doesn't need this can bus
-  bus_vehicle = 0; //vehicle PT can bus for comma ai harness
-  //bus_chassis = 3; //vehicle Chassis can bus, Bolt EV doesn't need this can bus
-}
-
 static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   int bus_fwd = -1;
   int addr = GET_ADDR(to_fwd);
@@ -258,6 +246,6 @@ const safety_hooks gm_hooks = {
   .tx = gm_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = gm_fwd_hook,
-  .addr_check = gm_addr_checks,
-  .addr_check_len = sizeof(gm_addr_checks) / sizeof(gm_addr_checks[0]),
+//  .addr_check = gm_addr_checks,
+//  .addr_check_len = sizeof(gm_addr_checks) / sizeof(gm_addr_checks[0]),
 };
