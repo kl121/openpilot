@@ -37,14 +37,15 @@ const CanMsg GM_TX_MSGS[] = {{MSG_TX_LKA, 0, 4}, {MSG_TX_ALIVE, 0, 7}, {MSG_TX_A
 
 // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
 
-AddrCheckStruct gm_rx_checks[] = {
+AddrCheckStruct gm_addr_checks[] = {
   {.msg = {{MSG_RX_STEER, 0, 8, .expected_timestep = 100000U}, { 0 }, { 0 }}},
   {.msg = {{MSG_RX_WHEEL, 0, 5, .expected_timestep = 100000U}, { 0 }, { 0 }}},
   {.msg = {{MSG_RX_BUTTON, 0, 7, .expected_timestep = 100000U}, { 0 }, { 0 }}},
   {.msg = {{MSG_RX_BRAKE, 0, 6, .expected_timestep = 100000U}, { 0 }, { 0 }}},
   {.msg = {{MSG_RX_GAS, 0, 7, .expected_timestep = 100000U}, { 0 }, { 0 }}},
 };
-const int GM_RX_CHECK_LEN = sizeof(gm_rx_checks) / sizeof(gm_rx_checks[0]);
+#define GM_RX_CHECK_LEN (sizeof(gm_addr_checks) / sizeof(gm_addr_checks[0]))
+addr_checks gm_rx_checks = {gm_addr_checks, GM_RX_CHECK_LEN};
 
 int cam_can_bus = -1;
 int bus_camera = -1;
@@ -52,8 +53,7 @@ int bus_vehicle = -1;
 
 static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
-  bool valid = addr_safety_check(to_push, gm_rx_checks, GM_RX_CHECK_LEN,
-                                 NULL, NULL, NULL);
+  bool valid = addr_safety_check(to_push, &gm_rx_checks, NULL, NULL, NULL);
 
   int addr = GET_ADDR(to_push);
   int bus = GET_BUS(to_push);
@@ -237,6 +237,15 @@ static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   }
   return bus_fwd;
 }
+
+
+static const addr_checks* gm_init(int16_t param) {
+  UNUSED(param);
+  controls_allowed = false;
+  relay_malfunction_reset();
+  return &gm_rx_checks;
+}
+
 
 const safety_hooks gm_hooks = {
   .init = gm_init,
