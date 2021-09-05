@@ -239,7 +239,7 @@ static int gm_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
 }
 
 
-static const addr_checks* gm_init(int16_t param) {
+static const addr_checks* gm_init_origin(int16_t param) {
   UNUSED(param);
   controls_allowed = false;
   relay_malfunction_reset();
@@ -253,6 +253,6 @@ const safety_hooks gm_hooks = {
   .tx = gm_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = gm_fwd_hook,
-  .addr_check = gm_rx_checks,
-  .addr_check_len = sizeof(gm_rx_checks) / sizeof(gm_rx_checks[0]),
+  .addr_check = gm_addr_checks,
+  .addr_check_len = sizeof(gm_addr_checks) / sizeof(gm_addr_checks[0]),
 };
