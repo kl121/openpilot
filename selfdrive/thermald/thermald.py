@@ -431,7 +431,7 @@ def thermald_thread():
 
     # dp - auto shutdown
     if off_ts is not None:
-      shutdown_sec = 240
+      shutdown_sec = 600
       sec_now = sec_since_boot() - off_ts
       if (shutdown_sec - 5) < sec_now:
         msg.deviceState.chargingDisabled = True
