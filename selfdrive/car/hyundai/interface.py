@@ -22,8 +22,6 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
     tire_stiffness_factor = 1.
 
-    ret.startAccel = 1.0
-
     if candidate == CAR.SANTA_FE:
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 3982. * CV.LB_TO_KG + STD_CARGO_KG
@@ -218,7 +216,7 @@ class CarInterface(CarInterfaceBase):
 
     # these cars require a special panda safety mode due to missing counters and checksums in the messages
     if candidate in [CAR.HYUNDAI_GENESIS, CAR.IONIQ_EV_2020, CAR.IONIQ_EV_LTD, CAR.IONIQ_PHEV, CAR.IONIQ, CAR.KONA_EV, CAR.KIA_SORENTO,
-                     CAR.SONATA_LF, CAR.KIA_NIRO_EV, CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER, CAR.KIA_SELTOS,
+                     CAR.SONATA_LF, CAR.KIA_NIRO_EV, CAR.KIA_OPTIMA, CAR.VELOSTER, CAR.KIA_STINGER,
                      CAR.GENESIS_G70, CAR.GENESIS_G80, CAR.KIA_CEED, CAR.ELANTRA]:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiLegacy
 
