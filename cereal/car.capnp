@@ -148,7 +148,7 @@ struct CarState {
   wheelSpeeds @2 :WheelSpeeds;
 
   # gas pedal, 0.0-1.0
-  gas @3 :Float32;        # this is user + computer
+  gas @3 :Float32;        # this is user pedal only
   gasPressed @4 :Bool;    # this is user pedal only
 
   # brake pedal, 0.0-1.0
@@ -432,7 +432,8 @@ struct CarParams {
   startingAccelRate @53 :Float32; # m/s^2/s while trying to start
 
   steerActuatorDelay @36 :Float32; # Steering wheel actuator delay in seconds
-  longitudinalActuatorDelay @58 :Float32; # Gas/Brake actuator delay in seconds
+  longitudinalActuatorDelayLowerBound @61 :Float32; # Gas/Brake actuator delay in seconds, lower bound
+  longitudinalActuatorDelayUpperBound @58 :Float32; # Gas/Brake actuator delay in seconds, upper bound
   openpilotLongitudinalControl @37 :Bool; # is openpilot doing the longitudinal control?
   carVin @38 :Text; # VIN number queried during fingerprinting
   dashcamOnly @41: Bool;
@@ -522,6 +523,7 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    stellantis @25;
   }
 
   enum SteerControlType {
