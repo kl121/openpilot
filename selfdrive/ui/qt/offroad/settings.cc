@@ -157,7 +157,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     retrainingBtn = new ButtonControl("트레이닝 가이드", "가이드 보기", "오픈파일럿의 제한적 상황과 규정을 확인");
     connect(retrainingBtn, &ButtonControl::clicked, [=]() {
       if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
-        Params().remove("CompletedTrainingVersion");
         emit reviewTrainingGuide();
       }
     });
