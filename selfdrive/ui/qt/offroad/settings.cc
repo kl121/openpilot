@@ -53,7 +53,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "../assets/offroad/icon_shell.png",
                                   this));
 
-  toggles.append(new ParamControl("UploadRaw",
+  addItem(new ParamControl("UploadRaw",
                                     "업로드 raw 로그",
                                     "와이파이 연결 시 로그와 영상 전체를 업로드 합니다.",
                                   "../assets/offroad/icon_network.png",
