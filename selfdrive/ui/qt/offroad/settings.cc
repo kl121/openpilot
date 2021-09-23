@@ -26,31 +26,28 @@
 #include "selfdrive/ui/qt/qt_window.h"
 
 TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
 
-  QList<ParamControl*> toggles;
-
-  toggles.append(new ParamControl("OpenpilotEnabledToggle",
+  addItem(new ParamControl("OpenpilotEnabledToggle",
                                   "오픈파일럿 사용",
                                   "어댑티브 크루즈 컨트롤 및 차선 유지 지원을 위해 오픈파일럿 시스템을 사용하십시오. 이 기능을 사용하려면 항상 주의를 기울여야 합니다. 이 설정을 변경하는 것은 자동차의 전원이 꺼졌을 때 적용됩니다.",
                                   "../assets/offroad/icon_openpilot.png",
                                   this));
-  toggles.append(new ParamControl("IsLdwEnabled",
+  addItemnew ParamControl("IsLdwEnabled",
                                   "차선이탈 경보 사용",
                                   "50km/h이상의 속도로 주행하는 동안 방향 지시등이 활성화되지 않은 상태에서 차량이 감지된 차선 위를 넘어갈 경우 원래 차선으로 다시 방향을 전환하도록 경고를 보냅니다.",
                                   "../assets/offroad/icon_warning.png",
                                   this));
-  toggles.append(new ParamControl("IsRHD",
+  addItem(new ParamControl("IsRHD",
                                   "우핸들 운전방식 사용",
                                   "오픈파일럿이 좌측 교통 규칙을 준수하도록 허용하고 우측 운전석에서 운전자 모니터링을 수행하십시오.",
                                   "../assets/offroad/icon_openpilot_mirrored.png",
                                   this));
-  toggles.append(new ParamControl("IsMetric",
+  addItem(new ParamControl("IsMetric",
                                   "미터법 사용",
                                   "mi/h 대신 km/h 단위로 속도를 표시합니다.",
                                   "../assets/offroad/icon_metric.png",
                                   this));
-  toggles.append(new ParamControl("CommunityFeaturesToggle",
+  addItem(new ParamControl("CommunityFeaturesToggle",
                                   "커뮤니티 기능 사용",
                                   "comma.ai에서 유지 또는 지원하지 않고 표준 안전 모델에 부합하는 것으로 확인되지 않은 오픈 소스 커뮤니티의 기능을 사용하십시오. 이러한 기능에는 커뮤니티 지원 자동차와 커뮤니티 지원 하드웨어가 포함됩니다. 이러한 기능을 사용할 때는 각별히 주의해야 합니다.",
                                   "../assets/offroad/icon_shell.png",
@@ -67,15 +64,15 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                                  "운전자 모니터링 카메라에서 데이터를 업로드하고 운전자 모니터링 알고리즘을 개선하십시오.",
                                                  "../assets/offroad/icon_monitoring.png",
                                                  this);
-  toggles.append(record_toggle);
-  toggles.append(new ParamControl("EndToEndToggle",
-                                  "차선이 없을 때 사용 버전 알파",
+  addItem(record_toggle);
+  addItem(new ParamControl("EndToEndToggle",
+                                  "\U0001f96c 차선이 없을 때 사용 버전 알파",
                                   "차선이 없는 곳에서 사람과 같이 운전을 하는 것을 목표합니다.",
                                   "../assets/offroad/icon_road.png",
                                   this));
 
 #ifdef ENABLE_MAPS
-  toggles.append(new ParamControl("NavSettingTime24h",
+  addItem(new ParamControl("NavSettingTime24h",
                                   "Show ETA in 24h format",
                                   "Use 24h format instead of am/pm",
                                   "../assets/offroad/icon_metric.png",
@@ -84,23 +81,15 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
 
   bool record_lock = Params().getBool("RecordFrontLock");
   record_toggle->setEnabled(!record_lock);
-
-  for(ParamControl *toggle : toggles) {
-    if(main_layout->count() != 0) {
-      main_layout->addWidget(horizontal_line());
-    }
-    main_layout->addWidget(toggle);
-  }
 }
 
-DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
+  setSpacing(50);
   Params params = Params();
-  main_layout->addWidget(new LabelControl("Dongle ID", getDongleId().value_or("N/A")));
-  main_layout->addWidget(horizontal_line());
+  addItem(new LabelControl("Dongle ID", getDongleId().value_or("N/A")));
 
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
-  main_layout->addWidget(new LabelControl("시리얼", serial));
+  addItem(new LabelControl("시리얼", serial));
 
   QHBoxLayout *reset_layout = new QHBoxLayout();
   reset_layout->setSpacing(30);
@@ -157,7 +146,6 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     retrainingBtn = new ButtonControl("트레이닝 가이드", "가이드 보기", "오픈파일럿의 제한적 상황과 규정을 확인");
     connect(retrainingBtn, &ButtonControl::clicked, [=]() {
       if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
-        Params().remove("CompletedTrainingVersion");
         emit reviewTrainingGuide();
       }
     });
@@ -174,9 +162,8 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 
   for (auto btn : {dcamBtn, resetCalibBtn, retrainingBtn, regulatoryBtn}) {
     if (btn) {
-      main_layout->addWidget(horizontal_line());
       connect(parent, SIGNAL(offroadTransition(bool)), btn, SLOT(setEnabled(bool)));
-      main_layout->addWidget(btn);
+      addItem(btn);
     }
   }
 
@@ -229,10 +216,10 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
     #poweroff_btn { background-color: #E22C2C; }
     #poweroff_btn:pressed { background-color: #FF2424; }
   )");
-  main_layout->addLayout(power_layout);
+  addItem(power_layout);
 }
 
-SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
+SoftwarePanel::SoftwarePanel(QWidget* parent) : ListWidget(parent) {
   gitBranchLbl = new LabelControl("Git Branch");
   gitCommitLbl = new LabelControl("Git Commit");
   osVersionLbl = new LabelControl("OS Version");
@@ -249,12 +236,6 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
     std::system("pkill -1 -f selfdrive.updated");
   });
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
-  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl};
-  for (int i = 0; i < std::size(widgets); ++i) {
-    main_layout->addWidget(widgets[i]);
-    main_layout->addWidget(horizontal_line());
-  }
 
   auto uninstallBtn = new ButtonControl("Uninstall " + getBrand(), "UNINSTALL");
   connect(uninstallBtn, &ButtonControl::clicked, [=]() {
@@ -263,7 +244,11 @@ SoftwarePanel::SoftwarePanel(QWidget* parent) : QWidget(parent) {
     }
   });
   connect(parent, SIGNAL(offroadTransition(bool)), uninstallBtn, SLOT(setEnabled(bool)));
-  main_layout->addWidget(uninstallBtn);
+
+  QWidget *widgets[] = {versionLbl, lastUpdateLbl, updateBtn, gitBranchLbl, gitCommitLbl, osVersionLbl, uninstallBtn};
+  for (QWidget* w : widgets) {
+    addItem(w);
+  }
 
   fs_watch = new QFileSystemWatcher(this);
   QObject::connect(fs_watch, &QFileSystemWatcher::fileChanged, [=](const QString path) {
@@ -302,24 +287,24 @@ QWidget * network_panel(QWidget * parent) {
 #ifdef QCOM
   QWidget *w = new QWidget(parent);
   QVBoxLayout *layout = new QVBoxLayout(w);
-  layout->setSpacing(30);
+  layout->setContentsMargins(50, 0, 50, 0);
 
+  ListWidget *list = new ListWidget();
+  list->setSpacing(30);
   // wifi + tethering buttons
   auto wifiBtn = new ButtonControl("WiFi Settings", "OPEN");
   QObject::connect(wifiBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_wifi(); });
-  layout->addWidget(wifiBtn);
-  layout->addWidget(horizontal_line());
+  list->addItem(wifiBtn);
 
   auto tetheringBtn = new ButtonControl("Tethering Settings", "OPEN");
   QObject::connect(tetheringBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_tethering(); });
-  layout->addWidget(tetheringBtn);
-  layout->addWidget(horizontal_line());
+  list->addItem(tetheringBtn);
 
   // SSH key management
-  layout->addWidget(new SshToggle());
-  layout->addWidget(horizontal_line());
-  layout->addWidget(new SshControl());
+  list->addItem(new SshToggle());
+  list->addItem(new SshControl());
 
+  layout->addWidget(list);
   layout->addStretch(1);
 #else
   Networking *w = new Networking(parent);
