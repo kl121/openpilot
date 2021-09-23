@@ -179,6 +179,9 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
       Hardware::reboot();
     }
   });
+
+
+#ifdef QCOM
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::clicked, [=]() {
@@ -187,7 +190,6 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
       }
   });
 
-#ifdef QCOM
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
   QObject::connect(cleanbuild_btn, &QPushButton::clicked, [=]() {
