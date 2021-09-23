@@ -174,7 +174,7 @@ class PowerMonitoring:
     return disable_charging
 
   # See if we need to shutdown
-  def should_shutdown(self, pandaState, offroad_timestamp, started_seen):
+  def should_shutdown(self, pandaState, offroad_timestamp, started_seen,chargingStatusModified):
     if pandaState is None or offroad_timestamp is None:
       return False
 
@@ -184,7 +184,9 @@ class PowerMonitoring:
 
     should_shutdown = False
     # Wait until we have shut down charging before powering down
+
+    # chargingStatusModified = 충전선은 붙어있지만, 충전은 중단된 상태.
     should_shutdown |= (not panda_charging and self.should_disable_charging(pandaState, offroad_timestamp))
-    should_shutdown |= ((HARDWARE.get_battery_capacity() < BATT_PERC_OFF) and (not HARDWARE.get_battery_charging()) and ((now - offroad_timestamp) > 60))
+    should_shutdown |= ((HARDWARE.get_battery_capacity() < BATT_PERC_OFF) and (not HARDWARE.get_battery_charging() ) and ((now - offroad_timestamp) > 60)) and not chargingStatusModified
     should_shutdown &= started_seen or (now > MIN_ON_TIME_S)
     return should_shutdown
