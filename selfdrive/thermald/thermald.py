@@ -424,11 +424,11 @@ def thermald_thread():
     # based on kegman, ���� ���й��͸��� ����, �̿� ���͸� �ۼ�Ƽ��,
     if EON:
       from selfdrive.thermald.eon_battery_manager import setEONChargingStatus
-      setEONChargingStatus(power_monitor.car_voltage_mV, msg.deviceState.batteryPercent,started_seen)
+      chargingStatusModified = setEONChargingStatus(power_monitor.car_voltage_mV, msg.deviceState.batteryPercent,started_seen)
    
 
     # Check if we need to shut down
-    if power_monitor.should_shutdown(pandaState, off_ts, started_seen):
+    if power_monitor.should_shutdown(pandaState, off_ts, started_seen,chargingStatusModified):
       cloudlog.info(f"shutting device down, offroad since {off_ts}")
       # TODO: add function for blocking cloudlog instead of sleep
       time.sleep(10)

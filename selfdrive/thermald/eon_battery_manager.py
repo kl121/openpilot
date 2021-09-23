@@ -8,7 +8,7 @@ def setEONChargingStatus(car_voltage_mV, batteryPercent,started_seen) :
     if EON:
         if car_voltage_mV is None or batteryPercent is None :
             HARDWARE.set_battery_charging(True)
-            return
+            return False
         # print( "car_voltage_mV:",car_voltage_mV)
         # print( "batteryPercent:",batteryPercent)
         # print( "VBATT_PAUSE_CHARGING:",VBATT_PAUSE_CHARGING)
@@ -19,12 +19,12 @@ def setEONChargingStatus(car_voltage_mV, batteryPercent,started_seen) :
             if batteryPercent > BATT_PERC_MAX : #or car_voltage_mV < VBATT_PAUSE_CHARGING * 1e3:
                 # print("log purpose : HARDWARE.set_battery_charging(False)  False ")
                 HARDWARE.set_battery_charging(False)
-                return
+                return True
         else :
             # print("log purpose : HARDWARE.get_battery_charging()  False ")
             #if batteryPercent < BATT_PERC_MIN and car_voltage_mV  > VBATT_PAUSE_CHARGING * 1e3:
             if batteryPercent < BATT_PERC_MIN :#and car_voltage_mV > VBATT_PAUSE_CHARGING * 1e3:
                 #print("log purpose : HARDWARE.set_battery_charging(True)  True ")
                 HARDWARE.set_battery_charging(True)
-                return
+                return False
 
