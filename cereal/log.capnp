@@ -301,7 +301,7 @@ struct DeviceState @0xa4d8b5af2aa492eb {
   startedMonoTime @13 :UInt64;
 
   lastAthenaPingTime @32 :UInt64;
-  wifiIpAddress @35 :Text;
+  wifiIpAddress @37 :Text;
 
   # system utilization
   freeSpacePercent @7 :Float32;

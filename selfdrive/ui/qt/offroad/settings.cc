@@ -25,14 +25,14 @@
 #include "selfdrive/ui/qt/util.h"
 #include "selfdrive/ui/qt/qt_window.h"
 
-TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
+TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
 
   addItem(new ParamControl("OpenpilotEnabledToggle",
                                   "오픈파일럿 사용",
                                   "어댑티브 크루즈 컨트롤 및 차선 유지 지원을 위해 오픈파일럿 시스템을 사용하십시오. 이 기능을 사용하려면 항상 주의를 기울여야 합니다. 이 설정을 변경하는 것은 자동차의 전원이 꺼졌을 때 적용됩니다.",
                                   "../assets/offroad/icon_openpilot.png",
                                   this));
-  addItemnew ParamControl("IsLdwEnabled",
+  addItem(new ParamControl("IsLdwEnabled",
                                   "차선이탈 경보 사용",
                                   "50km/h이상의 속도로 주행하는 동안 방향 지시등이 활성화되지 않은 상태에서 차량이 감지된 차선 위를 넘어갈 경우 원래 차선으로 다시 방향을 전환하도록 경고를 보냅니다.",
                                   "../assets/offroad/icon_warning.png",
@@ -53,7 +53,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "../assets/offroad/icon_shell.png",
                                   this));
 
-  toggles.append(new ParamControl("UploadRaw",
+  addItem(new ParamControl("UploadRaw",
                                     "업로드 raw 로그",
                                     "와이파이 연결 시 로그와 영상 전체를 업로드 합니다.",
                                   "../assets/offroad/icon_network.png",
@@ -91,63 +91,46 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QString serial = QString::fromStdString(params.get("HardwareSerial", false));
   addItem(new LabelControl("시리얼", serial));
 
-  QHBoxLayout *reset_layout = new QHBoxLayout();
-  reset_layout->setSpacing(30);
-
-  // reset calibration button
-  QPushButton *reset_calib_btn = new QPushButton("캘리브레이션 리셋");
-  reset_layout->addWidget(reset_calib_btn);
-  QObject::connect(reset_calib_btn, &QPushButton::clicked, [=]() {
-      if (ConfirmationDialog::confirm("캘리브레이션을 다시 하시겠습니까?",this)) {
-          Params().remove("CalibrationParams");
-      }
-  });
-
-  main_layout->addWidget(horizontal_line());
-  main_layout->addLayout(reset_layout);
-
-  // offroad-only buttons
-
   auto dcamBtn = new ButtonControl("운전자 영상", "미리보기",
-                                        "운전자 영상이 제대로 작동하는지 확인을 합니다. 차량을 끄고 사용하도록 하십시오.");
+                                   "운전자 영상이 제대로 작동하는지 확인을 합니다. 차량 시동을 끄고 사용하도록 하십시오.");
   connect(dcamBtn, &ButtonControl::clicked, [=]() { emit showDriverView(); });
 
-  QString resetCalibDesc = "오픈파일럿은 좌우로 4° 위아래로 5° 를 보정합니다. 그 이상의 경우 보정이 필요합니다.";
+  QString resetCalibDesc = "오픈파일럿은 좌우로 4° 위아래로 5° 의 오차범위내에 장착되어야 합니다. 오픈파일럿이 항상 캘리브레이션을 하기때문에 리셋은 대부분의 경우 불필요합니다.";
   auto resetCalibBtn = new ButtonControl("캘리브레이션 리셋", "리셋", resetCalibDesc);
   connect(resetCalibBtn, &ButtonControl::clicked, [=]() {
-    if (ConfirmationDialog::confirm("캘리브레이션을 리셋하시겠습니까?", this)) {
-      Params().remove("CalibrationParams");
-    }
+      if (ConfirmationDialog::confirm("캘리브레이션을 리셋하시겠습니까?", this)) {
+        Params().remove("CalibrationParams");
+      }
   });
   connect(resetCalibBtn, &ButtonControl::showDescription, [=]() {
-    QString desc = resetCalibDesc;
-    std::string calib_bytes = Params().get("CalibrationParams");
-    if (!calib_bytes.empty()) {
-      try {
-        AlignedBuffer aligned_buf;
-        capnp::FlatArrayMessageReader cmsg(aligned_buf.align(calib_bytes.data(), calib_bytes.size()));
-        auto calib = cmsg.getRoot<cereal::Event>().getLiveCalibration();
-        if (calib.getCalStatus() != 0) {
-          double pitch = calib.getRpyCalib()[1] * (180 / M_PI);
-          double yaw = calib.getRpyCalib()[2] * (180 / M_PI);
-          desc += QString(" Your device is pointed %1° %2 and %3° %4.")
-                                .arg(QString::number(std::abs(pitch), 'g', 1), pitch > 0 ? "up" : "down",
-                                     QString::number(std::abs(yaw), 'g', 1), yaw > 0 ? "right" : "left");
+      QString desc = resetCalibDesc;
+      std::string calib_bytes = Params().get("CalibrationParams");
+      if (!calib_bytes.empty()) {
+        try {
+          AlignedBuffer aligned_buf;
+          capnp::FlatArrayMessageReader cmsg(aligned_buf.align(calib_bytes.data(), calib_bytes.size()));
+          auto calib = cmsg.getRoot<cereal::Event>().getLiveCalibration();
+          if (calib.getCalStatus() != 0) {
+            double pitch = calib.getRpyCalib()[1] * (180 / M_PI);
+            double yaw = calib.getRpyCalib()[2] * (180 / M_PI);
+            desc += QString(" Your device is pointed %1° %2 and %3° %4.")
+                    .arg(QString::number(std::abs(pitch), 'g', 1), pitch > 0 ? "up" : "down",
+                         QString::number(std::abs(yaw), 'g', 1), yaw > 0 ? "right" : "left");
+          }
+        } catch (kj::Exception) {
+          qInfo() << "invalid CalibrationParams";
         }
-      } catch (kj::Exception) {
-        qInfo() << "invalid CalibrationParams";
       }
-    }
-    resetCalibBtn->setDescription(desc);
+      resetCalibBtn->setDescription(desc);
   });
 
   ButtonControl *retrainingBtn = nullptr;
   if (!params.getBool("Passive")) {
     retrainingBtn = new ButtonControl("트레이닝 가이드", "가이드 보기", "오픈파일럿의 제한적 상황과 규정을 확인");
     connect(retrainingBtn, &ButtonControl::clicked, [=]() {
-      if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
-        emit reviewTrainingGuide();
-      }
+        if (ConfirmationDialog::confirm("트레이닝 가이드를 확인하시겠습니까?", this)) {
+          emit reviewTrainingGuide();
+        }
     });
   }
 
@@ -155,8 +138,8 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   if (Hardware::TICI()) {
     regulatoryBtn = new ButtonControl("Regulatory", "VIEW", "");
     connect(regulatoryBtn, &ButtonControl::clicked, [=]() {
-      const std::string txt = util::read_file(ASSET_PATH.toStdString() + "/offroad/fcc.html");
-      RichTextDialog::alert(QString::fromStdString(txt), this);
+        const std::string txt = util::read_file(ASSET_PATH.toStdString() + "/offroad/fcc.html");
+        RichTextDialog::alert(QString::fromStdString(txt), this);
     });
   }
 
@@ -171,14 +154,16 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   QHBoxLayout *power_layout = new QHBoxLayout();
   power_layout->setSpacing(30);
 
-  QPushButton *reboot_btn = new QPushButton("재부팅");
+  QPushButton *reboot_btn = new QPushButton("Reboot");
   reboot_btn->setObjectName("reboot_btn");
   power_layout->addWidget(reboot_btn);
   QObject::connect(reboot_btn, &QPushButton::clicked, [=]() {
-    if (ConfirmationDialog::confirm("단순 재부팅합니다.", this)) {
-      Hardware::reboot();
-    }
+      if (ConfirmationDialog::confirm("Are you sure you want to reboot?", this)) {
+        Hardware::reboot();
+      }
   });
+
+#ifdef QCOM
   QPushButton *reboot_rmprebuilt_btn = new QPushButton("빌드부팅");
   power_layout->addWidget(reboot_rmprebuilt_btn);
   QObject::connect(reboot_rmprebuilt_btn, &QPushButton::clicked, [=]() {
@@ -187,7 +172,6 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
       }
   });
 
-#ifdef QCOM
   QPushButton *cleanbuild_btn = new QPushButton("클린 빌드부팅");
   power_layout->addWidget(cleanbuild_btn);
   QObject::connect(cleanbuild_btn, &QPushButton::clicked, [=]() {
@@ -197,13 +181,13 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
   });
 #endif
 
-  QPushButton *poweroff_btn = new QPushButton("전원종료");
+  QPushButton *poweroff_btn = new QPushButton("Power Off");
   poweroff_btn->setObjectName("poweroff_btn");
   power_layout->addWidget(poweroff_btn);
   QObject::connect(poweroff_btn, &QPushButton::clicked, [=]() {
-    if (ConfirmationDialog::confirm("전원을 끄시겠습니까?", this)) {
-      Hardware::poweroff();
-    }
+      if (ConfirmationDialog::confirm("Are you sure you want to power off?", this)) {
+        Hardware::poweroff();
+      }
   });
 
   setStyleSheet(R"(
@@ -216,6 +200,10 @@ DevicePanel::DevicePanel(QWidget* parent) : ListWidget(parent) {
     #poweroff_btn { background-color: #E22C2C; }
     #poweroff_btn:pressed { background-color: #FF2424; }
   )");
+
+
+
+
   addItem(power_layout);
 }
 
