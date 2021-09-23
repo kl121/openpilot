@@ -3,7 +3,8 @@ from selfdrive.hardware import HARDWARE,EON
 BATT_PERC_MIN = 40
 BATT_PERC_MAX = 60
 
-def setEONChargingStatus(car_voltage_mV, batteryPercent) :
+def setEONChargingStatus(car_voltage_mV, batteryPercent,started_seen) :
+    print("started seeen  : " + str(started_seen))
     if EON:
         if car_voltage_mV is None or batteryPercent is None :
             HARDWARE.set_battery_charging(True)
