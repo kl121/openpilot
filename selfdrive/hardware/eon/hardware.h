@@ -92,6 +92,7 @@ public:
   static void update_reboot() {
 
     rm_prebuilt();
+    std::system("/system/bin/su -c LD_LIBRARY_PATH=/data/phonelibs:/data/data/com.termux/files/usr/lib data/data/com.termux/files/usr/bin/git -C /data/openpilot pull");
     reboot();
   }
   static void clean_build_reboot() {
