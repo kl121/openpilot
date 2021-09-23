@@ -265,7 +265,9 @@ def thermald_thread():
         network_type = HARDWARE.get_network_type()
         network_strength = HARDWARE.get_network_strength(network_type)
         network_info = HARDWARE.get_network_info()  # pylint: disable=assignment-from-none
-        nvme_temps = HARDWARE.get_nvme_temps()
+        nvme_temps = None
+        if TICI:
+          nvme_temps = HARDWARE.get_nvme_temps()
 
 
         wifiIpAddress = HARDWARE.get_ip_address()
