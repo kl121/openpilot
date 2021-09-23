@@ -25,6 +25,7 @@ def set_timezone(valid_timezones, timezone):
                               mv /data/etc/tmptime /data/etc/localtime"', shell=True)
       subprocess.check_call(f'sudo su -c "echo \"{timezone}\" > /data/etc/timezone"', shell=True)
     else:
+      print("going to call sudo")
       subprocess.check_call(f'sudo timedatectl set-timezone {timezone}', shell=True)
   except subprocess.CalledProcessError:
     cloudlog.exception(f"Error setting timezone to {timezone}")
