@@ -138,7 +138,7 @@ static void ui_draw_world(UIState *s) {
   ui_draw_vision_lane_lines(s);
 
   // Draw lead indicators if openpilot is handling longitudinal
-  if (s->scene.longitudinal_control) {
+//  if (s->scene.longitudinal_control) {
     auto lead_one = (*s->sm)["modelV2"].getModelV2().getLeadsV3()[0];
     auto lead_two = (*s->sm)["modelV2"].getModelV2().getLeadsV3()[1];
     if (lead_one.getProb() > .5) {
@@ -146,7 +146,7 @@ static void ui_draw_world(UIState *s) {
     }
    if (lead_two.getProb() > .5 && (std::abs(lead_one.getX()[0] - lead_two.getX()[0]) > 3.0)) {
       draw_lead(s, lead_two, s->scene.lead_vertices[1]);
-    }
+//    }
   }
   nvgResetScissor(s->vg);
 }
