@@ -22,7 +22,7 @@
 
 static void ui_draw_text(const UIState *s, float x, float y, const char *string, float size, NVGcolor color, const char *font_name) {
   nvgFontFace(s->vg, font_name);
-  nvgFontSize(s->vg, size*0.75);
+  nvgFontSize(s->vg, size*0.7);
   nvgFillColor(s->vg, color);
   nvgText(s->vg, x, y, string, NULL);
 }
