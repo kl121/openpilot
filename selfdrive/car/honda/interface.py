@@ -39,9 +39,9 @@ class CarInterface(CarInterfaceBase):
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
       ret.openpilotLongitudinalControl = Params().get_bool("DisableRadar")
+      ret.longitudinalActuatorDelayUpperBound = 1.0 # s
 
       ret.pcmCruise = not ret.openpilotLongitudinalControl
-      ret.communityFeature = ret.openpilotLongitudinalControl
     else:
       ret.safetyModel = car.CarParams.SafetyModel.hondaNidec
       ret.enableGasInterceptor = 0x201 in fingerprint[0]
