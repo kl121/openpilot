@@ -437,7 +437,7 @@ def thermald_thread():
       HARDWARE.shutdown()
 
     # dp - auto shutdown
-    if off_ts is not None:
+    if off_ts is not None and not HARDWARE.get_usb_present():
       shutdown_sec = 240
       sec_now = sec_since_boot() - off_ts
       if (shutdown_sec - 5) < sec_now:
