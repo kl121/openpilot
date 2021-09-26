@@ -126,8 +126,8 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    # if ret.vEgo < self.CP.minEnableSpeed:
-    #   events.add(EventName.belowEngageSpeed)
+    if ret.vEgo < self.CP.minEnableSpeed:
+      events.add(EventName.belowEngageSpeed)
     if self.CS.park_brake:
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
@@ -136,14 +136,14 @@ class CarInterface(CarInterfaceBase):
       if self.CS.adaptive_Cruise and (ret.brakePressed or ret.regenPressed):
         events.add(EventName.pedalPressed)
         self.CS.adaptive_Cruise = False
-        self.CS.enable_lkas = True
+        self.CS.enable_lkas = False
 
-    # handle button presses
+    # handle button presses 모든 가속 제어를 불가상태로 임시 처리
     if not self.CS.main_on and self.CP.enableGasInterceptor:
       for b in ret.buttonEvents:
         if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
-          self.CS.enable_lkas = True
+          self.CS.enable_lkas = False
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
@@ -151,11 +151,11 @@ class CarInterface(CarInterfaceBase):
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = False
-          self.CS.enable_lkas = True
+          self.CS.enable_lkas = False
           events.add(EventName.buttonCancel)
     elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
-      self.CS.enable_lkas = True
+      self.CS.enable_lkas = False
 
     #Added by jc01rho inspired by JangPoo
     if self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
@@ -164,12 +164,12 @@ class CarInterface(CarInterfaceBase):
         if self.flag_pcmEnable_initialSet == False :
           self.initial_pcmEnable_counter = self.initial_pcmEnable_counter + 1
           if self.initial_pcmEnable_counter > 750 :
-            events.add(EventName.pcmEnable)
+            events.add(EventName.buttonEnable)
             self.flag_pcmEnable_initialSet = True
             self.flag_pcmEnable_able = False
             self.initial_pcmEnable_counter = 0
         else :
-          events.add(EventName.pcmEnable)
+          events.add(EventName.buttonEnable)
           self.flag_pcmEnable_able = False
           # self.flag_pcmEnable_initialSet = True
           # self.initial_pcmEnable_counter = 0
