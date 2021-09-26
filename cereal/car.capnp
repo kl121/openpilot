@@ -394,10 +394,10 @@ struct CarParams {
 
   steerMaxBP @11 :List(Float32);
   steerMaxV @12 :List(Float32);
-  gasMaxBPDEPRECATED @13 :List(Float32);
-  gasMaxVDEPRECATED @14 :List(Float32);
-  brakeMaxBPDEPRECATED @15 :List(Float32);
-  brakeMaxVDEPRECATED @16 :List(Float32);
+  gasMaxBP @13 :List(Float32);
+  gasMaxV @14 :List(Float32);
+  brakeMaxBP @15 :List(Float32);
+  brakeMaxV @16 :List(Float32);
 
   # things about the car in the manual
   mass @17 :Float32;            # [kg] curb weight: all fluids no cargo
