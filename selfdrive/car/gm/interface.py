@@ -136,14 +136,14 @@ class CarInterface(CarInterfaceBase):
       if self.CS.adaptive_Cruise and (ret.brakePressed or ret.regenPressed):
         events.add(EventName.pedalPressed)
         self.CS.adaptive_Cruise = False
-        self.CS.enable_lkas = True
+        self.CS.enable_lkas = False
 
-    # handle button presses
+    # handle button presses 모든 가속 제어를 불가상태로 임시 처리
     if not self.CS.main_on and self.CP.enableGasInterceptor:
       for b in ret.buttonEvents:
         if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
-          self.CS.enable_lkas = True
+          self.CS.enable_lkas = False
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
@@ -151,11 +151,11 @@ class CarInterface(CarInterfaceBase):
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = False
-          self.CS.enable_lkas = True
+          self.CS.enable_lkas = False
           events.add(EventName.buttonCancel)
     elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
-      self.CS.enable_lkas = True
+      self.CS.enable_lkas = False
 
     #Added by jc01rho inspired by JangPoo
     if self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
