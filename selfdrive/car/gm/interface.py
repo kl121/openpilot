@@ -126,8 +126,8 @@ class CarInterface(CarInterfaceBase):
 
     events = self.create_common_events(ret)
 
-    # if ret.vEgo < self.CP.minEnableSpeed:
-    #   events.add(EventName.belowEngageSpeed)
+    if ret.vEgo < self.CP.minEnableSpeed:
+      events.add(EventName.belowEngageSpeed)
     if self.CS.park_brake:
       events.add(EventName.parkBrake)
     if ret.vEgo < self.CP.minSteerSpeed:
@@ -164,12 +164,12 @@ class CarInterface(CarInterfaceBase):
         if self.flag_pcmEnable_initialSet == False :
           self.initial_pcmEnable_counter = self.initial_pcmEnable_counter + 1
           if self.initial_pcmEnable_counter > 750 :
-            events.add(EventName.pcmEnable)
+            events.add(EventName.buttonEnable)
             self.flag_pcmEnable_initialSet = True
             self.flag_pcmEnable_able = False
             self.initial_pcmEnable_counter = 0
         else :
-          events.add(EventName.pcmEnable)
+          events.add(EventName.buttonEnable)
           self.flag_pcmEnable_able = False
           # self.flag_pcmEnable_initialSet = True
           # self.initial_pcmEnable_counter = 0
