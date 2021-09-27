@@ -9,6 +9,8 @@ from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 ACCEL_HYST_GAP = 0.008
+VEL = [13.889, 16.667, 25.]  # velocities
+MIN_PEDAL = [0.02, 0.05, 0.1]
 
 def accel_hysteresis(accel, accel_steady):
 
