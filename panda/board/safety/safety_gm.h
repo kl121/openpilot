@@ -87,9 +87,6 @@ static int gm_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
         case 5:  // main on
           controls_allowed = 1;
           break;
-//        case 6:
-//          controls_allowed = 1;
-//          break;
         default:
           break;  // any other button is irrelevant
       }
