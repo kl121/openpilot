@@ -133,17 +133,17 @@ class CarInterface(CarInterfaceBase):
     if ret.vEgo < self.CP.minSteerSpeed:
       events.add(car.CarEvent.EventName.belowSteerSpeed)
     if self.CP.enableGasInterceptor:
-      if self.CS.adaptive_Cruise and (ret.brakePressed or ret.regenPressed):
+      if self.CS.adaptive_Cruise and ret.brakePressed:
         events.add(EventName.pedalPressed)
         self.CS.adaptive_Cruise = False
-        self.CS.enable_lkas = False
+        self.CS.enable_lkas = True
 
-    # handle button presses 모든 가속 제어를 불가상태로 임시 처리
+    # handle button presses
     if not self.CS.main_on and self.CP.enableGasInterceptor:
       for b in ret.buttonEvents:
         if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
-          self.CS.enable_lkas = False
+          self.CS.enable_lkas = True
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = True
@@ -151,11 +151,12 @@ class CarInterface(CarInterfaceBase):
           events.add(EventName.buttonEnable)
         if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = False
-          self.CS.enable_lkas = False
+          self.CS.enable_lkas = True
           events.add(EventName.buttonCancel)
     elif self.CS.main_on:
       self.CS.adaptive_Cruise = False
-      self.CS.enable_lkas = False
+      self.CS.enable_lkas = True
+
 
     #Added by jc01rho inspired by JangPoo
     if self.CS.main_on  and ret.cruiseState.enabled and ret.gearShifter == GearShifter.drive and ret.vEgo > 2 and not ret.brakePressed :
@@ -175,10 +176,6 @@ class CarInterface(CarInterfaceBase):
           # self.initial_pcmEnable_counter = 0
     else  :
       self.flag_pcmEnable_able = True
-
-    # if not self.flag_pcmEnable_initialSet  and  (ret.gearShifter == GearShifter.park or ret.gearShifter == GearShifter.reverse or (ret.brakePressed and ret.vEgo < 1)) :
-    #   self.flag_pcmEnable_initialSet = True
-
     ret.events = events.to_msg()
 
     # copy back carState packet to CS
@@ -199,3 +196,4 @@ class CarInterface(CarInterfaceBase):
 
     self.frame += 1
     return can_sends
+

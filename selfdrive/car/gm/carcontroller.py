@@ -8,19 +8,17 @@ from selfdrive.car.gm.values import DBC, CanBus, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
-ACCEL_HYST_GAP = 0.008
+
 VEL = [13.889, 16.667, 25.]  # velocities
 MIN_PEDAL = [0.02, 0.05, 0.1]
 
 def accel_hysteresis(accel, accel_steady):
 
-  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
-  if accel == 0:
-    accel_steady = 0.
-  elif accel > accel_steady + ACCEL_HYST_GAP:
-    accel_steady = accel - ACCEL_HYST_GAP
-  elif accel < accel_steady - ACCEL_HYST_GAP:
-    accel_steady = accel + ACCEL_HYST_GAP
+  # for small accel oscillations less than 0.02, don't change the accel command
+  if accel > accel_steady + 0.02:
+    accel_steady = accel - 0.02
+  elif accel < accel_steady - 0.02:
+    accel_steady = accel + 0.02
   accel = accel_steady
 
   return accel, accel_steady
@@ -32,13 +30,13 @@ class CarController():
     self.lka_icon_status_last = (False, False)
     self.steer_rate_limited = False
     self.accel_steady = 0.
-    self.apply_pedal_last = 0.
+    #self.apply_pedal_last = 0.
 
     self.params = CarControllerParams()
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
-    self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
-    self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
+    #self.packer_obj = CANPacker(DBC[CP.carFingerprint]['radar'])
+    #self.packer_ch = CANPacker(DBC[CP.carFingerprint]['chassis'])
 
   def update(self, enabled, CS, frame, actuators,
              hud_v_cruise, hud_show_lanes, hud_show_car, hud_alert):
@@ -49,7 +47,7 @@ class CarController():
     can_sends = []
 
     # STEER
-    lkas_enabled = enabled and not CS.out.steerWarning and CS.out.vEgo > P.MIN_STEER_SPEED and CS.enable_lkas
+    lkas_enabled = enabled and not (CS.out.steerWarning or CS.out.steerError) and CS.out.vEgo > P.MIN_STEER_SPEED
     if (frame % P.STEER_STEP) == 0:
       if lkas_enabled:
         new_steer = int(round(actuators.steer * P.STEER_MAX))
@@ -79,6 +77,7 @@ class CarController():
 
       idx = (frame // 2) % 4
       can_sends.append(create_gas_command(self.packer_pt, final_pedal, idx))
+      #self.apply_pedal_last = final_pedal
 
     # Send dashboard UI commands (ACC status), 25hz
     #if (frame % 4) == 0:
