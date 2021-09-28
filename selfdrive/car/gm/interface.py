@@ -165,18 +165,19 @@ class CarInterface(CarInterfaceBase):
         if self.flag_pcmEnable_initialSet == False :
           self.initial_pcmEnable_counter = self.initial_pcmEnable_counter + 1
           if self.initial_pcmEnable_counter > 750 :
-            events.add(EventName.buttonEnable)
+            events.add(EventName.pcmEnable)
             self.flag_pcmEnable_initialSet = True
             self.flag_pcmEnable_able = False
             self.initial_pcmEnable_counter = 0
         else :
-          events.add(EventName.buttonEnable)
+          events.add(EventName.pcmEnable)
           self.flag_pcmEnable_able = False
           # self.flag_pcmEnable_initialSet = True
           # self.initial_pcmEnable_counter = 0
     else  :
       self.flag_pcmEnable_able = True
     ret.events = events.to_msg()
+
 
     # copy back carState packet to CS
     self.CS.out = ret.as_reader()
