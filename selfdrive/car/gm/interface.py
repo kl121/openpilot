@@ -141,14 +141,14 @@ class CarInterface(CarInterfaceBase):
     # handle button presses
     if not self.CS.main_on and self.CP.enableGasInterceptor:
       for b in ret.buttonEvents:
-        if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
-          self.CS.adaptive_Cruise = True
-          self.CS.enable_lkas = True
-          events.add(EventName.buttonEnable)
-        if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
-          self.CS.adaptive_Cruise = True
-          self.CS.enable_lkas = False
-          events.add(EventName.buttonEnable)
+        # if (b.type == ButtonType.decelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+        #   self.CS.adaptive_Cruise = True
+        #   self.CS.enable_lkas = True
+        #   events.add(EventName.buttonEnable)
+        # if (b.type == ButtonType.accelCruise and not b.pressed) and not self.CS.adaptive_Cruise:
+        #   self.CS.adaptive_Cruise = False
+        #   self.CS.enable_lkas = False
+        #   events.add(EventName.buttonEnable)
         if (b.type == ButtonType.cancel and b.pressed) and self.CS.adaptive_Cruise:
           self.CS.adaptive_Cruise = False
           self.CS.enable_lkas = True
