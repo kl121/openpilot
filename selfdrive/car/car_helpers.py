@@ -17,7 +17,7 @@ from selfdrive.car.gm.values import CAR
 EventName = car.CarEvent.EventName
 
 
-def get_startup_event(car_recognized, controller_available, fuzzy_fingerprint, fw_seen):
+def get_startup_event(car_recognized, controller_available, fw_seen):
   if comma_remote and tested_branch:
     event = EventName.startup
   else:
@@ -30,8 +30,6 @@ def get_startup_event(car_recognized, controller_available, fuzzy_fingerprint, f
       event = EventName.startupNoFw
   elif car_recognized and not controller_available:
     event = EventName.startupNoControl
-  elif car_recognized and fuzzy_fingerprint:
-    event = EventName.startupFuzzyFingerprint
   return event
 
 

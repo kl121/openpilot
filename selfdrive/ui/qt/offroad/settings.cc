@@ -26,7 +26,7 @@
 #include "selfdrive/ui/qt/qt_window.h"
 
 TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
-
+  auto params = Params();
   addItem(new ParamControl("OpenpilotEnabledToggle",
                                   "오픈파일럿 사용",
                                   "어댑티브 크루즈 컨트롤 및 차선 유지 지원을 위해 오픈파일럿 시스템을 사용하십시오. 이 기능을 사용하려면 항상 주의를 기울여야 합니다. 이 설정을 변경하는 것은 자동차의 전원이 꺼졌을 때 적용됩니다.",
@@ -70,7 +70,6 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "차선이 없는 곳에서 사람과 같이 운전을 하는 것을 목표합니다.",
                                   "../assets/offroad/icon_road.png",
                                   this));
-
 #ifdef ENABLE_MAPS
   addItem(new ParamControl("NavSettingTime24h",
                                   "Show ETA in 24h format",
@@ -78,8 +77,16 @@ TogglesPanel::TogglesPanel(QWidget *parent) : ListWidget(parent) {
                                   "../assets/offroad/icon_metric.png",
                                   this));
 #endif
+  if (params.getBool("DisableRadar_Allow")) {
+    addItem(new ParamControl("DisableRadar",
+                             "openpilot Longitudinal Control",
+                             "openpilot will disable the car's radar and will take over control of gas and brakes. Warning: this disables AEB!",
+                             "../assets/offroad/icon_speed_limit.png",
+                             this));
 
-  bool record_lock = Params().getBool("RecordFrontLock");
+  }
+
+  bool record_lock = params.getBool("RecordFrontLock");
   record_toggle->setEnabled(!record_lock);
 }
 
@@ -280,7 +287,7 @@ QWidget * network_panel(QWidget * parent) {
   ListWidget *list = new ListWidget();
   list->setSpacing(30);
   // wifi + tethering buttons
-  auto wifiBtn = new ButtonControl("WiFi Settings", "OPEN");
+  auto wifiBtn = new ButtonControl("Wi-Fi Settings", "OPEN");
   QObject::connect(wifiBtn, &ButtonControl::clicked, [=]() { HardwareEon::launch_wifi(); });
   list->addItem(wifiBtn);
 
