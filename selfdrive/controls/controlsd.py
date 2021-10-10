@@ -87,7 +87,7 @@ class Controls:
       self.log_sock = messaging.sub_sock('androidLog')
 
     # wait for one pandaState and one CAN packet
-    panda_type = messaging.recv_one(self.sm.sock['pandaState']).pandaState.pandaType
+    panda_type = messaging.recv_one(self.sm.sock['pandaStates']).pandaState.pandaType
     has_relay = panda_type in [PandaType.blackPanda, PandaType.uno, PandaType.dos]
     print("Waiting for CAN messages...")
     get_one_can(self.can_sock)
