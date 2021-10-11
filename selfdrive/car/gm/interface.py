@@ -42,7 +42,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.minEnableSpeed = -1
     ret.mass = 1625. + STD_CARGO_KG
-    ret.safetyModel = car.CarParams.SafetyModel.gm
     ret.wheelbase = 2.60096
     ret.steerRatio = 16.8
     ret.steerRatioRear = 0.
