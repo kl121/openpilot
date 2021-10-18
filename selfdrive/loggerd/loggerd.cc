@@ -233,7 +233,6 @@ void encoder_thread(const LogCameraInfo &cam_info) {
           eidx.setSegmentNum(cur_seg);
           eidx.setSegmentId(out_id);
           if (lh) {
-            // TODO: this should read cereal/services.h for qlog decimation
             auto bytes = msg.toBytes();
             lh_log(lh, bytes.begin(), bytes.size(), true);
           }
@@ -300,7 +299,16 @@ void rotate_if_needed() {
 } // namespace
 
 int main(int argc, char** argv) {
-  setpriority(PRIO_PROCESS, 0, -20);
+  if (Hardware::EON()) {
+    setpriority(PRIO_PROCESS, 0, -20);
+  } else {
+    int ret;
+    ret = set_core_affinity({0, 1, 2, 3});
+    assert(ret == 0);
+    // TODO: why does this impact camerad timings?
+    //ret = set_realtime_priority(1);
+    //assert(ret == 0);
+  }
 
   clear_locks();
 
