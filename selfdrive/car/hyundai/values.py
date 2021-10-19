@@ -165,6 +165,23 @@ FINGERPRINTS = {
 
 
 FW_VERSIONS = {
+  CAR.IONIQ: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00AEhe SCC H-CUP      1.01 1.01 96400-G2000         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2301 4AEHC107',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G2400 180222',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x816H6F2051\x00\x00\x00\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x816U3H1051\x00\x00\xf1\x006U3H0_C2\x00\x006U3H1051\x00\x00HAE0G16US2\x00\x00\x00\x00',
+    ],
+  },
   CAR.IONIQ_PHEV: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\000AEhe SCC FHCUP      1.00 1.02 99110-G2100         ',
@@ -789,21 +806,29 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\000DNhe SCC FHCUP      1.00 1.02 99110-L5000         ',
       b'\xf1\x8799110L5000\xf1\000DNhe SCC FHCUP      1.00 1.02 99110-L5000         ',
+      b'\xf1\000DNhe SCC F-CUP      1.00 1.02 99110-L5000         ',
+      b'\xf1\x8799110L5000\xf1\000DNhe SCC F-CUP      1.00 1.02 99110-L5000         ',
       ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x8756310-L5500\xf1\x00DN8 MDPS C 1.00 1.02 56310-L5500 4DNHC102',
       b'\xf1\x8756310-L5450\xf1\x00DN8 MDPS C 1.00 1.02 56310-L5450 4DNHC102',
+      b'\xf1\x8756310-L5450\xf1\000DN8 MDPS C 1.00 1.03 56310-L5450 4DNHC103',
       ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.04 99211-L1000 191016',
       b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.05 99211-L1000 201109',
+      b'\xf1\000DN8HMFC  AT USA LHD 1.00 1.06 99211-L1000 210325',
       ],
     (Ecu.transmission, 0x7e1, None): [
       b'\xf1\000PSBG2333  E14\x00\x00\x00\x00\x00\x00\x00TDN2H20SA6N\xc2\xeeW',
       b'\xf1\x87959102T250\000\000\000\000\000\xf1\x81E09\000\000\000\000\000\000\000\xf1\000PSBG2323  E09\000\000\000\000\000\000\000TDN2H20SA5\x97R\x88\x9e',
+      b'\xf1\000PSBG2323  E09\000\000\000\000\000\000\000TDN2H20SA5\x97R\x88\x9e',
+      b'\xf1\000PSBG2333  E16\000\000\000\000\000\000\000TDN2H20SA7\0323\xf9\xab',
+      b'\xf1\x87PCU\000\000\000\000\000\000\000\000\000\xf1\x81E16\000\000\000\000\000\000\000\xf1\000PSBG2333  E16\000\000\000\000\000\000\000TDN2H20SA7\0323\xf9\xab',
       ],
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x87391162J012',
+      b'\xf1\x87391162J013',
       ],
   },
 }
