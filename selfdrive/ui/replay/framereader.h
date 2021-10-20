@@ -1,8 +1,14 @@
 #pragma once
 
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+#include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
+// independent of QT, needs ffmpeg
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -13,7 +19,7 @@ public:
   FrameReader();
   ~FrameReader();
   bool load(const std::string &url);
-  bool get(int idx, uint8_t *rgb, uint8_t *yuv);
+  std::optional<std::pair<uint8_t *, uint8_t*>> get(int idx);
   int getRGBSize() const { return width * height * 3; }
   int getYUVSize() const { return width * height * 3 / 2; }
   size_t getFrameCount() const { return frames_.size(); }
@@ -22,19 +28,24 @@ public:
   int width = 0, height = 0;
 
 private:
-  bool decode(int idx, uint8_t *rgb, uint8_t *yuv);
-  bool decodeFrame(AVFrame *f, uint8_t *rgb, uint8_t *yuv);
-
+  void decodeThread();
+  std::pair<uint8_t *, uint8_t *> decodeFrame(AVPacket *pkt);
   struct Frame {
     AVPacket pkt = {};
-    int decoded = false;
+    std::unique_ptr<uint8_t[]> rgb_data = nullptr;
+    std::unique_ptr<uint8_t[]> yuv_data = nullptr;
     bool failed = false;
   };
   std::vector<Frame> frames_;
-  AVFrame *av_frame_ = nullptr;
+
   AVFormatContext *pFormatCtx_ = nullptr;
   AVCodecContext *pCodecCtx_ = nullptr;
-  int key_frames_count_ = 0;
-  std::vector<uint8_t> yuv_buf_;
+
+  std::mutex mutex_;
+  std::condition_variable cv_decode_;
+  std::condition_variable cv_frame_;
+  int decode_idx_ = 0;
+  std::atomic<bool> exit_ = false;
   bool valid_ = false;
+  std::thread decode_thread_;
 };
